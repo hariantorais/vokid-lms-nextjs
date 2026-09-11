@@ -11,6 +11,7 @@ import {
   AlertCircle,
   Loader2,
   Link2,
+  Target,
 } from 'lucide-react';
 import { createLessonAction } from '../actions/lesson-actions';
 import { validateMaterialFile } from '@/features/shared/validations/media-validation';
@@ -32,6 +33,7 @@ export function LessonForm({ modules, onSuccess }: LessonFormProps) {
 
   const [moduleId, setModuleId] = useState(modules[0]?.id ?? '');
   const [title, setTitle] = useState('');
+  const [learningObjectives, setLearningObjectives] = useState('');
   const [contentType, setContentType] = useState<ContentType>('TEXT');
   const [contentUrl, setContentUrl] = useState('');
   const [contentText, setContentText] = useState('');
@@ -112,6 +114,7 @@ export function LessonForm({ modules, onSuccess }: LessonFormProps) {
         contentType,
         contentUrl: contentType === 'TEXT' ? null : contentUrl.trim(),
         contentText: contentType === 'TEXT' ? contentText.trim() : null,
+        learningObjectives: learningObjectives.trim() || null,
         orderIndex,
       });
 
@@ -120,6 +123,7 @@ export function LessonForm({ modules, onSuccess }: LessonFormProps) {
       } else {
         setSuccessMessage('Materi berhasil diterbitkan ke siswa!');
         setTitle('');
+        setLearningObjectives('');
         setContentUrl('');
         setContentText('');
         setUploadFileName(null);
@@ -181,6 +185,25 @@ export function LessonForm({ modules, onSuccess }: LessonFormProps) {
           disabled={isPending}
           required
           className="w-full px-3 py-3 rounded-2xl border border-slate-300 font-bold text-xs text-slate-900 focus:ring-2 focus:ring-sky-500"
+        />
+      </div>
+
+      {/* 2.1 Tujuan Pembelajaran (Learning Objectives) */}
+      <div>
+        <div className="flex items-center justify-between mb-1">
+          <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider flex items-center gap-1">
+            <Target className="w-3.5 h-3.5 text-sky-600" />
+            <span>Tujuan Pembelajaran Siswa</span>
+          </label>
+          <span className="text-[10px] text-slate-400 font-medium">(Opsional)</span>
+        </div>
+        <textarea
+          value={learningObjectives}
+          onChange={(e) => setLearningObjectives(e.target.value)}
+          placeholder="Contoh: Siswa mampu mengenali dan menyebutkan angka 1 sampai 10 dengan benar..."
+          rows={2}
+          disabled={isPending}
+          className="w-full p-3 rounded-2xl border border-slate-300 font-medium text-xs text-slate-900 focus:ring-2 focus:ring-sky-500 leading-relaxed"
         />
       </div>
 

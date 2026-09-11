@@ -20,6 +20,7 @@ import {
   ListChecks,
   Play,
   RotateCcw,
+  Target,
 } from 'lucide-react';
 import { VoiceSubmission } from './VoiceSubmission';
 import { PhotoHomeworkSubmission } from './PhotoHomeworkSubmission';
@@ -491,6 +492,17 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
 
             {/* Content Reader */}
             <div className="p-5 sm:p-6 overflow-y-auto space-y-4 text-slate-800 flex-1">
+              {readingLesson.learning_objectives && (
+                <div className="p-3.5 rounded-2xl bg-sky-50 border border-sky-200/80 text-xs">
+                  <div className="flex items-center gap-1.5 text-sky-800 font-extrabold text-[11px] uppercase tracking-wider mb-1">
+                    <Target className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                    <span>🎯 Target Belajar:</span>
+                  </div>
+                  <p className="text-slate-700 font-semibold leading-relaxed pl-5 whitespace-pre-wrap">
+                    {readingLesson.learning_objectives}
+                  </p>
+                </div>
+              )}
               <div className="text-sm sm:text-base font-normal leading-relaxed whitespace-pre-wrap text-slate-800 bg-slate-50/80 p-5 rounded-2xl border border-slate-200">
                 {readingLesson.content_text ?? 'Belum ada isi materi bacaan.'}
               </div>

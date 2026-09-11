@@ -214,6 +214,7 @@ export function ModuleManagementCard({
               <div className="flex items-center gap-1 shrink-0">
                 <button
                   type="button"
+                  data-testid={`edit-module-btn-${mod.id}`}
                   onClick={() => handleOpenEdit(mod)}
                   className="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors cursor-pointer"
                   title="Ubah Judul"
@@ -222,6 +223,7 @@ export function ModuleManagementCard({
                 </button>
                 <button
                   type="button"
+                  data-testid={`delete-module-btn-${mod.id}`}
                   onClick={() => handleDeleteModule(mod.id, mod.title)}
                   className="p-2 rounded-xl text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
                   title="Hapus Bab"

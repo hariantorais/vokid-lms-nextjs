@@ -111,6 +111,7 @@ describe('Strict Database Type Definitions', () => {
       content_type: 'AUDIO',
       content_url: 'https://example.com/audio/vokid-seed-ba-bi-bu.mp3',
       content_text: null,
+      learning_objectives: null,
       order_index: 1,
       created_at: '2026-09-10T08:00:00Z',
     };

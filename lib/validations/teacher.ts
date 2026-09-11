@@ -32,6 +32,13 @@ export const createLessonSchema = z
       .optional()
       .or(z.literal(''))
       .transform((val) => (val && val.length > 0 ? val : null)),
+    learningObjectives: z
+      .string()
+      .trim()
+      .nullable()
+      .optional()
+      .or(z.literal(''))
+      .transform((val) => (val && val.length > 0 ? val : null)),
     orderIndex: z.coerce
       .number({ message: 'Urutan materi harus berupa angka' })
       .int({ message: 'Urutan materi harus berupa bilangan bulat' })

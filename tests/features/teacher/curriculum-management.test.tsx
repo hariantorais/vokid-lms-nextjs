@@ -139,6 +139,11 @@ vi.mock('@/lib/supabase/server', () => ({
       if (table === 'lessons') {
         return {
           select: vi.fn().mockReturnThis(),
+          eq: vi.fn().mockReturnValue({
+            count: 0,
+            data: [],
+            error: null,
+          }),
           in: vi.fn().mockReturnThis(),
           order: vi.fn().mockResolvedValue({
             data: [
@@ -354,8 +359,8 @@ describe('Komponen UI Manajemen Kurikulum Guru', () => {
       />
     );
 
-    expect(screen.getByText(/Kelola Modul Pembelajaran/i)).toBeInTheDocument();
-    expect(screen.getByText(/\+ Tambah Modul/i)).toBeInTheDocument();
+    expect(screen.getByText(/Daftar Bab & Modul/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tambah Bab/i)).toBeInTheDocument();
     expect(screen.getByText(/Membaca Suku Kata Ba-Bi-Bu/i)).toBeInTheDocument();
     expect(screen.getByTestId('edit-module-btn-mod-1')).toBeInTheDocument();
     expect(screen.getByTestId('delete-module-btn-mod-1')).toBeInTheDocument();
@@ -378,6 +383,7 @@ describe('Komponen UI Manajemen Kurikulum Guru', () => {
             content_type: 'AUDIO' as const,
             content_url: 'https://cdn.vokid.sch.id/audio/1.mp3',
             content_text: null,
+            learning_objectives: null,
             order_index: 1,
             created_at: new Date().toISOString(),
             assignments: [
@@ -406,8 +412,8 @@ describe('Komponen UI Manajemen Kurikulum Guru', () => {
       />
     );
 
-    expect(screen.getByText(/Kelola Penugasan Siswa/i)).toBeInTheDocument();
-    expect(screen.getByText(/\+ Buat Tugas Baru/i)).toBeInTheDocument();
+    expect(screen.getByText(/Materi Pembelajaran & Tugas/i)).toBeInTheDocument();
+    expect(screen.getByText(/Tugas Baru/i)).toBeInTheDocument();
     expect(screen.getByText(/Ucapkan kata apel dan bola dengan lantang/i)).toBeInTheDocument();
     expect(screen.getAllByText(/Tugas Suara/i).length).toBeGreaterThan(0);
     expect(screen.getByTestId('delete-assignment-btn-asg-1')).toBeInTheDocument();

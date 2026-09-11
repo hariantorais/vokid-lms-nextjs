@@ -40,6 +40,7 @@ describe('Unit & Integration Test AdaptivePortal (Fase A vs Fase B/C)', () => {
                 content_type: 'AUDIO',
                 content_url: 'https://storage.googleapis.com/vokid-cdn/audio/ba-bi-bu.mp3',
                 content_text: null,
+                learning_objectives: null,
                 order_index: 1,
                 created_at: new Date().toISOString(),
                 assignments: [

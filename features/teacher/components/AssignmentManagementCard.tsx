@@ -432,6 +432,7 @@ export function AssignmentManagementCard({
 
                                   <button
                                     type="button"
+                                    data-testid={`delete-assignment-btn-${asg.id}`}
                                     onClick={() => handleDeleteAssignment(asg.id)}
                                     className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 hover:underline cursor-pointer"
                                   >

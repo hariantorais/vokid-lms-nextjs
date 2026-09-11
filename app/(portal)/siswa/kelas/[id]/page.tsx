@@ -52,6 +52,7 @@ export default async function StudentClassPage({ params }: StudentClassPageProps
                     content_type: 'AUDIO' as const,
                     content_url: 'https://storage.googleapis.com/vokid-cdn/audio/vokid-seed-ba-bi-bu.mp3',
                     content_text: null,
+                    learning_objectives: null,
                     order_index: 1,
                     created_at: new Date().toISOString(),
                     assignments: [

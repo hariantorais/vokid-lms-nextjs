@@ -14,6 +14,7 @@ import {
   Check,
   Lock,
   ArrowLeft,
+  Target,
 } from 'lucide-react';
 import { AudioPromptPlayer } from './AudioPromptPlayer';
 import { VoiceSubmission } from './VoiceSubmission';
@@ -152,6 +153,19 @@ export function StudentModuleLessonList({
                 </h3>
               </div>
             </div>
+
+            {/* Target Belajar Kita Hari Ini (Tujuan Pembelajaran) */}
+            {focusedLesson.learning_objectives && (
+              <div className="p-3.5 rounded-2xl bg-gradient-to-r from-amber-50 to-orange-50/70 border border-amber-200/90 shadow-2xs">
+                <div className="flex items-center gap-1.5 text-amber-800 font-black text-[11px] uppercase tracking-wider mb-1">
+                  <Target className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>🎯 Target Belajar Kita:</span>
+                </div>
+                <p className="text-xs font-bold text-amber-950 leading-relaxed pl-5 whitespace-pre-wrap">
+                  {focusedLesson.learning_objectives}
+                </p>
+              </div>
+            )}
 
             {/* Video YouTube Embed Langsung */}
             {focusedLesson.content_type === 'VIDEO' && focusedLesson.content_url && (

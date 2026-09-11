@@ -65,7 +65,7 @@ export async function createLessonAction(formData: unknown): Promise<ActionRespo
       return { success: false, error: issue ? issue.message : 'Data materi tidak valid.' };
     }
 
-    const { moduleId, title, contentType, contentUrl, contentText, orderIndex } = validationResult.data;
+    const { moduleId, title, contentType, contentUrl, contentText, learningObjectives, orderIndex } = validationResult.data;
 
     const supabase = await createClient();
     const authCheck = await verifyTeacherRole(supabase);
@@ -81,6 +81,7 @@ export async function createLessonAction(formData: unknown): Promise<ActionRespo
         content_type: contentType,
         content_url: contentUrl ?? null,
         content_text: contentText ?? null,
+        learning_objectives: learningObjectives ?? null,
         order_index: orderIndex,
       })
       .select()
@@ -199,6 +200,10 @@ export async function updateLessonAction(formData: unknown): Promise<ActionRespo
     const contentType = rawPayload.contentType as 'TEXT' | 'VIDEO' | 'AUDIO' | 'PDF';
     const contentText = typeof rawPayload.contentText === 'string' ? rawPayload.contentText.trim() : null;
     const contentUrl = typeof rawPayload.contentUrl === 'string' ? rawPayload.contentUrl.trim() : null;
+    const learningObjectives =
+      typeof rawPayload.learningObjectives === 'string' && rawPayload.learningObjectives.trim().length > 0
+        ? rawPayload.learningObjectives.trim()
+        : null;
 
     if (!lessonId || !UUID_REGEX.test(lessonId)) {
       return { success: false, error: 'ID materi tidak valid.' };
@@ -227,11 +232,13 @@ export async function updateLessonAction(formData: unknown): Promise<ActionRespo
       content_type: 'TEXT' | 'VIDEO' | 'AUDIO' | 'PDF';
       content_text: string | null;
       content_url: string | null;
+      learning_objectives: string | null;
     } = {
       title,
       content_type: contentType,
       content_text: contentType === 'TEXT' ? contentText : null,
       content_url: contentType !== 'TEXT' ? contentUrl : null,
+      learning_objectives: learningObjectives,
     };
 
     // Ambil materi lama untuk memeriksa jika ada file R2 yang diganti

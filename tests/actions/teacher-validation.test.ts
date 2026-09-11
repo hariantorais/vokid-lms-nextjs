@@ -135,12 +135,13 @@ describe('Unit Test Validasi Zod Guru - createLessonSchema', () => {
     }
   });
 
-  it('harus lolos validasi saat diberikan data lengkap yang sah', () => {
+  it('harus lolos validasi saat diberikan data lengkap yang sah beserta learningObjectives', () => {
     const validData = {
       moduleId: validUUID,
       title: 'Materi Fonik Suku Kata Ba-Bi-Bu',
       contentType: 'AUDIO',
       contentUrl: 'https://storage.googleapis.com/vokid/audio/ba-bi-bu.mp3',
+      learningObjectives: 'Siswa mampu melafalkan suku kata ba, bi, bu dengan fasih.',
       orderIndex: 1,
     };
 
@@ -149,6 +150,7 @@ describe('Unit Test Validasi Zod Guru - createLessonSchema', () => {
     if (result.success) {
       expect(result.data.title).toBe('Materi Fonik Suku Kata Ba-Bi-Bu');
       expect(result.data.contentType).toBe('AUDIO');
+      expect(result.data.learningObjectives).toBe('Siswa mampu melafalkan suku kata ba, bi, bu dengan fasih.');
       expect(result.data.orderIndex).toBe(1);
     }
   });
@@ -157,11 +159,11 @@ describe('Unit Test Validasi Zod Guru - createLessonSchema', () => {
 describe('Unit Test Validasi Zod Guru - createAssignmentSchema', () => {
   const validUUID = 'dddddddd-1111-0000-0000-000000000001';
 
-  it('harus menolak jika instruksi tugas (prompt) kurang dari 5 karakter', () => {
+  it('harus menolak jika instruksi tugas (prompt) kurang dari 3 karakter', () => {
     const invalidData = {
       lessonId: validUUID,
       type: 'VOICE_TASK',
-      prompt: 'Halo',
+      prompt: 'Ha',
     };
 
     const result = createAssignmentSchema.safeParse(invalidData);
@@ -169,11 +171,11 @@ describe('Unit Test Validasi Zod Guru - createAssignmentSchema', () => {
     if (!result.success) {
       const issue = result.error.issues.find((i) => i.path.includes('prompt'));
       expect(issue).toBeDefined();
-      expect(issue?.message).toContain('minimal 5 karakter');
+      expect(issue?.message).toContain('minimal 3 karakter');
     }
   });
 
-  it('harus menolak tipe penugasan di luar VOICE_TASK dan PHOTO_HOMEWORK', () => {
+  it('harus menolak tipe penugasan di luar opsi yang sah', () => {
     const invalidData = {
       lessonId: validUUID,
       type: 'MULTIPLE_CHOICE',
@@ -185,7 +187,7 @@ describe('Unit Test Validasi Zod Guru - createAssignmentSchema', () => {
     if (!result.success) {
       const issue = result.error.issues.find((i) => i.path.includes('type'));
       expect(issue).toBeDefined();
-      expect(issue?.message).toContain("Tipe tugas harus berupa 'VOICE_TASK' atau 'PHOTO_HOMEWORK'");
+      expect(issue?.message).toContain("Tipe tugas harus berupa 'VOICE_TASK', 'PHOTO_HOMEWORK', atau 'QUIZ_CBT'");
     }
   });
 

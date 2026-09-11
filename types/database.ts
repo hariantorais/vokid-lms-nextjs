@@ -125,6 +125,7 @@ export type Database = {
           content_url: string | null
           created_at: string
           id: string
+          learning_objectives: string | null
           module_id: string
           order_index: number
           title: string
@@ -135,6 +136,7 @@ export type Database = {
           content_url?: string | null
           created_at?: string
           id?: string
+          learning_objectives?: string | null
           module_id: string
           order_index?: number
           title: string
@@ -145,6 +147,7 @@ export type Database = {
           content_url?: string | null
           created_at?: string
           id?: string
+          learning_objectives?: string | null
           module_id?: string
           order_index?: number
           title?: string
