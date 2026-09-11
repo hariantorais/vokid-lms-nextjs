@@ -10,11 +10,19 @@
 [![Cloudflare R2](https://img.shields.io/badge/Storage-Cloudflare%20R2-orange?logo=cloudflare&logoColor=white)](https://www.cloudflare.com/products/r2/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-blue?logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 
+[![Status](https://img.shields.io/badge/Status-Under%20Active%20Development%20%F0%9F%9A%A7-amber?style=for-the-badge)](https://github.com/hariantorais/vokid-lms-nextjs)
+
 <p align="center">
   Platform Pembelajaran Interaktif yang dirancang khusus untuk siswa Sekolah Dasar (SD) Indonesia dengan pendekatan <b>Mobile-First Gamified</b>, memfasilitasi <b>Fase A (Kelas 1-2)</b> berbasis audio/suara visual dan <b>Fase B & C (Kelas 3-6)</b> berbasis literasi, video, serta ujian CBT interaktif.
 </p>
 
 </div>
+
+---
+
+> [!NOTE]  
+> ### 🚧 Status Proyek: Sedang Dalam Tahap Pengembangan Aktif (*Work in Progress*)
+> Repositori ini sedang dalam proses riset dan pengembangan berkelanjutan (fitur, pengujian adaptif, dan integrasi backend). Fitur-fitur, skema database, serta antarmuka pengguna (UI/UX) masih dapat mengalami pembaruan dan penyempurnaan secara berkala. Masukan serta kolaborasi sangat kami apresiasi!
 
 ---
 
