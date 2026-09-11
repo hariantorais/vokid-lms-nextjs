@@ -1,10 +1,10 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import { Plus, BookOpen, ChevronRight, Edit2 } from 'lucide-react';
 import { formatModuleTitle } from '@/lib/formatters';
-import type { SubjectOption } from '../../ModuleManagementCard';
-import type { ModuleWithLessonsAndAssignments } from '../../AssignmentManagementCard';
+import type { SubjectOption, ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
 
 interface SubjectModuleListViewProps {
   subjects: SubjectOption[];
@@ -166,9 +166,10 @@ export function SubjectModuleListView({
               ) ?? 0;
 
             return (
-              <div
+              <Link
                 key={mod.id}
-                onClick={() => onSelectModule(mod.id, mod.subject_id)}
+                href={`/guru/bab/${mod.id}`}
+                prefetch={true}
                 className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs hover:border-sky-400 hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-3 active:scale-[0.99] group"
               >
                 <div className="flex items-center gap-3.5 min-w-0 flex-1">
@@ -191,7 +192,7 @@ export function SubjectModuleListView({
                 <div className="flex items-center gap-1 shrink-0 text-slate-300 group-hover:text-sky-600 transition-colors">
                   <ChevronRight className="w-5 h-5" />
                 </div>
-              </div>
+              </Link>
             );
           })}
         </div>

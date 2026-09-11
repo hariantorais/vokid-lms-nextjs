@@ -1,30 +1,27 @@
-import React from 'react';
-import { getAllCurriculumData } from '@/features/teacher/services/teacher-service';
-import { TeacherGeneralCurriculumView } from '@/features/teacher/components/TeacherGeneralCurriculumView';
+import { redirect } from 'next/navigation';
+import { getTeacherClassrooms } from '@/features/teacher/services/teacher-service';
 
 export const dynamic = 'force-dynamic';
 
 interface PageProps {
   searchParams: Promise<{
     classId?: string;
-    moduleId?: string;
-    babId?: string;
-    subjectId?: string;
   }>;
 }
 
 export default async function GuruMateriPage({ searchParams }: PageProps) {
   const { classId } = await searchParams;
 
-  const result = await getAllCurriculumData(classId);
+  if (classId) {
+    redirect(`/guru/kelas/${classId}`);
+  }
 
-  const curriculumData = result.success
-    ? result.data
-    : {
-        classrooms: [],
-        activeClass: null,
-        subjects: [],
-      };
+  const result = await getTeacherClassrooms();
+  const classrooms = result.success ? result.data : [];
 
-  return <TeacherGeneralCurriculumView data={curriculumData} />;
+  if (classrooms.length > 0) {
+    redirect(`/guru/kelas/${classrooms[0].id}`);
+  }
+
+  redirect('/guru/kelas');
 }

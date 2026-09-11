@@ -1,6 +1,7 @@
 'use client';
 
 import React from 'react';
+import Link from 'next/link';
 import {
   ArrowLeft,
   Layers,
@@ -13,9 +14,8 @@ import {
   Volume2,
   ChevronRight,
 } from 'lucide-react';
-import { formatModuleTitle, cleanModuleTitle } from '@/lib/formatters';
-import type { SubjectOption } from '../../ModuleManagementCard';
-import type { ModuleWithLessonsAndAssignments } from '../../AssignmentManagementCard';
+import { formatModuleTitle } from '@/lib/formatters';
+import type { SubjectOption, ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
 import type { Lesson } from '@/types/database';
 
 interface ModuleDetailViewProps {
@@ -45,18 +45,6 @@ export function ModuleDetailView({
 
   return (
     <div className="space-y-4 select-none">
-      {/* Navigation & Action Bar inside Bab */}
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onBackToSubject}
-          className="h-9 px-2 text-slate-600 hover:text-slate-900 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer active:scale-98"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Mapel</span>
-        </button>
-      </div>
-
       {/* Level 3: Bab Header Info Card (Aksen khas & elegan pembeda bab vs materi) */}
       <div className="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white p-5 rounded-3xl shadow-sm border border-slate-700/50 relative overflow-hidden">
         {/* Subtle decoration background */}
@@ -134,9 +122,10 @@ export function ModuleDetailView({
               const tasksCount = les.assignments?.length ?? 0;
 
               return (
-                <div
+                <Link
                   key={les.id}
-                  onClick={() => onSelectLesson(les.id)}
+                  href={`/guru/pelajaran/${les.id}`}
+                  prefetch={true}
                   className="bg-white p-4 rounded-2xl border border-slate-200/90 shadow-xs hover:border-sky-400 hover:shadow-md transition-all cursor-pointer flex items-center justify-between gap-3 group active:scale-[0.99]"
                 >
                   <div className="flex items-center gap-3 min-w-0 flex-1">
@@ -177,7 +166,10 @@ export function ModuleDetailView({
 
                   <div
                     className="flex items-center gap-1.5 shrink-0"
-                    onClick={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
                   >
                     <button
                       type="button"
@@ -198,7 +190,7 @@ export function ModuleDetailView({
                     </button>
                     <ChevronRight className="w-5 h-5 text-slate-300 group-hover:text-sky-600 transition-colors" />
                   </div>
-                </div>
+                </Link>
               );
             })}
           </div>

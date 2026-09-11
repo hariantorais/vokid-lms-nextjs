@@ -13,8 +13,6 @@ import {
   getTeacherClassrooms,
   getClassCurriculum,
 } from '@/features/teacher/services/teacher-service';
-import { ModuleManagementCard } from '@/features/teacher/components/ModuleManagementCard';
-import { AssignmentManagementCard } from '@/features/teacher/components/AssignmentManagementCard';
 
 // Mock Next.js cache revalidatePath & navigation
 vi.mock('next/cache', () => ({
@@ -333,89 +331,3 @@ describe('Unit Test Kurikulum & Server Actions Guru', () => {
   });
 });
 
-describe('Komponen UI Manajemen Kurikulum Guru', () => {
-  it('harus merender ModuleManagementCard dengan daftar modul dan tombol tambah', () => {
-    const mockSubjects = [
-      { id: 'sub-1', name: 'Bahasa Indonesia' },
-      { id: 'sub-2', name: 'Matematika' },
-    ];
-
-    const mockModules = [
-      {
-        id: 'mod-1',
-        title: 'Membaca Suku Kata Ba-Bi-Bu',
-        order_index: 1,
-        subject_id: 'sub-1',
-        subject_name: 'Bahasa Indonesia',
-        lessons_count: 2,
-      },
-    ];
-
-    render(
-      <ModuleManagementCard
-        classId="class-1"
-        subjects={mockSubjects}
-        modules={mockModules}
-      />
-    );
-
-    expect(screen.getByText(/Daftar Bab & Modul/i)).toBeInTheDocument();
-    expect(screen.getByText(/Tambah Bab/i)).toBeInTheDocument();
-    expect(screen.getByText(/Membaca Suku Kata Ba-Bi-Bu/i)).toBeInTheDocument();
-    expect(screen.getByTestId('edit-module-btn-mod-1')).toBeInTheDocument();
-    expect(screen.getByTestId('delete-module-btn-mod-1')).toBeInTheDocument();
-  });
-
-  it('harus merender AssignmentManagementCard dengan daftar materi dan tugas', () => {
-    const mockModules = [
-      {
-        id: 'mod-1',
-        title: 'Membaca Suku Kata',
-        order_index: 1,
-        subject_id: 'sub-1',
-        is_published: true,
-        created_at: new Date().toISOString(),
-        lessons: [
-          {
-            id: 'les-1',
-            module_id: 'mod-1',
-            title: 'Fonik Ba-Bi-Bu',
-            content_type: 'AUDIO' as const,
-            content_url: 'https://cdn.vokid.sch.id/audio/1.mp3',
-            content_text: null,
-            learning_objectives: null,
-            order_index: 1,
-            created_at: new Date().toISOString(),
-            assignments: [
-              {
-                id: 'asg-1',
-                lesson_id: 'les-1',
-                type: 'VOICE_TASK' as const,
-                prompt: 'Ucapkan kata apel dan bola dengan lantang',
-                instruction_audio_url: null,
-                due_date: null,
-                quiz_question_count: null,
-                passing_score: null,
-                created_at: new Date().toISOString(),
-              },
-            ],
-          },
-        ],
-      },
-    ];
-
-    render(
-      <AssignmentManagementCard
-        classId="class-1"
-        modules={mockModules}
-        gradeLevel={1}
-      />
-    );
-
-    expect(screen.getByText(/Materi Pembelajaran & Tugas/i)).toBeInTheDocument();
-    expect(screen.getByText(/Tugas Baru/i)).toBeInTheDocument();
-    expect(screen.getByText(/Ucapkan kata apel dan bola dengan lantang/i)).toBeInTheDocument();
-    expect(screen.getAllByText(/Tugas Suara/i).length).toBeGreaterThan(0);
-    expect(screen.getByTestId('delete-assignment-btn-asg-1')).toBeInTheDocument();
-  });
-});

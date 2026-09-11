@@ -2,9 +2,8 @@
 
 import React from 'react';
 import { Loader2, Layers } from 'lucide-react';
-import { MobileDrawer } from '../../MobileDrawer';
-import type { SubjectOption } from '../../ModuleManagementCard';
-import type { ModuleWithLessonsAndAssignments } from '../../AssignmentManagementCard';
+import { MobileDrawer } from '@/features/teacher/components/MobileDrawer';
+import type { SubjectOption, ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
 
 interface ModuleDrawersProps {
   isCreateModuleOpen: boolean;

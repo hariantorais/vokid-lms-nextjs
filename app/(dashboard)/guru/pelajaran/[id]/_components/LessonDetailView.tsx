@@ -3,8 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import {
-  ArrowLeft,
-  Edit2,
   BookOpen,
   Video,
   FileText,
@@ -21,9 +19,8 @@ import {
 } from 'lucide-react';
 import { formatModuleTitle } from '@/lib/formatters';
 import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
-import { getVideoEmbedUrl } from '../utils/media-embed';
-import type { SubjectOption } from '../../ModuleManagementCard';
-import type { ModuleWithLessonsAndAssignments } from '../../AssignmentManagementCard';
+import { getVideoEmbedUrl } from '@/features/teacher/utils/media-embed';
+import type { SubjectOption, ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
 import type { Lesson, Assignment, Submission } from '@/types/database';
 
 export type LessonWithAssignments = ModuleWithLessonsAndAssignments['lessons'][number];
@@ -42,7 +39,6 @@ export function LessonDetailView({
   activeLesson,
   activeModule,
   activeSubject,
-  onBackToModule,
   onOpenEditLesson,
   onOpenCreateAssignment,
   onDeleteAssignment,
@@ -51,30 +47,6 @@ export function LessonDetailView({
 
   return (
     <div className="space-y-4">
-      {/* Breadcrumb Navigation */}
-      <div className="flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onBackToModule}
-          className="h-9 px-2 text-slate-600 hover:text-slate-900 font-bold text-xs flex items-center gap-1.5 transition-colors cursor-pointer active:scale-98"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Kembali ke Bab</span>
-        </button>
-
-        <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => onOpenEditLesson(activeLesson)}
-            className="h-9 px-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs cursor-pointer active:scale-98"
-            title="Edit Materi Ini"
-          >
-            <Edit2 className="w-3.5 h-3.5 text-slate-500" />
-            <span>Edit Materi</span>
-          </button>
-        </div>
-      </div>
-
       {/* Level 4 & 5a: Unified Lesson Post Card */}
       <div className="bg-white p-4 sm:p-5 rounded-2xl border border-slate-200 shadow-xs space-y-3.5">
         {/* Top Post Header: Breadcrumb & Format Badge */}
@@ -162,51 +134,56 @@ export function LessonDetailView({
             {activeLesson.content_type === 'VIDEO' && (
               <div>
                 {getVideoEmbedUrl(activeLesson.content_url) ? (
-                  <div className="relative w-full aspect-video rounded-xl overflow-hidden border border-slate-200 bg-slate-950 shadow-xs">
+                  <div className="relative w-full aspect-video rounded-xl overflow-hidden bg-slate-900 border border-slate-200 shadow-inner">
                     <iframe
                       src={getVideoEmbedUrl(activeLesson.content_url)!}
-                      title={`Video: ${activeLesson.title}`}
-                      className="w-full h-full border-0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                      title={activeLesson.title}
+                      className="absolute inset-0 w-full h-full border-0"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
                     />
                   </div>
                 ) : (
-                  <div className="rounded-xl overflow-hidden border border-slate-200 bg-slate-950 shadow-xs">
-                    <video
-                      controls
-                      src={activeLesson.content_url}
-                      className="w-full max-h-[360px] aspect-video object-contain"
+                  <div className="p-4 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Video className="w-4 h-4 text-amber-600" />
+                      <span className="text-xs font-bold text-amber-900 truncate">
+                        {activeLesson.content_url}
+                      </span>
+                    </div>
+                    <a
+                      href={activeLesson.content_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="px-2.5 py-1 text-[11px] font-extrabold text-amber-700 bg-amber-100 hover:bg-amber-200 rounded-lg transition"
                     >
-                      Browser Anda tidak mendukung tag video.
-                    </video>
+                      Buka Tautan
+                    </a>
                   </div>
                 )}
               </div>
             )}
 
             {activeLesson.content_type === 'PDF' && (
-              <div className="p-3.5 sm:p-4 rounded-xl bg-slate-50/80 hover:bg-slate-100/80 border border-slate-200/90 transition-colors flex items-center justify-between gap-3 group">
-                <div className="flex items-center gap-3 min-w-0">
-                  <div className="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center shadow-xs shrink-0">
-                    <FileText className="w-5 h-5" />
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <div className="w-8 h-8 rounded-lg bg-rose-100 text-rose-600 flex items-center justify-center shrink-0">
+                    <FileText className="w-4 h-4" />
                   </div>
                   <div className="min-w-0">
-                    <h4 className="text-xs font-bold text-slate-900 truncate group-hover:text-rose-600 transition-colors">
-                      Dokumen Materi PDF
-                    </h4>
-                    <p className="text-[11px] text-slate-500 truncate">
-                      Klik untuk melihat atau membaca dokumen
+                    <p className="text-xs font-bold text-slate-800 truncate">
+                      Dokumen PDF Terlampir
                     </p>
+                    <p className="text-[10px] text-slate-400">Siap dibaca siswa</p>
                   </div>
                 </div>
                 <a
                   href={getMediaProxyUrl(activeLesson.content_url)}
                   target="_blank"
-                  rel="noreferrer"
-                  className="h-8 px-3.5 rounded-lg bg-rose-600 hover:bg-rose-700 text-white font-bold text-xs inline-flex items-center gap-1.5 shadow-2xs shrink-0 transition-transform active:scale-95 cursor-pointer"
+                  rel="noopener noreferrer"
+                  className="px-3 py-1.5 text-xs font-bold text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded-lg transition shrink-0"
                 >
-                  <span>Buka PDF</span>
+                  Buka Berkas
                 </a>
               </div>
             )}
@@ -273,41 +250,37 @@ export function LessonDetailView({
                       }`}
                     >
                       {asg.type === 'QUIZ_CBT' ? (
-                        <ListChecks className="w-3 h-3 text-amber-600" />
+                        <>
+                          <ListChecks className="w-3 h-3" /> Kuis CBT
+                        </>
                       ) : asg.type === 'VOICE_TASK' ? (
-                        <Mic className="w-3 h-3" />
+                        <>
+                          <Mic className="w-3 h-3" /> Tugas Rekaman Suara
+                        </>
                       ) : (
-                        <Camera className="w-3 h-3" />
+                        <>
+                          <Camera className="w-3 h-3" /> Foto PR Buku Tulis
+                        </>
                       )}
-                      <span>
-                        {asg.type === 'QUIZ_CBT'
-                          ? `Pilihan Ganda CBT (${asg.quiz_question_count ?? 5} Soal Acak)`
-                          : asg.type === 'VOICE_TASK'
-                            ? 'Tugas Suara (Fase A)'
-                            : 'Foto PR / LKPD'}
-                      </span>
                     </span>
 
                     <button
                       type="button"
                       onClick={() => onDeleteAssignment(asg.id)}
-                      className="text-[11px] font-semibold text-rose-500 hover:underline cursor-pointer"
+                      className="text-[11px] font-bold text-rose-500 hover:text-rose-700 cursor-pointer"
                     >
                       Hapus
                     </button>
                   </div>
 
-                  <p className="text-xs text-slate-800 font-medium leading-relaxed">
-                    {asg.prompt}
-                  </p>
+                  <p className="text-xs font-bold text-slate-800 line-clamp-2">{asg.prompt}</p>
 
-                  {/* Quick Access to Grading */}
-                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2 text-xs">
+                  <div className="flex items-center justify-between pt-1 border-t border-slate-100 text-xs">
                     {asg.type === 'QUIZ_CBT' ? (
                       <div className="flex items-center gap-2 text-[11px] text-slate-500 font-medium">
                         <span className="flex items-center gap-1">
-                          <Sparkles className="w-3 h-3 text-purple-600" />
-                          <span className="text-purple-700 font-bold">Koreksi Otomatis Server CBT</span>
+                          <Sparkles className="w-3 h-3 text-amber-500" />
+                          <span>KKM: {asg.passing_score ?? 75}</span>
                         </span>
                         <span>•</span>
                         <span className="flex items-center gap-1">

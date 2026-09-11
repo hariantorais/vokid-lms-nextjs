@@ -236,7 +236,7 @@ export function TeacherDashboardMobile({
 
               <div className="pt-2 border-t border-slate-100 flex items-center gap-2">
                 <Link
-                  href={`/guru/kelas/${cls.id}/materi`}
+                  href={`/guru/kelas/${cls.id}`}
                   className="w-full min-h-[46px] rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-98 text-white font-black text-xs flex items-center justify-center gap-1.5 shadow-xs transition-transform"
                 >
                   <BookOpen className="w-4 h-4" />
