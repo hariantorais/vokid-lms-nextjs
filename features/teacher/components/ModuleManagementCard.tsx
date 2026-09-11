@@ -18,6 +18,7 @@ import {
   updateModuleAction,
   deleteModuleAction,
 } from '../actions/teacher-actions';
+import { formatModuleTitle, cleanModuleTitle } from '@/lib/formatters';
 
 export interface ModuleData {
   id: string;
@@ -80,7 +81,7 @@ export function ModuleManagementCard({
 
   const handleOpenEdit = (mod: ModuleData) => {
     setEditingModule(mod);
-    setEditTitle(mod.title);
+    setEditTitle(cleanModuleTitle(mod.title));
     setEditOrderIndex(mod.order_index);
     setIsEditOpen(true);
   };
@@ -202,7 +203,7 @@ export function ModuleManagementCard({
                 </span>
                 <div className="min-w-0 flex-1">
                   <h4 className="text-xs font-bold text-slate-900 leading-snug break-words">
-                    {mod.title}
+                    {formatModuleTitle(mod.order_index, mod.title)}
                   </h4>
                   <p className="text-[11px] text-slate-400 font-medium mt-0.5">
                     {mod.subject_name ?? 'Matematika'} • {mod.lessons_count ?? 0} materi
@@ -264,11 +265,14 @@ export function ModuleManagementCard({
             <input
               type="text"
               required
-              placeholder="Contoh: Bab 1: Ayo Membilang sampai 10"
+              placeholder="Masukkan judul bab..."
               value={newTitle}
               onChange={(e) => setNewTitle(e.target.value)}
               className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 transition-all"
             />
+            <p className="text-[10px] text-slate-400 mt-1">
+              Nomor bab akan dibuat otomatis sesuai urutan.
+            </p>
           </div>
 
           <div>

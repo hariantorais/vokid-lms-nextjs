@@ -62,12 +62,27 @@ export async function createAssignmentAction(formData: unknown): Promise<ActionR
       return { success: false, error: issue ? issue.message : 'Data penugasan tidak valid.' };
     }
 
-    const { lessonId, type, prompt, instructionAudioUrl, dueDate } = validationResult.data;
+    const {
+      lessonId,
+      type,
+      prompt,
+      instructionAudioUrl,
+      dueDate,
+      quizQuestionCount,
+      passingScore,
+      questions,
+    } = validationResult.data;
 
     const supabase = await createClient();
     const authCheck = await verifyTeacherRole(supabase);
     if (!authCheck.authorized) {
       return { success: false, error: authCheck.error };
+    }
+
+    if (type === 'QUIZ_CBT') {
+      if (!questions || questions.length === 0) {
+        return { success: false, error: 'Tugas Pilihan Ganda CBT wajib memiliki minimal 1 soal dalam bank soal.' };
+      }
     }
 
     const { data: newAssignment, error: insertError } = await supabase
@@ -78,6 +93,8 @@ export async function createAssignmentAction(formData: unknown): Promise<ActionR
         prompt,
         instruction_audio_url: instructionAudioUrl,
         due_date: dueDate,
+        quiz_question_count: type === 'QUIZ_CBT' ? (quizQuestionCount ?? questions?.length ?? 5) : null,
+        passing_score: type === 'QUIZ_CBT' ? (passingScore ?? 60) : null,
       })
       .select()
       .single();
@@ -88,6 +105,35 @@ export async function createAssignmentAction(formData: unknown): Promise<ActionR
         success: false,
         error: `Gagal menyimpan penugasan siswa: ${insertError?.message ?? 'Kesalahan basis data'}`,
       };
+    }
+
+    // Jika tipe QUIZ_CBT, simpan bank soal ke tabel quiz_questions
+    if (type === 'QUIZ_CBT' && questions && questions.length > 0) {
+      const questionRows = questions.map((q, idx) => ({
+        assignment_id: newAssignment.id,
+        question_text: q.questionText,
+        option_a: q.optionA,
+        option_b: q.optionB,
+        option_c: q.optionC,
+        option_d: q.optionD,
+        correct_answer: q.correctAnswer,
+        explanation: q.explanation || null,
+        order_index: idx + 1,
+      }));
+
+      const { error: questionsError } = await supabase
+        .from('quiz_questions')
+        .insert(questionRows);
+
+      if (questionsError) {
+        console.error('[Action Error] Gagal insert bank soal:', questionsError);
+        // Rollback assignment jika gagal insert soal
+        await supabase.from('assignments').delete().eq('id', newAssignment.id);
+        return {
+          success: false,
+          error: `Gagal menyimpan bank soal kuis: ${questionsError.message}`,
+        };
+      }
     }
 
     revalidatePath('/guru');
@@ -101,5 +147,30 @@ export async function createAssignmentAction(formData: unknown): Promise<ActionR
     console.error('[Action Error] Exception in createAssignmentAction:', err);
     const errorMsg = err instanceof Error ? err.message : 'Terjadi kesalahan sistem yang tidak diharapkan.';
     return { success: false, error: errorMsg };
+  }
+}
+
+/**
+ * Server Action: Mengambil bank soal untuk suatu kuis CBT
+ */
+export async function getQuizQuestionsAction(assignmentId: string): Promise<ActionResponse<any[]>> {
+  try {
+    const supabase = await createClient();
+    const { data: questions, error } = await supabase
+      .from('quiz_questions')
+      .select('*')
+      .eq('assignment_id', assignmentId)
+      .order('order_index', { ascending: true });
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    return { success: true, data: questions ?? [] };
+  } catch (err: unknown) {
+    return {
+      success: false,
+      error: err instanceof Error ? err.message : 'Gagal memuat soal kuis.',
+    };
   }
 }

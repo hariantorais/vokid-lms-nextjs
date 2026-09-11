@@ -1,4 +1,4 @@
-import { PutObjectCommand } from '@aws-sdk/client-s3';
+import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getR2Client, getR2BucketName, getR2PublicDomain } from '@/lib/storage/r2';
 import type { ActionResponse } from '../types/storage';
 
@@ -14,6 +14,80 @@ export interface UploadFileToR2Params {
 export interface UploadR2Result {
   key: string;
   publicUrl: string;
+}
+
+/**
+ * Ekstrak key berkas R2 dari URL publik Cloudflare R2
+ * Contoh: "https://pub-vokid.r2.dev/materials/modul_1.pdf" -> "materials/modul_1.pdf"
+ */
+export function extractR2KeyFromUrl(url: string | null | undefined): string | null {
+  if (!url) return null;
+  try {
+    const publicDomain = getR2PublicDomain();
+    if (url.startsWith(publicDomain)) {
+      const path = url.slice(publicDomain.length).replace(/^\/+/, '');
+      return path.length > 0 ? path : null;
+    }
+
+    const parsed = new URL(url);
+    const pathname = parsed.pathname.replace(/^\/+/, '');
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions'];
+    if (validFolders.some((f) => pathname.startsWith(`${f}/`))) {
+      return pathname;
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Mengubah URL Cloudflare R2 publik menjadi URL internal proxy Next.js (/api/media?url=...)
+ * Hal ini memastikan berkas (seperti PDF) dapat dibuka 100% lancar di browser pengguna
+ * tanpa terhalang blokir DNS / Internet Positif provider seluler Indonesia pada domain *.r2.dev.
+ */
+export function getMediaProxyUrl(url: string | null | undefined): string {
+  if (!url) return '';
+  if (url.includes('.r2.dev') || url.startsWith('materials/') || url.startsWith('audio-prompts/') || url.startsWith('submissions/')) {
+    return `/api/media?url=${encodeURIComponent(url)}`;
+  }
+  return url;
+}
+
+/**
+ * Service: Menghapus berkas dari Cloudflare R2 Bucket
+ * @param keyOrUrl Key berkas (contoh: "materials/file.pdf") atau URL publik R2
+ */
+export async function deleteFileFromR2(keyOrUrl: string): Promise<ActionResponse<boolean>> {
+  try {
+    const key = extractR2KeyFromUrl(keyOrUrl) || keyOrUrl;
+    if (!key || key.trim().length === 0) {
+      return { success: false, error: 'Key berkas R2 tidak valid.' };
+    }
+
+    const client = getR2Client();
+    const bucket = getR2BucketName();
+
+    const command = new DeleteObjectCommand({
+      Bucket: bucket,
+      Key: key,
+    });
+
+    await client.send(command);
+
+    return {
+      success: true,
+      data: true,
+    };
+  } catch (err: unknown) {
+    console.error('[Storage Service Error] Delete from Cloudflare R2 failed:', err);
+    const msg =
+      err instanceof Error ? err.message : 'Gagal menghapus berkas dari Cloudflare R2.';
+    return {
+      success: false,
+      error: msg,
+    };
+  }
 }
 
 /**

@@ -48,6 +48,8 @@ export type Database = {
           lesson_id: string
           prompt: string
           type: Database["public"]["Enums"]["assignment_type"]
+          quiz_question_count: number | null
+          passing_score: number | null
         }
         Insert: {
           created_at?: string
@@ -57,6 +59,8 @@ export type Database = {
           lesson_id: string
           prompt: string
           type: Database["public"]["Enums"]["assignment_type"]
+          quiz_question_count?: number | null
+          passing_score?: number | null
         }
         Update: {
           created_at?: string
@@ -66,6 +70,8 @@ export type Database = {
           lesson_id?: string
           prompt?: string
           type?: Database["public"]["Enums"]["assignment_type"]
+          quiz_question_count?: number | null
+          passing_score?: number | null
         }
         Relationships: [
           {
@@ -304,6 +310,56 @@ export type Database = {
           },
         ]
       }
+      quiz_questions: {
+        Row: {
+          id: string
+          assignment_id: string
+          question_text: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          correct_answer: 'A' | 'B' | 'C' | 'D'
+          explanation: string | null
+          order_index: number
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          assignment_id: string
+          question_text: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          correct_answer: 'A' | 'B' | 'C' | 'D'
+          explanation?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          assignment_id?: string
+          question_text?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          correct_answer?: 'A' | 'B' | 'C' | 'D'
+          explanation?: string | null
+          order_index?: number
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          }
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -312,7 +368,7 @@ export type Database = {
       is_teacher: { Args: never; Returns: boolean }
     }
     Enums: {
-      assignment_type: "VOICE_TASK" | "PHOTO_HOMEWORK"
+      assignment_type: "VOICE_TASK" | "PHOTO_HOMEWORK" | "QUIZ_CBT"
       content_type: "TEXT" | "VIDEO" | "PDF" | "AUDIO"
       submission_status: "PENDING" | "GRADED"
       user_role: "GURU" | "SISWA" | "ORANG_TUA"
@@ -446,7 +502,7 @@ export const Constants = {
   },
   public: {
     Enums: {
-      assignment_type: ["VOICE_TASK", "PHOTO_HOMEWORK"],
+      assignment_type: ["VOICE_TASK", "PHOTO_HOMEWORK", "QUIZ_CBT"],
       content_type: ["TEXT", "VIDEO", "PDF", "AUDIO"],
       submission_status: ["PENDING", "GRADED"],
       user_role: ["GURU", "SISWA", "ORANG_TUA"],
@@ -471,3 +527,5 @@ export type Module = Database['public']['Tables']['modules']['Row'];
 export type Lesson = Database['public']['Tables']['lessons']['Row'];
 export type Assignment = Database['public']['Tables']['assignments']['Row'];
 export type Submission = Database['public']['Tables']['submissions']['Row'];
+export type QuizQuestion = Database['public']['Tables']['quiz_questions']['Row'];
+

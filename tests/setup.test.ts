@@ -127,6 +127,8 @@ describe('Strict Database Type Definitions', () => {
       prompt: 'Tekan tombol mikrofon besar dan ucapkan "Buku Budi Baru"',
       instruction_audio_url: 'https://example.com/audio/instruction.mp3',
       due_date: '2026-09-17T23:59:59Z',
+      quiz_question_count: null,
+      passing_score: null,
       created_at: '2026-09-10T08:00:00Z',
     };
 

@@ -7,10 +7,11 @@ interface MobileDrawerProps {
   isOpen: boolean;
   onClose: () => void;
   title: string;
+  subtitle?: React.ReactNode;
   children: React.ReactNode;
 }
 
-export function MobileDrawer({ isOpen, onClose, title, children }: MobileDrawerProps) {
+export function MobileDrawer({ isOpen, onClose, title, subtitle, children }: MobileDrawerProps) {
   // Render state to allow closing animations to complete before unmounting
   const [mounted, setMounted] = useState(false);
   const [visible, setVisible] = useState(false);
@@ -67,11 +68,14 @@ export function MobileDrawer({ isOpen, onClose, title, children }: MobileDrawerP
 
         {/* Header */}
         <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between shrink-0">
-          <h3 className="font-black text-base text-slate-900 tracking-tight">{title}</h3>
+          <div className="min-w-0 flex-1 pr-2">
+            <h3 className="font-black text-base text-slate-900 tracking-tight leading-snug">{title}</h3>
+            {subtitle && <div className="mt-0.5">{subtitle}</div>}
+          </div>
           <button
             type="button"
             onClick={onClose}
-            className="w-9 h-9 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition-all cursor-pointer"
+            className="w-9 h-9 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-95 flex items-center justify-center text-slate-600 transition-all cursor-pointer shrink-0"
             title="Tutup"
           >
             <X className="w-5 h-5" />

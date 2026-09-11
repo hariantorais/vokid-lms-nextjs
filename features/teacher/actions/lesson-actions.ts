@@ -5,6 +5,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createLessonSchema } from '@/lib/validations/teacher';
 import type { Lesson } from '@/types/database';
 import type { ActionResponse } from '@/features/shared/types/storage';
+import { deleteFileFromR2 } from '@/features/shared/services/storage-service';
 
 function parsePayload(input: unknown): Record<string, unknown> {
   if (input instanceof FormData) {
@@ -144,6 +145,13 @@ export async function deleteLessonAction(
       };
     }
 
+    // 2. Ambil info materi terlebih dahulu untuk mendapatkan content_url R2 jika ada
+    const { data: lessonToDelete } = await supabase
+      .from('lessons')
+      .select('id, content_url')
+      .eq('id', lessonId)
+      .maybeSingle();
+
     const { error: deleteError } = await supabase
       .from('lessons')
       .delete()
@@ -155,6 +163,15 @@ export async function deleteLessonAction(
         success: false,
         error: `Gagal menghapus materi: ${deleteError.message}`,
       };
+    }
+
+    // 3. Hapus berkas fisik di Cloudflare R2 jika berkas tersimpan di R2
+    if (lessonToDelete?.content_url) {
+      try {
+        await deleteFileFromR2(lessonToDelete.content_url);
+      } catch (r2Err) {
+        console.warn('[R2 Warning] Gagal menghapus berkas materi di Cloudflare R2:', r2Err);
+      }
     }
 
     revalidatePath('/guru');
@@ -217,6 +234,13 @@ export async function updateLessonAction(formData: unknown): Promise<ActionRespo
       content_url: contentType !== 'TEXT' ? contentUrl : null,
     };
 
+    // Ambil materi lama untuk memeriksa jika ada file R2 yang diganti
+    const { data: oldLesson } = await supabase
+      .from('lessons')
+      .select('id, content_url')
+      .eq('id', lessonId)
+      .maybeSingle();
+
     const { data: updatedLesson, error: updateError } = await supabase
       .from('lessons')
       .update(updateData)
@@ -230,6 +254,16 @@ export async function updateLessonAction(formData: unknown): Promise<ActionRespo
         success: false,
         error: `Gagal memperbarui materi: ${updateError?.message ?? 'Kesalahan basis data'}`,
       };
+    }
+
+    // Jika berkas lama tersimpan di R2 dan URL-nya berubah/dihapus, bersihkan berkas lama dari R2
+    const newContentUrl = updateData.content_url;
+    if (oldLesson?.content_url && oldLesson.content_url !== newContentUrl) {
+      try {
+        await deleteFileFromR2(oldLesson.content_url);
+      } catch (r2Err) {
+        console.warn('[R2 Warning] Gagal menghapus berkas lama di Cloudflare R2:', r2Err);
+      }
     }
 
     revalidatePath('/guru');

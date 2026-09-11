@@ -63,6 +63,8 @@ export default async function StudentClassPage({ params }: StudentClassPageProps
                         instruction_audio_url: 'https://storage.googleapis.com/vokid-cdn/audio/vokid-seed-instruksi-tugas1.mp3',
                         due_date: new Date(Date.now() + 7 * 86400000).toISOString(),
                         created_at: new Date().toISOString(),
+                        quiz_question_count: null,
+                        passing_score: null,
                         hasSubmitted: false,
                       },
                     ],

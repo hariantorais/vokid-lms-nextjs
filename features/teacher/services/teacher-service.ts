@@ -249,7 +249,162 @@ export async function getClassCurriculum(
   }
 }
 
+export interface GeneralCurriculumData {
+  classrooms: ClassRecord[];
+  activeClass: ClassRecord | null;
+  subjects: Array<
+    Subject & {
+      modules: Array<
+        Module & {
+          lessons: Array<
+            Lesson & {
+              assignments: Assignment[];
+            }
+          >;
+        }
+      >;
+    }
+  >;
+  allCurriculumsByClass?: Record<
+    string,
+    Array<
+      Subject & {
+        modules: Array<
+          Module & {
+            lessons: Array<
+              Lesson & {
+                assignments: Assignment[];
+              }
+            >;
+          }
+        >;
+      }
+    >
+  >;
+}
+
+/**
+ * Mengambil data kurikulum secara umum (dengan daftar semua kelas & kurikulum seluruh kelas untuk navigasi instan)
+ */
+export async function getAllCurriculumData(
+  selectedClassId?: string
+): Promise<ActionResponse<GeneralCurriculumData>> {
+  try {
+    const supabase = await createClient();
+
+    // 1. Ambil seluruh kelas
+    const { data: classrooms, error: classError } = await supabase
+      .from('classes')
+      .select('*')
+      .order('grade_level', { ascending: true });
+
+    if (classError) {
+      return { success: false, error: 'Gagal memuat daftar kelas.' };
+    }
+
+    const classList = (classrooms ?? []) as ClassRecord[];
+    if (classList.length === 0) {
+      return {
+        success: true,
+        data: {
+          classrooms: [],
+          activeClass: null,
+          subjects: [],
+          allCurriculumsByClass: {},
+        },
+      };
+    }
+
+    // 2. Ambil seluruh data kurikulum (subjects, modules, lessons, assignments) secara paralel untuk SEMUA kelas
+    const classIds = classList.map((c) => c.id);
+
+    const [subjectsRes, modulesRes, lessonsRes, assignmentsRes] = await Promise.all([
+      supabase
+        .from('subjects')
+        .select('*')
+        .in('class_id', classIds)
+        .order('created_at', { ascending: true }),
+      supabase
+        .from('modules')
+        .select('*')
+        .order('order_index', { ascending: true }),
+      supabase
+        .from('lessons')
+        .select('*')
+        .order('order_index', { ascending: true }),
+      supabase
+        .from('assignments')
+        .select('*, submissions(*)')
+        .order('created_at', { ascending: true }),
+    ]);
+
+    if (subjectsRes.error) {
+      return { success: false, error: 'Gagal memuat mata pelajaran.' };
+    }
+
+    const allSubjects = subjectsRes.data ?? [];
+    const allModules = modulesRes.data ?? [];
+    const allLessons = lessonsRes.data ?? [];
+    const allAssignments = assignmentsRes.data ?? [];
+
+    // Strukturkan data kurikulum per kelas (dictionary classId -> subjects)
+    const allCurriculumsByClass: GeneralCurriculumData['allCurriculumsByClass'] = {};
+
+    for (const cls of classList) {
+      const classSubjects = allSubjects.filter((s) => s.class_id === cls.id);
+
+      const structuredSubjects = classSubjects.map((subj) => {
+        const relatedModules = allModules
+          .filter((m) => m.subject_id === subj.id)
+          .map((mod) => {
+            const relatedLessons = allLessons
+              .filter((l) => l.module_id === mod.id)
+              .map((les) => {
+                const relatedAssignments = allAssignments.filter(
+                  (a) => a.lesson_id === les.id
+                );
+                return {
+                  ...les,
+                  assignments: relatedAssignments,
+                };
+              });
+
+            return {
+              ...mod,
+              lessons: relatedLessons,
+            };
+          });
+
+        return {
+          ...subj,
+          modules: relatedModules,
+        };
+      });
+
+      allCurriculumsByClass[cls.id] = structuredSubjects;
+    }
+
+    // Tentukan kelas aktif jika ada selectedClassId yang valid
+    const targetClass = selectedClassId ? classList.find((c) => c.id === selectedClassId) ?? null : null;
+    const activeSubjects = targetClass ? (allCurriculumsByClass[targetClass.id] ?? []) : [];
+
+    return {
+      success: true,
+      data: {
+        classrooms: classList,
+        activeClass: targetClass,
+        subjects: activeSubjects,
+        allCurriculumsByClass,
+      },
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Kesalahan internal saat mengambil kurikulum umum.';
+    return { success: false, error: msg };
+  }
+}
+
 interface RawPendingSubmission {
+
   id: string;
   file_url: string;
   status: string;

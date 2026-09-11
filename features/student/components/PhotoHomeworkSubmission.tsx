@@ -147,22 +147,11 @@ export function PhotoHomeworkSubmission({
   return (
     <div
       data-testid="photo-submission"
-      className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-sky-200 shadow-sm space-y-4"
+      className="p-3.5 rounded-2xl bg-sky-50/50 border border-sky-200 space-y-3"
     >
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-8 h-8 rounded-full bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
-            📷
-          </div>
-          <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
-            Foto Tugas PR Buku
-          </h4>
-        </div>
-      </div>
-
       {/* Error Banner */}
       {errorMessage && (
-        <div className="p-3 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2 text-rose-700 text-xs font-bold">
+        <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-bold">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
@@ -187,36 +176,30 @@ export function PhotoHomeworkSubmission({
         className="hidden"
       />
 
-      {/* State 1: IDLE - Tombol Sentuh Pilihan Kamera / Galeri (min 64x64px) */}
+      {/* State 1: IDLE - Tombol Kamera & Galeri Cepat */}
       {status === 'idle' && (
-        <div className="space-y-3 py-2">
-          <p className="text-xs font-bold text-slate-500 text-center sm:text-left">
-            Jepret halaman buku tugasmu atau ambil dari galeri foto:
-          </p>
+        <div className="grid grid-cols-2 gap-2.5 py-1">
+          <button
+            data-testid="open-camera-btn"
+            type="button"
+            onClick={() => cameraInputRef.current?.click()}
+            disabled={disabled}
+            className="h-12 rounded-xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-black text-xs flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer disabled:opacity-50"
+          >
+            <Camera className="w-4 h-4" />
+            <span>Kamera 📸</span>
+          </button>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <button
-              data-testid="open-camera-btn"
-              type="button"
-              onClick={() => cameraInputRef.current?.click()}
-              disabled={disabled}
-              className="min-h-[64px] min-w-[64px] p-4 rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-black text-sm sm:text-base flex items-center justify-center gap-3 shadow-md shadow-sky-200 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <Camera className="w-6 h-6" />
-              <span>Buka Kamera 📸</span>
-            </button>
-
-            <button
-              data-testid="open-gallery-btn"
-              type="button"
-              onClick={() => galleryInputRef.current?.click()}
-              disabled={disabled}
-              className="min-h-[64px] min-w-[64px] p-4 rounded-2xl border-2 border-sky-300 bg-sky-50 hover:bg-sky-100 active:scale-95 text-sky-900 font-extrabold text-sm sm:text-base flex items-center justify-center gap-3 transition-all cursor-pointer disabled:opacity-50"
-            >
-              <ImageIcon className="w-6 h-6 text-sky-600" />
-              <span>Pilih dari Galeri</span>
-            </button>
-          </div>
+          <button
+            data-testid="open-gallery-btn"
+            type="button"
+            onClick={() => galleryInputRef.current?.click()}
+            disabled={disabled}
+            className="h-12 rounded-xl border border-sky-300 bg-white hover:bg-sky-50 active:scale-95 text-sky-900 font-black text-xs flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50"
+          >
+            <ImageIcon className="w-4 h-4 text-sky-600" />
+            <span>Galeri Foto</span>
+          </button>
         </div>
       )}
 

@@ -388,6 +388,8 @@ describe('Komponen UI Manajemen Kurikulum Guru', () => {
                 prompt: 'Ucapkan kata apel dan bola dengan lantang',
                 instruction_audio_url: null,
                 due_date: null,
+                quiz_question_count: null,
+                passing_score: null,
                 created_at: new Date().toISOString(),
               },
             ],

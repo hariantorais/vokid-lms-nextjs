@@ -45,34 +45,32 @@ export function AudioPromptPlayer({ audioUrl, title = 'Dengarkan Suara Ibu Guru'
   };
 
   return (
-    <div className="flex items-center gap-4 p-4 rounded-3xl bg-linear-to-r from-amber-400 via-amber-300 to-orange-400 text-slate-950 shadow-md">
+    <div className="flex items-center gap-3 p-2.5 rounded-2xl bg-amber-100/80 border border-amber-300/80 text-slate-900">
       <audio ref={audioRef} src={audioUrl} preload="metadata" />
 
-      {/* Big Touch Target Play/Pause Button (min 64x64px) */}
+      {/* Touch Button Play/Pause */}
       <button
         type="button"
         onClick={togglePlayback}
-        aria-label={isPlaying ? 'Jeda Audio Petunjuk' : 'Putar Audio Petunjuk Guru'}
-        className={`w-16 h-16 min-w-[64px] min-h-[64px] rounded-2xl bg-white text-slate-900 shadow-md hover:shadow-lg flex items-center justify-center shrink-0 transition-transform active:scale-95 ${
-          isPlaying ? 'ring-4 ring-amber-500 scale-105 animate-pulse' : 'hover:scale-105'
+        aria-label={isPlaying ? 'Jeda Suara' : 'Putar Suara Guru'}
+        className={`w-11 h-11 min-w-[44px] min-h-[44px] rounded-xl bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 transition-transform active:scale-95 shadow-xs cursor-pointer ${
+          isPlaying ? 'ring-2 ring-amber-600 scale-105 animate-pulse' : 'hover:bg-amber-400'
         }`}
       >
         {isPlaying ? (
-          <Pause className="w-8 h-8 fill-slate-900 text-slate-900" />
+          <Pause className="w-5 h-5 fill-slate-950" />
         ) : (
-          <Play className="w-8 h-8 fill-slate-900 text-slate-900 ml-1" />
+          <Play className="w-5 h-5 fill-slate-950 ml-0.5" />
         )}
       </button>
 
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900/80 mb-0.5">
-          <Volume2 className="w-4 h-4 text-amber-900" />
-          <span>Petunjuk Suara Guru</span>
-          <Sparkles className="w-3.5 h-3.5 text-amber-700" />
+        <div className="flex items-center gap-1.5 text-[11px] font-black text-amber-950">
+          <Volume2 className="w-3.5 h-3.5 text-amber-800 shrink-0" />
+          <span>{title}</span>
         </div>
-        <p className="text-base font-extrabold text-slate-950 truncate">{title}</p>
-        <p className="text-xs text-slate-800 font-medium mt-0.5">
-          {isPlaying ? '🔊 Sedang bersuara... dengarkan baik-baik ya!' : '👉 Tekan tombol bulat putih untuk mendengarkan!'}
+        <p className="text-[10px] text-amber-900/80 font-bold truncate">
+          {isPlaying ? 'Sedang bersuara...' : 'Sentuh tombol untuk mendengar'}
         </p>
       </div>
     </div>

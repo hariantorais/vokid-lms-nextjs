@@ -7,7 +7,9 @@ import {
   updateModuleSchema,
   updateAssignmentSchema,
 } from '@/lib/validations/teacher';
+import { cleanModuleTitle } from '@/lib/formatters';
 import type { ActionResponse } from '@/features/shared/types/storage';
+import type { ClassRecord, Subject, Module, Lesson, Assignment } from '@/types/database';
 
 const UUID_REGEX = /^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$/;
 
@@ -83,11 +85,13 @@ export async function createModuleAction(
       return { success: false, error: authCheck.error };
     }
 
+    const sanitizedTitle = cleanModuleTitle(title) || title;
+
     const { data: newModule, error: insertError } = await supabase
       .from('modules')
       .insert({
         subject_id: subjectId,
-        title,
+        title: sanitizedTitle,
         order_index: orderIndex,
         is_published: true,
       })
@@ -145,7 +149,7 @@ export async function updateModuleAction(
       is_published?: boolean;
     } = {};
 
-    if (title !== undefined) updateData.title = title;
+    if (title !== undefined) updateData.title = cleanModuleTitle(title) || title;
     if (orderIndex !== undefined) updateData.order_index = orderIndex;
     if (isPublished !== undefined) updateData.is_published = isPublished;
 
@@ -536,3 +540,190 @@ export async function deleteSubjectAction(
     return { success: false, error: msg };
   }
 }
+
+/**
+ * Server Action: Pembuatan Kelas Baru oleh Guru
+ */
+export async function createClassAction(
+  payload: unknown
+): Promise<ActionResponse<{ id: string; name: string }>> {
+  try {
+    const raw = parsePayload(payload);
+    const name = typeof raw.name === 'string' ? raw.name.trim() : '';
+    const gradeLevel = typeof raw.gradeLevel === 'number' ? raw.gradeLevel : Number(raw.gradeLevel) || 1;
+    const academicYear = typeof raw.academicYear === 'string' ? raw.academicYear.trim() : '2026/2027';
+
+    if (!name || name.length < 2) {
+      return { success: false, error: 'Nama kelas minimal 2 karakter.' };
+    }
+
+    if (gradeLevel < 1 || gradeLevel > 6) {
+      return { success: false, error: 'Tingkat kelas harus antara 1 sampai 6 SD.' };
+    }
+
+    const supabase = await createClient();
+    const authCheck = await verifyTeacherRole(supabase);
+    if (!authCheck.authorized) {
+      return { success: false, error: authCheck.error };
+    }
+
+    const { data: newClass, error: insertError } = await supabase
+      .from('classes')
+      .insert({
+        name,
+        grade_level: gradeLevel,
+        academic_year: academicYear,
+        created_by: authCheck.userId === 'teacher-dev' ? null : authCheck.userId,
+      })
+      .select('id, name')
+      .single();
+
+    if (insertError || !newClass) {
+      console.error('[Action Error] Gagal insert kelas:', insertError);
+      return {
+        success: false,
+        error: `Gagal membuat kelas: ${insertError?.message ?? 'Kesalahan basis data'}`,
+      };
+    }
+
+    revalidatePath('/guru');
+    revalidatePath('/guru/materi');
+    revalidatePath('/siswa');
+
+    return {
+      success: true,
+      data: { id: newClass.id, name: newClass.name },
+    };
+  } catch (err: unknown) {
+    console.error('[Action Error] Exception in createClassAction:', err);
+    const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat membuat kelas.';
+    return { success: false, error: msg };
+  }
+}
+
+/**
+ * Server Action: Mengambil kurikulum kelas terpilih secara dinamis dan instan
+ */
+export async function getClassCurriculumAction(
+  classId: string
+): Promise<ActionResponse<{
+  classData: ClassRecord;
+  subjects: Array<
+    Subject & {
+      modules: Array<
+        Module & {
+          lessons: Array<
+            Lesson & {
+              assignments: Assignment[];
+            }
+          >;
+        }
+      >;
+    }
+  >;
+}>> {
+  try {
+    const supabase = await createClient();
+
+    // 1. Ambil data kelas
+    const { data: classData, error: classError } = await supabase
+      .from('classes')
+      .select('*')
+      .eq('id', classId)
+      .maybeSingle();
+
+    if (classError || !classData) {
+      return { success: false, error: 'Data kelas tidak ditemukan di basis data.' };
+    }
+
+    // 2. Ambil subjects
+    const { data: subjectsData, error: subjectsError } = await supabase
+      .from('subjects')
+      .select('*')
+      .eq('class_id', classId)
+      .order('created_at', { ascending: true });
+
+    if (subjectsError) {
+      return { success: false, error: 'Gagal memuat mata pelajaran kelas.' };
+    }
+
+    const subjectIds = (subjectsData ?? []).map((s) => s.id);
+
+    // 3. Ambil modules
+    const { data: modulesData, error: modulesError } = await supabase
+      .from('modules')
+      .select('*')
+      .in('subject_id', subjectIds.length > 0 ? subjectIds : ['00000000-0000-0000-0000-000000000000'])
+      .order('order_index', { ascending: true });
+
+    if (modulesError) {
+      return { success: false, error: 'Gagal memuat modul pembelajaran.' };
+    }
+
+    const moduleIds = (modulesData ?? []).map((m) => m.id);
+
+    // 4. Ambil lessons
+    const { data: lessonsData, error: lessonsError } = await supabase
+      .from('lessons')
+      .select('*')
+      .in('module_id', moduleIds.length > 0 ? moduleIds : ['00000000-0000-0000-0000-000000000000'])
+      .order('order_index', { ascending: true });
+
+    if (lessonsError) {
+      return { success: false, error: 'Gagal memuat materi pembelajaran.' };
+    }
+
+    const lessonIds = (lessonsData ?? []).map((l) => l.id);
+
+    // 5. Ambil assignments
+    const { data: assignmentsData, error: assignmentsError } = await supabase
+      .from('assignments')
+      .select('*, submissions(*)')
+      .in('lesson_id', lessonIds.length > 0 ? lessonIds : ['00000000-0000-0000-0000-000000000000'])
+      .order('created_at', { ascending: true });
+
+    if (assignmentsError) {
+      console.warn('[Action Warning] Gagal mengambil tugas:', assignmentsError.message);
+    }
+
+    const structuredSubjects = (subjectsData ?? []).map((subj) => {
+      const relatedModules = (modulesData ?? [])
+        .filter((m) => m.subject_id === subj.id)
+        .map((mod) => {
+          const relatedLessons = (lessonsData ?? [])
+            .filter((l) => l.module_id === mod.id)
+            .map((les) => {
+              const relatedAssignments = (assignmentsData ?? []).filter(
+                (a) => a.lesson_id === les.id
+              );
+              return {
+                ...les,
+                assignments: relatedAssignments,
+              };
+            });
+
+          return {
+            ...mod,
+            lessons: relatedLessons,
+          };
+        });
+
+      return {
+        ...subj,
+        modules: relatedModules,
+      };
+    });
+
+    return {
+      success: true,
+      data: {
+        classData: classData as unknown as ClassRecord,
+        subjects: structuredSubjects,
+      },
+    };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat memuat kurikulum kelas.';
+    return { success: false, error: msg };
+  }
+}
+

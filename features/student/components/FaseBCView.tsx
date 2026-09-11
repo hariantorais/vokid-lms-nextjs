@@ -17,11 +17,17 @@ import {
   Volume2,
   Sparkles,
   Layers,
+  ListChecks,
+  Play,
+  RotateCcw,
 } from 'lucide-react';
 import { VoiceSubmission } from './VoiceSubmission';
 import { PhotoHomeworkSubmission } from './PhotoHomeworkSubmission';
+import { QuizCbtModal } from './QuizCbtModal';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
+import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData, LessonWithAssignment } from '../services/student-service';
+import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
 
 interface FaseBCViewProps {
   classroomData: StudentClassroomData;
@@ -30,6 +36,11 @@ interface FaseBCViewProps {
 export function FaseBCView({ classroomData }: FaseBCViewProps) {
   const { classData, subjects } = classroomData;
   const [expandedTaskId, setExpandedTaskId] = useState<string | null>(null);
+  const [activeQuizModal, setActiveQuizModal] = useState<{
+    id: string;
+    title: string;
+    score?: number | null;
+  } | null>(null);
 
   // Selected subject & selected module state
   const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id ?? '');
@@ -148,7 +159,7 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                       }`}
                     >
                       <span className="whitespace-nowrap lg:truncate max-w-[200px]">
-                        {mod.order_index}. {mod.title}
+                        {mod.order_index}. {cleanModuleTitle(mod.title)}
                       </span>
                       <ChevronRight className="w-3.5 h-3.5 shrink-0 ml-1.5 hidden lg:block opacity-60" />
                     </button>
@@ -173,7 +184,7 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                 <span className="text-xs text-slate-400">• Bab {activeModule.order_index}</span>
               </div>
               <h1 className="text-xl sm:text-2xl font-black text-slate-900 mt-1.5 leading-tight">
-                {activeModule.title}
+                {cleanModuleTitle(activeModule.title)}
               </h1>
             </div>
 
@@ -252,7 +263,7 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                           </button>
                         ) : lesson.content_url ? (
                           <a
-                            href={lesson.content_url}
+                            href={getMediaProxyUrl(lesson.content_url)}
                             target="_blank"
                             rel="noreferrer"
                             className="min-h-[44px] px-3.5 py-2 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors shrink-0"
@@ -295,15 +306,31 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                             className="mt-3 p-4 sm:p-5 rounded-2xl bg-white border border-sky-200 shadow-2xs space-y-3"
                           >
                             <div className="flex items-center justify-between gap-2">
-                              <span className="px-2.5 py-0.5 rounded-full text-[10px] font-black bg-sky-100 text-sky-800">
-                                {asg.type === 'PHOTO_HOMEWORK' ? '📷 Tugas Foto PR' : '🎤 Tugas Suara'}
+                              <span
+                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
+                                  asg.type === 'QUIZ_CBT'
+                                    ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                                    : asg.type === 'PHOTO_HOMEWORK'
+                                    ? 'bg-sky-100 text-sky-800'
+                                    : 'bg-purple-100 text-purple-800'
+                                }`}
+                              >
+                                {asg.type === 'QUIZ_CBT'
+                                  ? '📝 Kuis CBT Pilihan Ganda'
+                                  : asg.type === 'PHOTO_HOMEWORK'
+                                  ? '📷 Tugas Foto PR'
+                                  : '🎤 Tugas Suara'}
                               </span>
 
-                              {/* Status Badge */}
+                              {/* Status Badge / Score */}
                               {isDone ? (
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800">
                                   <CheckCircle2 className="w-3 h-3" />
-                                  <span>Sudah Dikirim</span>
+                                  <span>
+                                    {asg.score !== null && asg.score !== undefined
+                                      ? `Nilai: ${asg.score}/100`
+                                      : 'Sudah Selesai'}
+                                  </span>
                                 </span>
                               ) : (
                                 <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-black bg-amber-100 text-amber-800">
@@ -327,31 +354,66 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                             <div className="pt-2 border-t border-slate-100 space-y-3">
                               <div className="flex items-center justify-between gap-2">
                                 <span className="text-[11px] text-slate-500 leading-tight">
-                                  {isDone
+                                  {asg.type === 'QUIZ_CBT'
+                                    ? isDone
+                                      ? `Nilai terkoreksi: ${asg.score ?? 0}/100. Bisa diulang dengan soal acak baru.`
+                                      : `${asg.quiz_question_count ?? 5} soal pilihan ganda acak dari bank soal.`
+                                    : isDone
                                     ? 'Jawaban Anda telah tersimpan.'
                                     : asg.type === 'PHOTO_HOMEWORK'
                                     ? 'Kirim foto buku tulis tugasmu.'
                                     : 'Rekam suaramu untuk Ibu Guru.'}
                                 </span>
-                                {!isDone && (
+
+                                {asg.type === 'QUIZ_CBT' ? (
                                   <button
                                     type="button"
                                     onClick={() =>
-                                      setExpandedTaskId(expandedTaskId === asg.id ? null : asg.id)
+                                      setActiveQuizModal({
+                                        id: asg.id,
+                                        title: asg.prompt,
+                                        score: asg.score ?? null,
+                                      })
                                     }
-                                    className="min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-black bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0 ${
+                                      isDone
+                                        ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
+                                        : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                    }`}
                                   >
-                                    {asg.type === 'PHOTO_HOMEWORK' ? (
-                                      <Camera className="w-4 h-4" />
+                                    {isDone ? (
+                                      <>
+                                        <RotateCcw className="w-4 h-4 text-amber-700" />
+                                        <span>Ulangi Kuis</span>
+                                      </>
                                     ) : (
-                                      <UploadCloud className="w-4 h-4" />
+                                      <>
+                                        <Play className="w-4 h-4 fill-white" />
+                                        <span>Mulai Kuis</span>
+                                      </>
                                     )}
-                                    <span>{expandedTaskId === asg.id ? 'Tutup' : 'Kirim Tugas'}</span>
                                   </button>
+                                ) : (
+                                  !isDone && (
+                                    <button
+                                      type="button"
+                                      onClick={() =>
+                                        setExpandedTaskId(expandedTaskId === asg.id ? null : asg.id)
+                                      }
+                                      className="min-h-[44px] px-3.5 py-2 rounded-xl text-xs font-black bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0"
+                                    >
+                                      {asg.type === 'PHOTO_HOMEWORK' ? (
+                                        <Camera className="w-4 h-4" />
+                                      ) : (
+                                        <UploadCloud className="w-4 h-4" />
+                                      )}
+                                      <span>{expandedTaskId === asg.id ? 'Tutup' : 'Kirim Tugas'}</span>
+                                    </button>
+                                  )
                                 )}
                               </div>
 
-                              {expandedTaskId === asg.id && !isDone && (
+                              {expandedTaskId === asg.id && !isDone && asg.type !== 'QUIZ_CBT' && (
                                 <div className="mt-3">
                                   {asg.type === 'PHOTO_HOMEWORK' ? (
                                     <PhotoHomeworkSubmission
@@ -447,6 +509,20 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
             </div>
           </div>
         </div>
+      )}
+
+      {/* 4. Interactive Quiz CBT Modal for Fase B/C */}
+      {activeQuizModal && (
+        <QuizCbtModal
+          isOpen={Boolean(activeQuizModal)}
+          assignmentId={activeQuizModal.id}
+          assignmentTitle={activeQuizModal.title}
+          initialScore={activeQuizModal.score}
+          onClose={() => setActiveQuizModal(null)}
+          onSuccess={() => {
+            setSubmittedTasks((prev) => ({ ...prev, [activeQuizModal.id]: true }));
+          }}
+        />
       )}
     </div>
   );

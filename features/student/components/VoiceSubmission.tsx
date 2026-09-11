@@ -236,35 +236,19 @@ export function VoiceSubmission({
   return (
     <div
       data-testid="voice-submission"
-      className="p-5 sm:p-6 rounded-3xl bg-white border-2 border-orange-200 shadow-sm space-y-4"
+      className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-3"
     >
-      {/* Header Interaktif */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-2xl bg-orange-100 text-orange-700 flex items-center justify-center font-black text-base shadow-xs">
-            🎤
-          </div>
-          <div>
-            <h4 className="font-extrabold text-sm sm:text-base text-slate-900">
-              Kirim Tugas Suara
-            </h4>
-            <p className="text-[11px] font-semibold text-slate-500">
-              Format audio: {mimeType}
-            </p>
-          </div>
+      {/* Recording status indicator if recording */}
+      {status === 'RECORDING' && (
+        <div className="flex items-center justify-center gap-2 py-1 px-3 bg-rose-100 border border-rose-300 text-rose-700 rounded-full font-black text-xs animate-pulse">
+          <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
+          <span>Merekam: {formatDuration(recordingDuration)}</span>
         </div>
-
-        {status === 'RECORDING' && (
-          <div className="flex items-center gap-2 px-3.5 py-1.5 bg-rose-100 border border-rose-300 text-rose-700 rounded-full font-black text-xs animate-pulse">
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
-            <span>Sedang merekam... {formatDuration(recordingDuration)}</span>
-          </div>
-        )}
-      </div>
+      )}
 
       {/* Pesan Error */}
       {errorMessage && (
-        <div className="p-3.5 bg-rose-50 border border-rose-200 rounded-2xl flex items-center gap-2.5 text-rose-700 text-xs font-bold">
+        <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-bold">
           <AlertCircle className="w-4 h-4 shrink-0" />
           <span>{errorMessage}</span>
         </div>
@@ -273,22 +257,17 @@ export function VoiceSubmission({
       {/* 4. Tampilan Antarmuka */}
       {/* A. Status: 'IDLE' */}
       {status === 'IDLE' && (
-        <div className="flex flex-col items-center justify-center py-3 space-y-3">
+        <div className="flex flex-col items-center justify-center py-2 space-y-2">
           <button
             data-testid="record-btn"
             type="button"
             onClick={startRecording}
             disabled={disabled}
-            className="min-h-[64px] min-w-[64px] w-full sm:w-auto px-8 py-4 rounded-3xl bg-linear-to-r from-red-500 via-orange-500 to-amber-500 hover:from-red-600 hover:to-orange-600 active:scale-95 text-white font-black text-base flex items-center justify-center gap-3 shadow-lg shadow-orange-200 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 rounded-2xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 active:scale-95 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-xs transition-all cursor-pointer disabled:opacity-50"
           >
-            <div className="w-8 h-8 rounded-full bg-white/20 flex items-center justify-center">
-              <Mic className="w-5 h-5 text-white" />
-            </div>
-            <span>Mulai Rekam Suara</span>
+            <Mic className="w-4 h-4 text-white" />
+            <span>Tekan untuk Bicara 🎤</span>
           </button>
-          <p className="text-xs font-bold text-slate-500 text-center">
-            Sentuh tombol di atas dan mulailah berbicara dengan jelas.
-          </p>
         </div>
       )}
 

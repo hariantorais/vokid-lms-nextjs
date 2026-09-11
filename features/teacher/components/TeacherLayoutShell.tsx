@@ -31,6 +31,7 @@ export interface TeacherLayoutShellProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'full';
   headerSlot?: React.ReactNode;
   defaultClassId?: string;
+  transparentHeader?: boolean;
 }
 
 export function TeacherLayoutShell({
@@ -47,6 +48,7 @@ export function TeacherLayoutShell({
   maxWidth = 'sm',
   headerSlot,
   defaultClassId = '11111111-1111-1111-1111-111111111112',
+  transparentHeader = true,
 }: TeacherLayoutShellProps) {
   const pathname = usePathname();
 
@@ -73,12 +75,22 @@ export function TeacherLayoutShell({
       <div className={`w-full ${maxWidthClass} mx-auto px-3 sm:px-4 pt-2.5 sm:pt-4 ${showBottomNav ? 'pb-32 sm:pb-36' : 'pb-12 sm:pb-16'}`}>
         
         {/* Native Mobile App Top Header / Navigation Bar */}
-        <header className="bg-white/80 backdrop-blur-xl rounded-3xl px-3.5 py-2.5 min-h-[64px] border border-slate-200/70 shadow-xs flex items-center justify-between mb-3.5 sticky top-2 z-30 transition-all">
+        <header
+          className={`flex items-center justify-between transition-all ${
+            transparentHeader
+              ? 'bg-transparent border-0 shadow-none px-1 py-2 mb-2.5'
+              : 'bg-white/80 backdrop-blur-xl rounded-3xl px-3.5 py-2.5 min-h-[64px] border border-slate-200/70 shadow-xs mb-3.5 sticky top-2 z-30'
+          }`}
+        >
           <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
             {backHref ? (
               <Link
                 href={backHref}
-                className="w-9 h-9 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-90 text-slate-800 flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-2xs border border-slate-200/50"
+                className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
+                  transparentHeader
+                    ? 'bg-slate-900/5 hover:bg-slate-900/10 text-slate-800 border border-slate-900/10'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs border border-slate-200/50'
+                }`}
                 title="Kembali"
               >
                 <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
@@ -87,7 +99,11 @@ export function TeacherLayoutShell({
               <button
                 type="button"
                 onClick={onBackClick}
-                className="w-9 h-9 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-90 text-slate-800 flex items-center justify-center transition-all shrink-0 cursor-pointer shadow-2xs border border-slate-200/50"
+                className={`w-9 h-9 rounded-2xl flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
+                  transparentHeader
+                    ? 'bg-slate-900/5 hover:bg-slate-900/10 text-slate-800 border border-slate-900/10'
+                    : 'bg-slate-100 hover:bg-slate-200 text-slate-800 shadow-2xs border border-slate-200/50'
+                }`}
                 title="Kembali"
               >
                 <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
@@ -245,10 +261,10 @@ export function TeacherLayoutShell({
             {/* 4. Materi */}
             {(() => {
               const isActive =
-                activeNavTab === 'CURRICULUM' || pathname.includes('/materi');
+                activeNavTab === 'CURRICULUM' || pathname.startsWith('/guru/materi') || pathname.includes('/materi');
               return (
                 <Link
-                  href={`/guru/kelas/${defaultClassId}/materi`}
+                  href="/guru/materi"
                   prefetch={true}
                   className={`flex-1 py-2 flex flex-col items-center gap-1 rounded-2xl transition-all cursor-pointer active:scale-95 ${
                     isActive

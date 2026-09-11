@@ -50,6 +50,8 @@ describe('Unit & Integration Test AdaptivePortal (Fase A vs Fase B/C)', () => {
                     prompt: 'Ucapkan kalimat: Buku Budi Baru',
                     instruction_audio_url: 'https://storage.googleapis.com/vokid-cdn/audio/petunjuk.mp3',
                     due_date: null,
+                    quiz_question_count: null,
+                    passing_score: null,
                     created_at: new Date().toISOString(),
                     hasSubmitted: false,
                   },

@@ -71,6 +71,19 @@ export const createLessonSchema = z
 
 export type CreateLessonInput = z.infer<typeof createLessonSchema>;
 
+export const quizQuestionSchema = z.object({
+  id: z.string().optional(),
+  questionText: z.string().min(3, 'Teks pertanyaan minimal 3 karakter'),
+  optionA: z.string().min(1, 'Pilihan A wajib diisi'),
+  optionB: z.string().min(1, 'Pilihan B wajib diisi'),
+  optionC: z.string().min(1, 'Pilihan C wajib diisi'),
+  optionD: z.string().min(1, 'Pilihan D wajib diisi'),
+  correctAnswer: z.enum(['A', 'B', 'C', 'D'], { message: 'Kunci jawaban harus A, B, C, atau D' }),
+  explanation: z.string().optional().nullable(),
+});
+
+export type QuizQuestionInput = z.infer<typeof quizQuestionSchema>;
+
 /**
  * Validasi skema pembuatan penugasan (Assignment) oleh Guru
  */
@@ -78,13 +91,13 @@ export const createAssignmentSchema = z.object({
   lessonId: z
     .string({ message: 'Lesson ID wajib diisi' })
     .regex(uuidRegex, { message: 'Lesson ID harus berupa UUID yang valid' }),
-  type: z.enum(['VOICE_TASK', 'PHOTO_HOMEWORK'], {
-    message: "Tipe tugas harus berupa 'VOICE_TASK' atau 'PHOTO_HOMEWORK'",
+  type: z.enum(['VOICE_TASK', 'PHOTO_HOMEWORK', 'QUIZ_CBT'], {
+    message: "Tipe tugas harus berupa 'VOICE_TASK', 'PHOTO_HOMEWORK', atau 'QUIZ_CBT'",
   }),
   prompt: z
     .string({ message: 'Instruksi tugas wajib diisi' })
     .trim()
-    .min(5, { message: 'Instruksi tugas minimal 5 karakter' }),
+    .min(3, { message: 'Instruksi tugas minimal 3 karakter' }),
   instructionAudioUrl: z
     .string()
     .trim()
@@ -101,6 +114,9 @@ export const createAssignmentSchema = z.object({
     .optional()
     .or(z.literal(''))
     .transform((val) => (val && val.length > 0 ? val : null)),
+  quizQuestionCount: z.coerce.number().int().positive().optional().nullable().default(5),
+  passingScore: z.coerce.number().min(0).max(100).optional().nullable().default(60),
+  questions: z.array(quizQuestionSchema).optional(),
 });
 
 export type CreateAssignmentInput = z.infer<typeof createAssignmentSchema>;
