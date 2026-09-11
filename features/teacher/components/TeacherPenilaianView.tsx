@@ -21,9 +21,9 @@ interface TeacherPenilaianViewProps {
 export function TeacherPenilaianView({ queue, defaultClassId }: TeacherPenilaianViewProps) {
   return (
     <TeacherLayoutShell
-      title="Penilaian & Evaluasi"
-      subtitle="Antrean tugas siswa yang siap diperiksa"
-      badgeText={`${queue.length} Menunggu`}
+      title="Penilaian"
+      subtitle={`${queue.length} tugas siap dinilai`}
+      badgeText={`${queue.length} Tugas`}
       badgeVariant="amber"
       activeNavTab="PENILAIAN"
       defaultClassId={defaultClassId}

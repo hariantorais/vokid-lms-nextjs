@@ -51,37 +51,118 @@ export function KelasListClient({ classrooms }: KelasListClientProps) {
     });
   };
 
+  if (isCreateClassOpen) {
+    return (
+      <TeacherLayoutShell
+        title="Buat Kelas Baru"
+        onBackClick={() => {
+          setIsCreateClassOpen(false);
+          setNewClassName('');
+        }}
+        activeNavTab="CURRICULUM"
+        showBottomNav={false}
+      >
+        <form
+          id="create-class-form"
+          onSubmit={handleCreateClass}
+          className="space-y-4 pt-1 pb-24"
+        >
+            {/* Input Nama Kelas */}
+            <div>
+              <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                Nama Kelas *
+              </label>
+              <input
+                type="text"
+                required
+                autoFocus
+                placeholder="Contoh: Kelas 1-A, Kelas 2 Merak"
+                value={newClassName}
+                onChange={(e) => setNewClassName(e.target.value)}
+                className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs transition-all"
+              />
+              <p className="text-[11px] text-slate-400 mt-1.5 font-medium">
+                Gunakan nama yang mudah dikenali oleh guru dan siswa.
+              </p>
+            </div>
+
+            {/* Input Tingkat Kelas & Tahun Ajaran */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Tingkat Kelas *
+                </label>
+                <select
+                  value={newGradeLevel}
+                  onChange={(e) => setNewGradeLevel(Number(e.target.value))}
+                  className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs transition-all cursor-pointer"
+                >
+                  {[1, 2, 3, 4, 5, 6].map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      Kelas {lvl} SD ({lvl <= 2 ? 'Fase A' : lvl <= 4 ? 'Fase B' : 'Fase C'})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-1.5">
+                  Tahun Ajaran *
+                </label>
+                <input
+                  type="text"
+                  required
+                  placeholder="2026/2027"
+                  value={newAcademicYear}
+                  onChange={(e) => setNewAcademicYear(e.target.value)}
+                  className="w-full px-4 py-3 rounded-2xl bg-white border border-slate-200 text-sm font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500/20 focus:border-sky-500 shadow-xs transition-all"
+                />
+              </div>
+            </div>
+          </form>
+
+          {/* Fixed Bottom Action Bar: Tombol Simpan di Bawah agar Mudah Dijangkau Jari */}
+          <div className="fixed bottom-0 inset-x-0 z-40 bg-white/95 backdrop-blur-xl border-t border-slate-200/80 shadow-2xl pb-[env(safe-area-inset-bottom)]">
+            <div className="max-w-[440px] mx-auto p-3 flex gap-2.5">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsCreateClassOpen(false);
+                  setNewClassName('');
+                }}
+                className="h-12 px-4 rounded-2xl border border-slate-200 hover:bg-slate-50 active:scale-95 text-slate-600 font-bold text-xs flex items-center justify-center cursor-pointer transition-all shrink-0"
+              >
+                Batal
+              </button>
+
+              <button
+                type="submit"
+                form="create-class-form"
+                disabled={isPending}
+                className="flex-1 h-12 rounded-2xl bg-gradient-to-r from-sky-600 via-indigo-600 to-indigo-700 hover:opacity-95 active:scale-98 text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 shadow-md shadow-indigo-500/20 cursor-pointer disabled:opacity-50 transition-all"
+              >
+                {isPending ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>Menyimpan Kelas...</span>
+                  </>
+                ) : (
+                  'Simpan Kelas'
+                )}
+              </button>
+            </div>
+          </div>
+      </TeacherLayoutShell>
+    );
+  }
+
   return (
     <TeacherLayoutShell
       title="Daftar Kelas"
-      subtitle="Kelola mata pelajaran dan kurikulum kelas"
-      badgeText="Manajemen Kurikulum"
-      badgeVariant="purple"
       backHref="/guru"
       activeNavTab="CURRICULUM"
     >
       <div className="space-y-4">
-        {/* Action Header */}
-        <div className="flex items-center justify-between gap-2">
-          <div>
-            <h3 className="font-extrabold text-sm text-slate-900 leading-tight">
-              Semua Kelas Binaan
-            </h3>
-            <p className="text-[11px] text-slate-500 font-medium">
-              Pilih kelas untuk mengelola mapel, bab, dan materinya
-            </p>
-          </div>
-
-          <button
-            type="button"
-            onClick={() => setIsCreateClassOpen(true)}
-            className="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer shrink-0"
-          >
-            <Plus className="w-3.5 h-3.5 text-amber-400" />
-            <span>Kelas Baru</span>
-          </button>
-        </div>
-
         {/* List Kelas */}
         {classrooms.length === 0 ? (
           <div className="text-center py-14 bg-white rounded-3xl border border-slate-200/80 p-6 space-y-4 shadow-2xs">
@@ -124,16 +205,12 @@ export function KelasListClient({ classrooms }: KelasListClientProps) {
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 flex-wrap mb-0.5">
                         <span
-                          className={`text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md border ${
-                            isFaseA
-                              ? 'bg-amber-50 text-amber-800 border-amber-200/70'
-                              : 'bg-sky-50 text-sky-800 border-sky-200/70'
-                          }`}
+                          className={`text-[9.5px] font-black uppercase px-2 py-0.5 rounded-md border ${isFaseA
+                            ? 'bg-amber-50 text-amber-800 border-amber-200/70'
+                            : 'bg-sky-50 text-sky-800 border-sky-200/70'
+                            }`}
                         >
-                          Tingkat {cls.grade_level} SD • {isFaseA ? 'Fase A' : 'Fase B/C'}
-                        </span>
-                        <span className="text-[10px] text-slate-400 font-medium">
-                          T.A. {cls.academic_year}
+                          Kelas {cls.grade_level} SD
                         </span>
                       </div>
                       <h4 className="text-sm font-bold text-slate-900 group-hover:text-purple-700 leading-snug break-words transition-colors">
@@ -152,84 +229,20 @@ export function KelasListClient({ classrooms }: KelasListClientProps) {
         )}
       </div>
 
-      {/* Drawer Tambah Kelas Baru */}
-      <MobileDrawer
-        isOpen={isCreateClassOpen}
-        onClose={() => setIsCreateClassOpen(false)}
-        title="Buat Kelas Baru"
-        subtitle={
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-purple-50 border border-purple-100 text-[10px] font-extrabold text-purple-700 uppercase tracking-wider">
-              <Sparkles className="w-3 h-3 text-purple-600" />
-              Kurikulum Merdeka
-            </span>
+      {/* Floating Action Button (FAB) Tambah Kelas ala Native Mobile */}
+      <div className="fixed bottom-24 right-4 sm:right-6 md:right-8 z-40">
+        <button
+          type="button"
+          onClick={() => setIsCreateClassOpen(true)}
+          className="h-12 px-4 sm:h-13 sm:px-5 rounded-full bg-gradient-to-r from-sky-600 to-indigo-600 hover:from-sky-700 hover:to-indigo-700 text-white font-black text-xs flex items-center gap-2 shadow-xl shadow-indigo-500/30 hover:shadow-indigo-500/40 active:scale-95 transition-all cursor-pointer border border-white/20 ring-4 ring-white/30"
+          title="Tambah Kelas Baru"
+        >
+          <div className="w-6 h-6 rounded-full bg-white/20 flex items-center justify-center">
+            <Plus className="w-4 h-4 text-white stroke-[3]" />
           </div>
-        }
-      >
-        <form onSubmit={handleCreateClass} className="space-y-4">
-          <div>
-            <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-              Nama Kelas *
-            </label>
-            <input
-              type="text"
-              required
-              placeholder="Contoh: Kelas 1-A, Kelas 2-B"
-              value={newClassName}
-              onChange={(e) => setNewClassName(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-            />
-          </div>
-
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Tingkat Kelas *
-              </label>
-              <select
-                value={newGradeLevel}
-                onChange={(e) => setNewGradeLevel(Number(e.target.value))}
-                className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all cursor-pointer bg-white"
-              >
-                {[1, 2, 3, 4, 5, 6].map((lvl) => (
-                  <option key={lvl} value={lvl}>
-                    Kelas {lvl} ({lvl <= 2 ? 'Fase A' : lvl <= 4 ? 'Fase B' : 'Fase C'})
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div>
-              <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-                Tahun Ajaran *
-              </label>
-              <input
-                type="text"
-                required
-                placeholder="2026/2027"
-                value={newAcademicYear}
-                onChange={(e) => setNewAcademicYear(e.target.value)}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            disabled={isPending}
-            className="w-full h-11 rounded-2xl bg-slate-900 hover:bg-slate-800 active:scale-98 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50 transition-all"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                <span>Menyimpan Kelas...</span>
-              </>
-            ) : (
-              'Simpan Kelas'
-            )}
-          </button>
-        </form>
-      </MobileDrawer>
+          <span className="tracking-wide">Kelas Baru</span>
+        </button>
+      </div>
     </TeacherLayoutShell>
   );
 }

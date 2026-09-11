@@ -64,8 +64,8 @@ export function TeacherDashboardMobile({
 
   return (
     <TeacherLayoutShell
-      title={teacherProfile.fullName}
-      subtitle="Ruang Guru • Kurikulum Merdeka"
+      title={teacherProfile.fullName.split(',')[0]}
+      subtitle="Guru Kelas"
       badgeText="Pendidik SD"
       badgeVariant="sky"
       activeNavTab="HOME"

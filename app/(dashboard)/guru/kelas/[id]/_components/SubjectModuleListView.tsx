@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { Plus, BookOpen, ChevronRight, Edit2 } from 'lucide-react';
-import { formatModuleTitle } from '@/lib/formatters';
+import { cleanModuleTitle } from '@/lib/formatters';
 import type { SubjectOption, ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
 
 interface SubjectModuleListViewProps {
@@ -32,93 +32,60 @@ export function SubjectModuleListView({
   onOpenCreateModule,
 }: SubjectModuleListViewProps) {
   return (
-    <div className="space-y-4 select-none">
-      {/* Action Header */}
-      <div className="flex items-center justify-between gap-2">
-        <div>
-          <h3 className="font-extrabold text-sm text-slate-900 leading-tight">
-            Bab Pembelajaran
-          </h3>
-          <p className="text-[11px] text-slate-500 font-medium">
-            Pilih mapel di bawah untuk mengelola bab dan materinya
-          </p>
-        </div>
+    <div className="space-y-4 select-none pb-24">
+      {/* Level 2: Tab Navigasi Mapel (Mata Pelajaran) & Tombol Tambah Mapel di Sampingnya */}
+      <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar items-center">
+        {subjects.map((sub) => {
+          const isSelected = selectedSubjectId === sub.id;
 
-        <div className="flex items-center gap-1.5 shrink-0">
-          <button
-            type="button"
-            onClick={onOpenCreateSubject}
-            className="h-9 px-3 rounded-xl bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 font-bold text-xs flex items-center gap-1 transition-all shadow-2xs cursor-pointer"
-            title="Tambah Mata Pelajaran Baru"
-          >
-            <Plus className="w-3.5 h-3.5 text-sky-600" />
-            <span>Mapel</span>
-          </button>
-
-          <button
-            type="button"
-            onClick={onOpenCreateModule}
-            disabled={!activeSubject}
-            className="h-9 px-3.5 rounded-xl bg-slate-900 hover:bg-slate-800 active:scale-95 text-white font-bold text-xs flex items-center gap-1.5 transition-all shadow-xs cursor-pointer disabled:opacity-50"
-          >
-            <Plus className="w-3.5 h-3.5 text-amber-400" />
-            <span>Bab</span>
-          </button>
-        </div>
-      </div>
-
-      {/* Level 2: Tab Navigasi Mapel (Mata Pelajaran) */}
-      {subjects.length > 0 && (
-        <div className="flex gap-1.5 overflow-x-auto pb-1 no-scrollbar items-center">
-          {subjects.map((sub) => {
-            const count = modules.filter((m) => m.subject_id === sub.id).length;
-            const isSelected = selectedSubjectId === sub.id;
-
-            return (
-              <div
-                key={sub.id}
-                className={`inline-flex items-center rounded-xl text-xs font-bold transition-all shrink-0 ${
-                  isSelected
-                    ? 'bg-slate-900 text-white shadow-xs'
-                    : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
-                }`}
+          return (
+            <div
+              key={sub.id}
+              className={`inline-flex items-center rounded-xl text-xs font-bold transition-all shrink-0 ${
+                isSelected
+                  ? 'bg-slate-900 text-white shadow-xs'
+                  : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-50'
+              }`}
+            >
+              <button
+                type="button"
+                onClick={() => onSelectSubject(sub.id)}
+                className="px-3 py-2 cursor-pointer flex items-center"
               >
-                <button
-                  type="button"
-                  onClick={() => onSelectSubject(sub.id)}
-                  className="px-3.5 py-2 cursor-pointer flex items-center gap-1.5"
-                >
-                  <span>{sub.name}</span>
-                  <span
-                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-extrabold ${
-                      isSelected ? 'bg-white/20 text-white' : 'bg-slate-100 text-slate-500'
-                    }`}
-                  >
-                    {count} Bab
-                  </span>
-                </button>
+                <span>{sub.name}</span>
+              </button>
 
-                {/* Tombol Edit Mapel Langsung */}
-                <button
-                  type="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onOpenEditSubject(sub);
-                  }}
-                  className={`p-1.5 mr-1 rounded-lg transition-colors cursor-pointer ${
-                    isSelected
-                      ? 'text-white/70 hover:text-white hover:bg-white/10'
-                      : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
-                  }`}
-                  title={`Edit atau Hapus ${sub.name}`}
-                >
-                  <Edit2 className="w-3 h-3" />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
+              {/* Tombol Edit Mapel Langsung */}
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onOpenEditSubject(sub);
+                }}
+                className={`p-1.5 mr-1 rounded-lg transition-colors cursor-pointer ${
+                  isSelected
+                    ? 'text-white/70 hover:text-white hover:bg-white/10'
+                    : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100'
+                }`}
+                title={`Edit atau Hapus ${sub.name}`}
+              >
+                <Edit2 className="w-3 h-3" />
+              </button>
+            </div>
+          );
+        })}
+
+        {/* Tombol Tambah Mapel di Samping Tab Mapel */}
+        <button
+          type="button"
+          onClick={onOpenCreateSubject}
+          className="h-8 px-3 rounded-xl bg-white border border-dashed border-sky-400 hover:border-sky-600 hover:bg-sky-50 active:scale-95 text-sky-700 font-bold text-xs flex items-center gap-1.5 transition-all shadow-2xs shrink-0 cursor-pointer"
+          title="Tambah Mata Pelajaran Baru"
+        >
+          <Plus className="w-3.5 h-3.5 text-sky-600 stroke-[2.5]" />
+          <span>Tambah Mapel</span>
+        </button>
+      </div>
 
       {/* Level 3: List Kartu Bab di Mapel Terpilih / Kosong */}
       {subjects.length === 0 ? (
@@ -144,16 +111,26 @@ export function SubjectModuleListView({
           </button>
         </div>
       ) : subjectModules.length === 0 ? (
-        <div className="text-center py-14 bg-white rounded-3xl border border-slate-200/80 p-6 space-y-2">
+        <div className="text-center py-12 bg-white rounded-3xl border border-slate-200/80 p-6 space-y-3">
           <div className="w-12 h-12 rounded-2xl bg-slate-100 flex items-center justify-center mx-auto text-slate-400">
             <BookOpen className="w-6 h-6" />
           </div>
-          <p className="text-sm font-bold text-slate-800">
-            Belum ada Bab di mapel {activeSubject?.name ?? 'ini'}
-          </p>
-          <p className="text-xs text-slate-400 max-w-xs mx-auto">
-            Klik tombol &quot;+ Bab&quot; di atas untuk menyusun bab kurikulum pertama.
-          </p>
+          <div className="space-y-1">
+            <p className="text-sm font-bold text-slate-800">
+              Belum ada Bab di mapel {activeSubject?.name ?? 'ini'}
+            </p>
+            <p className="text-xs text-slate-400 max-w-xs mx-auto">
+              Susun bab pembelajaran dan materi kurikulum untuk siswa Anda.
+            </p>
+          </div>
+          <button
+            type="button"
+            onClick={onOpenCreateModule}
+            className="h-10 px-5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs inline-flex items-center gap-1.5 transition-all shadow-xs cursor-pointer active:scale-95"
+          >
+            <Plus className="w-4 h-4 text-amber-400" />
+            <span>Buat Bab Pertama</span>
+          </button>
         </div>
       ) : (
         <div className="grid grid-cols-1 gap-2.5">
@@ -179,12 +156,12 @@ export function SubjectModuleListView({
 
                   <div className="min-w-0 flex-1">
                     <h4 className="text-sm font-bold text-slate-900 group-hover:text-sky-700 leading-snug break-words transition-colors">
-                      {formatModuleTitle(mod.order_index, mod.title)}
+                      {cleanModuleTitle(mod.title) || mod.title}
                     </h4>
-                    <div className="flex items-center gap-2 mt-1 text-[11px] text-slate-400 font-medium flex-wrap">
-                      <span>{lessonsCount} Sub-bab / Materi</span>
+                    <div className="flex items-center gap-1.5 mt-1 text-[11px] text-slate-400 font-medium flex-wrap">
+                      <span>{lessonsCount} materi</span>
                       <span>•</span>
-                      <span>{totalTasksInModule} Tugas Terpasang</span>
+                      <span>{totalTasksInModule} tugas</span>
                     </div>
                   </div>
                 </div>

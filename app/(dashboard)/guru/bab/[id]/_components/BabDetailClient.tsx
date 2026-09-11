@@ -214,7 +214,7 @@ export function BabDetailClient({ data }: BabDetailClientProps) {
     <TeacherLayoutShell
       title={mod.title}
       subtitle={`${mod.subject.name} • ${classData.name}`}
-      badgeText={isFaseA ? 'Fase A (Kelas 1–2)' : 'Fase B/C (Kelas 3–6)'}
+      badgeText={isFaseA ? 'Fase A' : 'Fase B/C'}
       badgeVariant={isFaseA ? 'amber' : 'sky'}
       backHref={`/guru/kelas/${classData.id}`}
       activeNavTab="CURRICULUM"

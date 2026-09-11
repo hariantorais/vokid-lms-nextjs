@@ -204,7 +204,7 @@ export function PelajaranDetailClient({ data }: PelajaranDetailClientProps) {
     <TeacherLayoutShell
       title={lesson.title}
       subtitle={`${mod.title} • ${classData.name}`}
-      badgeText={isFaseA ? 'Fase A (Kelas 1–2)' : 'Fase B/C (Kelas 3–6)'}
+      badgeText={isFaseA ? 'Fase A' : 'Fase B/C'}
       badgeVariant={isFaseA ? 'amber' : 'sky'}
       backHref={`/guru/bab/${mod.id}`}
       activeNavTab="CURRICULUM"

@@ -35,7 +35,7 @@ export function TeacherStudentsView({
   return (
     <TeacherLayoutShell
       title="Daftar Siswa"
-      subtitle="Data murid aktif dan progres belajar kelas"
+      subtitle="Progres Murid"
       badgeText={`${students.length} Siswa`}
       badgeVariant="emerald"
       activeNavTab="STUDENTS"
