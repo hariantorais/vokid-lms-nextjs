@@ -1,7 +1,6 @@
 import React from 'react';
-import { getStudentClassroom } from '@/features/student/services/student-service';
-import { AdaptivePortal } from '@/features/student/components/AdaptivePortal';
-import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
+import { getStudentClassroom } from './_services/student-classroom.service';
+import { KelasDetailClient } from './_components/KelasDetailClient';
 import type { GradeLevel } from '@/types/database';
 
 export const dynamic = 'force-dynamic';
@@ -77,25 +76,5 @@ export default async function StudentClassPage({ params }: StudentClassPageProps
         ],
       };
 
-  const gradeLevel = (classroomData.classData.grade_level ?? 1) as GradeLevel;
-  const isFaseA = gradeLevel <= 2;
-  const faseText = isFaseA ? 'Fase A' : gradeLevel <= 4 ? 'Fase B' : 'Fase C';
-
-  return (
-    <StudentLayoutShell
-      title={classroomData.classData.name}
-      subtitle={`Kelas ${gradeLevel} SD • ${faseText}`}
-      badgeText={faseText}
-      badgeVariant={isFaseA ? 'amber' : 'sky'}
-      backHref="/siswa"
-      activeNavTab="MATERI"
-      showBottomNav={true}
-      maxWidth="sm"
-    >
-      <AdaptivePortal
-        classroomData={classroomData}
-        gradeLevel={gradeLevel}
-      />
-    </StudentLayoutShell>
-  );
+  return <KelasDetailClient classroomData={classroomData} />;
 }

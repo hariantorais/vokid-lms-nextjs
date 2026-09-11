@@ -54,7 +54,7 @@ export async function proxy(request: NextRequest) {
 
     // 2. Proteksi Peran (Role-Based Access Control)
     if (user && isProtectedPath) {
-        const role = user.user_metadata?.role;
+        const role = user.user_metadata?.role ?? request.cookies.get('vokid_role')?.value;
 
         // Siswa (Maryam, Asiyah, Khadijah) dilarang masuk ke ruang guru
         if (pathname.startsWith('/guru') && role !== 'GURU') {
@@ -62,9 +62,9 @@ export async function proxy(request: NextRequest) {
         }
     }
 
-    // 3. Jika sudah login dan membuka halaman login, arahkan ke dasbor yang sesuai
-    if (pathname === '/login' && user) {
-        const role = user.user_metadata?.role;
+    // 3. Jika sudah login dan membuka halaman login atau root '/', arahkan ke dasbor yang sesuai
+    if ((pathname === '/login' || pathname === '/') && user) {
+        const role = user.user_metadata?.role ?? request.cookies.get('vokid_role')?.value;
         if (role === 'GURU') {
             return NextResponse.redirect(new URL('/guru', request.url));
         }
@@ -79,8 +79,9 @@ export default proxy;
 
 export const config = {
     matcher: [
+        '/',
+        '/login',
         '/guru/:path*',
         '/siswa/:path*',
-        '/login',
     ],
 };

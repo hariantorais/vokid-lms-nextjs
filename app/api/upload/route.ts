@@ -34,7 +34,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions'];
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
     const folder = (
       typeof folderInput === 'string' && validFolders.includes(folderInput as R2Folder)
         ? folderInput

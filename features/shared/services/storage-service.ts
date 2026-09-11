@@ -2,7 +2,7 @@ import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getR2Client, getR2BucketName, getR2PublicDomain } from '@/lib/storage/r2';
 import type { ActionResponse } from '../types/storage';
 
-export type R2Folder = 'materials' | 'audio-prompts' | 'submissions';
+export type R2Folder = 'materials' | 'audio-prompts' | 'submissions' | 'avatars';
 
 export interface UploadFileToR2Params {
   folder: R2Folder;

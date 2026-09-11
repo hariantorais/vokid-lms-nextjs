@@ -66,25 +66,25 @@ export function MobileConfirmDialog({
   }[variant];
 
   const content = (
-    <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center p-0 sm:p-4 select-none">
+    <div className="fixed inset-0 z-[9999] flex items-end justify-center p-0 sm:p-4 select-none">
       {/* Backdrop */}
       <div
         onClick={isLoading ? undefined : onCancel}
-        className={`absolute inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity duration-250 ease-out cursor-pointer ${
+        className={`absolute inset-0 bg-slate-950/70 backdrop-blur-xs transition-opacity duration-300 ease-out cursor-pointer ${
           visible ? 'opacity-100' : 'opacity-0'
         }`}
       />
 
-      {/* Mobile Native Action Sheet / Dialog Box */}
+      {/* Mobile Native Action Sheet / Dialog Box - Slides and fades from bottom up */}
       <div
         role="alertdialog"
         aria-modal="true"
         aria-labelledby="confirm-dialog-title"
         aria-describedby="confirm-dialog-desc"
-        className={`relative w-full max-w-[390px] bg-white rounded-t-[2.2rem] sm:rounded-3xl shadow-2xl p-6 sm:p-7 z-10 transform transition-all duration-250 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center text-center ${
+        className={`relative w-full max-w-[420px] bg-white rounded-t-[2.2rem] sm:rounded-3xl shadow-2xl p-6 sm:p-7 z-10 transform transition-all duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] flex flex-col items-center text-center ${
           visible
-            ? 'translate-y-0 opacity-100 sm:scale-100'
-            : 'translate-y-full opacity-0 sm:scale-95 sm:translate-y-4'
+            ? 'translate-y-0 opacity-100'
+            : 'translate-y-24 opacity-0 pointer-events-none'
         }`}
       >
         {/* Pull Indicator Pill (Mobile native style) */}

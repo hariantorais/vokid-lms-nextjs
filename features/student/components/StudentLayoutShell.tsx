@@ -2,240 +2,166 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Image from 'next/image';
 import {
   ArrowLeft,
   Star,
-  Layers,
+  Compass,
   BookOpen,
-  LogOut,
-  Flame,
+  Trophy,
+  User,
 } from 'lucide-react';
 
-export interface StudentLayoutShellProps {
+interface StudentLayoutShellProps {
   children: React.ReactNode;
-  title: string;
+  backHref?: string;
+  maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
+  starsCount?: number;
+  userAvatarUrl?: string | null;
+  activeNavTab?: 'KELAS' | 'MATERI' | 'TUGAS' | 'PROFIL';
+  showBottomNav?: boolean;
+  title?: string;
   subtitle?: string;
   badgeText?: string;
-  badgeVariant?: 'amber' | 'sky' | 'emerald';
-  backHref?: string;
-  onBackClick?: () => void;
-  headerAction?: React.ReactNode;
-  activeNavTab?: 'KELAS' | 'MATERI' | 'KELUAR';
-  showBottomNav?: boolean;
-  maxWidth?: 'sm' | 'md' | 'lg' | 'full';
-  headerSlot?: React.ReactNode;
-  starsCount?: number;
+  badgeVariant?: 'teal' | 'amber' | 'sky' | 'emerald' | 'purple';
   transparentHeader?: boolean;
 }
 
-/**
- * StudentLayoutShell (Ruangguru Kids & Dafa Lulu Edition)
- * - Teal Brand: from-teal-500 to-cyan-600
- * - Rounded clean cards, modern floating bottom bar
- * - Light grayish background: bg-slate-50
- */
 export function StudentLayoutShell({
   children,
-  title,
-  subtitle,
-  badgeText,
   backHref,
-  onBackClick,
-  headerAction,
-  activeNavTab,
-  showBottomNav = true,
   maxWidth = 'sm',
-  headerSlot,
-  starsCount = 120,
-  transparentHeader = true,
+  starsCount = 0,
+  userAvatarUrl,
+  activeNavTab = 'MATERI',
+  showBottomNav = true,
 }: StudentLayoutShellProps) {
-  const pathname = usePathname();
+  const maxWidthClass =
+    maxWidth === 'sm'
+      ? 'max-w-md'
+      : maxWidth === 'md'
+        ? 'max-w-2xl'
+        : maxWidth === 'lg'
+          ? 'max-w-4xl'
+          : maxWidth === 'xl'
+            ? 'max-w-5xl'
+            : 'max-w-full';
 
-  const maxWidthClass = {
-    sm: 'max-w-[440px]',
-    md: 'max-w-2xl',
-    lg: 'max-w-5xl',
-    full: 'max-w-full',
-  }[maxWidth];
+  const isCustomImage =
+    userAvatarUrl &&
+    (userAvatarUrl.startsWith('http') || userAvatarUrl.startsWith('/'));
 
   return (
-    <div className="min-h-screen bg-slate-100/70 text-slate-900 flex flex-col antialiased relative selection:bg-teal-500 selection:text-white">
-      {/* Background Soft Pastel Teal-Cyan Gradient Accent */}
-      <div className="absolute top-0 inset-x-0 h-44 bg-gradient-to-b from-teal-100 via-teal-50 to-slate-100/70 -z-10 rounded-b-[36px]" />
-
-      {/* Main Container */}
-      <div
-        className={`w-full ${maxWidthClass} mx-auto px-3.5 sm:px-4 pt-3 ${
-          showBottomNav ? 'pb-28 sm:pb-32' : 'pb-12'
-        }`}
-      >
-        {/* Top App Header (100% Transparent when transparentHeader is true) */}
-        <header
-          className={`px-1 py-2 flex items-center justify-between mb-2.5 transition-all ${
-            transparentHeader
-              ? 'bg-transparent border-0 shadow-none'
-              : 'bg-white shadow-sm border border-slate-100 rounded-2xl px-3.5 py-2.5 mb-3.5 sticky top-2 z-30'
-          }`}
-        >
-          <div className="flex items-center gap-2.5 min-w-0 flex-1 mr-2">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center select-none font-sans">
+      <div className={`w-full ${maxWidthClass} flex-1 flex flex-col min-h-screen relative pb-24`}>
+        {/* ========================================================================= */}
+        {/* HEADER 100% TRANSPARAN (Tanpa Judul, Tombol Back Kiri, Avatar & Bintang Kanan) */}
+        {/* ========================================================================= */}
+        <header className="sticky top-0 z-40 w-full bg-transparent px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between pointer-events-none">
+          {/* Sisi Kiri: Tombol Kembali Taktil 3D */}
+          <div className="pointer-events-auto">
             {backHref ? (
               <Link
                 href={backHref}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
-                  transparentHeader
-                    ? 'bg-teal-900/10 hover:bg-teal-900/15 text-teal-900 border border-teal-900/10'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Kembali"
+                aria-label="Kembali"
+                className="w-11 h-11 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-b-4 border-slate-200 active:border-b-2 active:translate-y-0.5 text-slate-700 flex items-center justify-center shadow-xs hover:bg-slate-50 transition-all cursor-pointer"
               >
-                <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
+                <ArrowLeft className="w-5 h-5 stroke-[2.8]" />
               </Link>
-            ) : onBackClick ? (
-              <button
-                type="button"
-                onClick={onBackClick}
-                className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shrink-0 cursor-pointer active:scale-90 ${
-                  transparentHeader
-                    ? 'bg-teal-900/10 hover:bg-teal-900/15 text-teal-900 border border-teal-900/10'
-                    : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
-                }`}
-                title="Kembali"
-              >
-                <ArrowLeft className="w-4 h-4 stroke-[2.5]" />
-              </button>
             ) : (
-              /* Dafa Lulu / Ruangguru Kids Mascot Avatar */
-              <div className="relative shrink-0">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-amber-400 to-orange-400 text-white font-black text-sm flex items-center justify-center shadow-xs select-none">
-                  🦁
-                </div>
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-500 rounded-full border-2 border-white ring-1 ring-emerald-400/30" />
-              </div>
+              <div className="w-11 h-11" />
             )}
-
-            <div className="min-w-0 flex-1 py-0.5">
-              {/* Baris Atas: Nomor Bab & Nama Mata Pelajaran di sampingnya */}
-              <div className="flex items-center gap-1.5 flex-wrap mb-0.5">
-                {badgeText && (
-                  <span
-                    className={`inline-block px-2 py-0.5 rounded-md text-[10px] font-black uppercase tracking-wider ${
-                      transparentHeader
-                        ? 'bg-teal-700 text-white shadow-2xs'
-                        : 'bg-teal-100 text-teal-900 border border-teal-200'
-                    }`}
-                  >
-                    {badgeText}
-                  </span>
-                )}
-                {subtitle && (
-                  <span
-                    className={`text-[11px] font-bold truncate ${
-                      transparentHeader ? 'text-teal-800' : 'text-slate-500'
-                    }`}
-                  >
-                    • {subtitle}
-                  </span>
-                )}
-              </div>
-
-              {/* Judul Bab (Gelap Elegan, Bukan Hitam Pekat) */}
-              <h1
-                className={`text-sm sm:text-base font-black tracking-tight leading-snug line-clamp-2 ${
-                  transparentHeader ? 'text-teal-950' : 'text-slate-900'
-                }`}
-              >
-                {title}
-              </h1>
-            </div>
           </div>
 
-          {/* Right Action: Points / Stars Pill */}
-          <div className="flex items-center gap-1.5 shrink-0">
-            {headerAction ? (
-              headerAction
-            ) : (
-              <div
-                className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-black shadow-xs ${
-                  transparentHeader
-                    ? 'bg-amber-100/90 border border-amber-300/60 text-amber-900'
-                    : 'bg-amber-50 border border-amber-200 text-amber-900'
-                }`}
-              >
-                <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-600" />
-                <span>{starsCount}</span>
+          {/* Sisi Kanan: Avatar Siswa & Jumlah Bintang */}
+          <div className="flex items-center gap-2 pointer-events-auto">
+            <Link
+              href="/siswa/profil"
+              title="Buka Profil & Ganti Avatar"
+              className="group flex items-center gap-2 bg-white/95 backdrop-blur-md px-2.5 py-1.5 rounded-2xl border-2 border-b-4 border-slate-200 hover:border-amber-300 active:border-b-2 active:translate-y-0.5 shadow-xs transition-all cursor-pointer"
+            >
+              <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 via-orange-400 to-amber-300 flex items-center justify-center text-lg overflow-hidden border border-white shadow-2xs group-hover:scale-105 transition-transform">
+                {isCustomImage ? (
+                  <Image
+                    src={userAvatarUrl!}
+                    alt="Avatar"
+                    width={32}
+                    height={32}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <span>{userAvatarUrl || '🦁'}</span>
+                )}
               </div>
-            )}
+
+              <div className="flex items-center gap-1 pr-1">
+                <Star className="w-4 h-4 fill-amber-400 text-amber-500 drop-shadow-2xs animate-pulse" />
+                <span className="text-xs font-black text-slate-900 tracking-tight">
+                  {starsCount}
+                </span>
+              </div>
+            </Link>
           </div>
         </header>
 
-        {headerSlot && <div className="mb-3">{headerSlot}</div>}
+        {/* Konten Halaman */}
+        <main className="flex-1 px-4 sm:px-6 md:px-8 pt-1 pb-6 w-full">{children}</main>
 
-        {/* Main Body */}
-        <main className="space-y-3.5">{children}</main>
-      </div>
-
-      {/* Floating Bottom Navigation Dock (Ruangguru Signature Floating Pill) */}
-      {showBottomNav && (
-        <div className="fixed bottom-3 inset-x-3 max-w-[440px] mx-auto z-40">
-          <nav
-            aria-label="Navigasi Siswa"
-            className="bg-white text-slate-700 rounded-2xl p-1.5 shadow-xl border border-slate-200/80 flex items-center justify-between gap-1"
-          >
-            {/* 1. Beranda / Pilih Kelas */}
-            {(() => {
-              const isActive =
-                activeNavTab === 'KELAS' ||
-                pathname === '/siswa' ||
-                pathname.startsWith('/siswa/kelas');
-              return (
+        {/* ========================================================================= */}
+        {/* BOTTOM NAVIGATION BAR */}
+        {/* ========================================================================= */}
+        {showBottomNav && (
+          <nav className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none px-3 pb-3">
+            <div className={`w-full ${maxWidthClass} pointer-events-auto`}>
+              <div className="bg-white/95 backdrop-blur-md border-2 border-b-4 border-slate-200/90 rounded-3xl p-1.5 shadow-lg flex items-center justify-around">
                 <Link
                   href="/siswa"
-                  className={`flex-1 py-1.5 flex flex-col items-center gap-0.5 rounded-xl transition-all cursor-pointer active:scale-95 ${
-                    isActive
-                      ? 'text-teal-600 font-black'
-                      : 'text-slate-400 hover:text-slate-600 font-semibold'
-                  }`}
-                >
-                  <div
-                    className={`w-7 h-7 rounded-lg flex items-center justify-center transition-all ${
-                      isActive
-                        ? 'bg-teal-50 text-teal-600'
-                        : 'text-slate-400'
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'KELAS'
+                      ? 'bg-teal-500 text-white font-black shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900 font-bold'
                     }`}
-                  >
-                    <Layers className="w-4 h-4 stroke-[2.4]" />
-                  </div>
-                  <span className="text-[10px] tracking-tight">Kelas</span>
+                >
+                  <Compass className={`w-5 h-5 ${activeNavTab === 'KELAS' ? 'stroke-[2.8]' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase">Kelas</span>
                 </Link>
-              );
-            })()}
 
-            {/* 2. Scroll / Refresh Materi */}
-            <button
-              type="button"
-              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-              className="flex-1 py-1.5 flex flex-col items-center gap-0.5 rounded-xl text-slate-400 hover:text-teal-600 font-semibold transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400">
-                <BookOpen className="w-4 h-4 stroke-[2.2]" />
-              </div>
-              <span className="text-[10px] tracking-tight">Materi</span>
-            </button>
+                <Link
+                  href="/siswa"
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'MATERI'
+                      ? 'bg-teal-500 text-white font-black shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900 font-bold'
+                    }`}
+                >
+                  <BookOpen className={`w-5 h-5 ${activeNavTab === 'MATERI' ? 'stroke-[2.8]' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase">Materi</span>
+                </Link>
 
-            {/* 3. Keluar Portal */}
-            <Link
-              href="/login"
-              className="flex-1 py-1.5 flex flex-col items-center gap-0.5 rounded-xl text-slate-400 hover:text-rose-500 font-semibold transition-all cursor-pointer active:scale-95"
-            >
-              <div className="w-7 h-7 rounded-lg flex items-center justify-center text-slate-400">
-                <LogOut className="w-4 h-4 stroke-[2.2]" />
+                <Link
+                  href="/siswa"
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'TUGAS'
+                      ? 'bg-teal-500 text-white font-black shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900 font-bold'
+                    }`}
+                >
+                  <Trophy className={`w-5 h-5 ${activeNavTab === 'TUGAS' ? 'stroke-[2.8]' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase">Misi</span>
+                </Link>
+
+                <Link
+                  href="/siswa/profil"
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'PROFIL'
+                      ? 'bg-teal-500 text-white font-black shadow-xs'
+                      : 'text-slate-500 hover:text-slate-900 font-bold'
+                    }`}
+                >
+                  <User className={`w-5 h-5 ${activeNavTab === 'PROFIL' ? 'stroke-[2.8]' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase">Profil</span>
+                </Link>
               </div>
-              <span className="text-[10px] tracking-tight">Keluar</span>
-            </Link>
+            </div>
           </nav>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

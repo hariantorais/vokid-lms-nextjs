@@ -46,10 +46,10 @@ export type Database = {
           id: string
           instruction_audio_url: string | null
           lesson_id: string
-          prompt: string
-          type: Database["public"]["Enums"]["assignment_type"]
-          quiz_question_count: number | null
           passing_score: number | null
+          prompt: string
+          quiz_question_count: number | null
+          type: Database["public"]["Enums"]["assignment_type"]
         }
         Insert: {
           created_at?: string
@@ -57,10 +57,10 @@ export type Database = {
           id?: string
           instruction_audio_url?: string | null
           lesson_id: string
-          prompt: string
-          type: Database["public"]["Enums"]["assignment_type"]
-          quiz_question_count?: number | null
           passing_score?: number | null
+          prompt: string
+          quiz_question_count?: number | null
+          type: Database["public"]["Enums"]["assignment_type"]
         }
         Update: {
           created_at?: string
@@ -68,10 +68,10 @@ export type Database = {
           id?: string
           instruction_audio_url?: string | null
           lesson_id?: string
-          prompt?: string
-          type?: Database["public"]["Enums"]["assignment_type"]
-          quiz_question_count?: number | null
           passing_score?: number | null
+          prompt?: string
+          quiz_question_count?: number | null
+          type?: Database["public"]["Enums"]["assignment_type"]
         }
         Relationships: [
           {
@@ -118,38 +118,83 @@ export type Database = {
           },
         ]
       }
+      lesson_completions: {
+        Row: {
+          completed_at: string
+          id: string
+          lesson_id: string
+          student_id: string
+        }
+        Insert: {
+          completed_at?: string
+          id?: string
+          lesson_id: string
+          student_id: string
+        }
+        Update: {
+          completed_at?: string
+          id?: string
+          lesson_id?: string
+          student_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_completions_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_completions_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
+          audio_url: string | null
           content_text: string | null
           content_type: Database["public"]["Enums"]["content_type"]
           content_url: string | null
           created_at: string
           id: string
+          image_url: string | null
           learning_objectives: string | null
           module_id: string
           order_index: number
+          pdf_url: string | null
           title: string
         }
         Insert: {
+          audio_url?: string | null
           content_text?: string | null
           content_type: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           learning_objectives?: string | null
           module_id: string
           order_index?: number
+          pdf_url?: string | null
           title: string
         }
         Update: {
+          audio_url?: string | null
           content_text?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
           content_url?: string | null
           created_at?: string
           id?: string
+          image_url?: string | null
           learning_objectives?: string | null
           module_id?: string
           order_index?: number
+          pdf_url?: string | null
           title?: string
         }
         Relationships: [
@@ -220,6 +265,56 @@ export type Database = {
           role?: Database["public"]["Enums"]["user_role"]
         }
         Relationships: []
+      }
+      quiz_questions: {
+        Row: {
+          assignment_id: string
+          correct_answer: string
+          created_at: string
+          explanation: string | null
+          id: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          order_index: number
+          question_text: string
+        }
+        Insert: {
+          assignment_id: string
+          correct_answer: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a: string
+          option_b: string
+          option_c: string
+          option_d: string
+          order_index?: number
+          question_text: string
+        }
+        Update: {
+          assignment_id?: string
+          correct_answer?: string
+          created_at?: string
+          explanation?: string | null
+          id?: string
+          option_a?: string
+          option_b?: string
+          option_c?: string
+          option_d?: string
+          order_index?: number
+          question_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "quiz_questions_assignment_id_fkey"
+            columns: ["assignment_id"]
+            isOneToOne: false
+            referencedRelation: "assignments"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       subjects: {
         Row: {
@@ -313,56 +408,6 @@ export type Database = {
           },
         ]
       }
-      quiz_questions: {
-        Row: {
-          id: string
-          assignment_id: string
-          question_text: string
-          option_a: string
-          option_b: string
-          option_c: string
-          option_d: string
-          correct_answer: 'A' | 'B' | 'C' | 'D'
-          explanation: string | null
-          order_index: number
-          created_at: string
-        }
-        Insert: {
-          id?: string
-          assignment_id: string
-          question_text: string
-          option_a: string
-          option_b: string
-          option_c: string
-          option_d: string
-          correct_answer: 'A' | 'B' | 'C' | 'D'
-          explanation?: string | null
-          order_index?: number
-          created_at?: string
-        }
-        Update: {
-          id?: string
-          assignment_id?: string
-          question_text?: string
-          option_a?: string
-          option_b?: string
-          option_c?: string
-          option_d?: string
-          correct_answer?: 'A' | 'B' | 'C' | 'D'
-          explanation?: string | null
-          order_index?: number
-          created_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "quiz_questions_assignment_id_fkey"
-            columns: ["assignment_id"]
-            isOneToOne: false
-            referencedRelation: "assignments"
-            referencedColumns: ["id"]
-          }
-        ]
-      }
     }
     Views: {
       [_ in never]: never
@@ -372,7 +417,7 @@ export type Database = {
     }
     Enums: {
       assignment_type: "VOICE_TASK" | "PHOTO_HOMEWORK" | "QUIZ_CBT"
-      content_type: "TEXT" | "VIDEO" | "PDF" | "AUDIO"
+      content_type: "VIDEO" | "PDF" | "AUDIO" | "TEXT" | "MULTIMEDIA"
       submission_status: "PENDING" | "GRADED"
       user_role: "GURU" | "SISWA" | "ORANG_TUA"
     }
@@ -506,29 +551,20 @@ export const Constants = {
   public: {
     Enums: {
       assignment_type: ["VOICE_TASK", "PHOTO_HOMEWORK", "QUIZ_CBT"],
-      content_type: ["TEXT", "VIDEO", "PDF", "AUDIO"],
+      content_type: ["VIDEO", "PDF", "AUDIO", "TEXT", "MULTIMEDIA"],
       submission_status: ["PENDING", "GRADED"],
       user_role: ["GURU", "SISWA", "ORANG_TUA"],
     },
   },
-} as const;
+} as const
 
-// Domain Type Aliases
-export type UserRole = Database['public']['Enums']['user_role'];
-export type ContentType = Database['public']['Enums']['content_type'];
-export type AssignmentType = Database['public']['Enums']['assignment_type'];
-export type SubmissionStatus = Database['public']['Enums']['submission_status'];
-export type GradeLevel = 1 | 2 | 3 | 4 | 5 | 6;
-
+// Alias entity types
 export type Profile = Database['public']['Tables']['profiles']['Row'];
-export type ClassRecord = Database['public']['Tables']['classes']['Row'] & {
-  grade_level: GradeLevel;
-};
-export type ClassRoom = ClassRecord;
+export type ClassRecord = Database['public']['Tables']['classes']['Row'];
 export type Subject = Database['public']['Tables']['subjects']['Row'];
 export type Module = Database['public']['Tables']['modules']['Row'];
 export type Lesson = Database['public']['Tables']['lessons']['Row'];
+export type LessonCompletion = Database['public']['Tables']['lesson_completions']['Row'];
 export type Assignment = Database['public']['Tables']['assignments']['Row'];
-export type Submission = Database['public']['Tables']['submissions']['Row'];
 export type QuizQuestion = Database['public']['Tables']['quiz_questions']['Row'];
-
+export type Submission = Database['public']['Tables']['submissions']['Row'];

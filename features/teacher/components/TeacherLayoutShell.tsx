@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   Users,
   LayoutDashboard,
+  LogOut,
 } from 'lucide-react';
+import { logoutAction } from '@/app/(auth)/actions/auth-actions';
 
 export interface TeacherLayoutShellProps {
   children: React.ReactNode;
@@ -128,6 +130,14 @@ export function TeacherLayoutShell({
             {/* Right Action / Trailing Accessories */}
             <div className="flex items-center gap-1.5 shrink-0">
               {headerAction}
+              <button
+                type="button"
+                onClick={() => logoutAction()}
+                title="Keluar dari Akun Guru"
+                className="w-9 h-9 rounded-2xl bg-white/15 hover:bg-rose-600/90 text-white/90 hover:text-white flex items-center justify-center transition-all cursor-pointer active:scale-95 shadow-2xs border border-white/20"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </header>
         </div>
