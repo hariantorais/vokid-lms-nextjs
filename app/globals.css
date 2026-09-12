@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@plugin "@tailwindcss/typography";
 
 :root {
   --background: #f8fafc;
@@ -51,9 +52,12 @@ body {
 
 /* Game Visual Effects & Tactile 3D Buttons */
 @keyframes gameBounce {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: translateY(0);
   }
+
   50% {
     transform: translateY(-6px);
   }
@@ -64,9 +68,12 @@ body {
 }
 
 @keyframes starShine {
-  0%, 100% {
+
+  0%,
+  100% {
     transform: scale(1) rotate(0deg);
   }
+
   50% {
     transform: scale(1.15) rotate(12deg);
   }

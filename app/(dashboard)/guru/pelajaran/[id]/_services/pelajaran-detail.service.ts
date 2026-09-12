@@ -54,21 +54,15 @@ export async function getPelajaranDetail(
       success: true,
       data: {
         lesson: {
-          id: lessonData.id,
-          module_id: lessonData.module_id,
-          title: lessonData.title,
-          content_type: lessonData.content_type,
-          content_url: lessonData.content_url,
-          content_text: lessonData.content_text,
-          learning_objectives: lessonData.learning_objectives,
-          order_index: lessonData.order_index,
-          created_at: lessonData.created_at,
+          ...lessonData,
           module: {
             id: modData.id,
             title: modData.title,
             order_index: modData.order_index,
             subject_id: modData.subject_id,
             is_published: modData.is_published,
+            target_semester: modData.target_semester ?? null,
+            week_target: modData.week_target ?? null,
             created_at: modData.created_at,
             subject: {
               id: modData.subjects.id,

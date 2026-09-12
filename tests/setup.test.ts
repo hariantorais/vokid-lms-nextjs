@@ -101,6 +101,8 @@ describe('Strict Database Type Definitions', () => {
       title: 'Membaca Suku Kata [Seed]',
       order_index: 1,
       is_published: true,
+      target_semester: 1,
+      week_target: 1,
       created_at: '2026-09-10T08:00:00Z',
     };
 
@@ -112,6 +114,15 @@ describe('Strict Database Type Definitions', () => {
       content_url: 'https://example.com/audio/vokid-seed-ba-bi-bu.mp3',
       content_text: null,
       learning_objectives: null,
+      allocated_minutes: 70,
+      audio_url: 'https://example.com/audio/vokid-seed-ba-bi-bu.mp3',
+      image_url: null,
+      pdf_url: null,
+      intro_guide: null,
+      mindful_guide: null,
+      joyful_guide: null,
+      meaningful_guide: null,
+      required_materials: null,
       order_index: 1,
       created_at: '2026-09-10T08:00:00Z',
     };

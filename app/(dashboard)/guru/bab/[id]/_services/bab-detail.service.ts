@@ -67,6 +67,8 @@ export async function getBabDetail(babId: string): Promise<ActionResponse<BabDet
           order_index: moduleData.order_index,
           subject_id: moduleData.subject_id,
           is_published: moduleData.is_published,
+          target_semester: moduleData.target_semester ?? null,
+          week_target: moduleData.week_target ?? null,
           created_at: moduleData.created_at,
           subject: {
             id: subjectData.id,

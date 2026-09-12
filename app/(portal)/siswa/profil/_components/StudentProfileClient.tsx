@@ -5,7 +5,8 @@ import Image from 'next/image';
 import { UploadCloud, Check, Loader2, Sparkles, Star, ArrowLeft } from 'lucide-react';
 import { toast } from 'sonner';
 import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
-import { updateStudentAvatarAction, type StudentProfile } from '../_actions/profile.actions';
+import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
+import { updateStudentAvatarAction, type StudentProfile } from '../../_actions/profile.actions';
 
 interface StudentProfileClientProps {
   initialProfile: StudentProfile;
@@ -88,6 +89,7 @@ export function StudentProfileClient({ initialProfile, totalStars = 0 }: Student
     <StudentLayoutShell
       title="Profil Siswa"
       backHref="/siswa"
+      activeNavTab="PROFIL"
       showBottomNav={true}
       maxWidth="sm"
       starsCount={totalStars}
@@ -101,10 +103,12 @@ export function StudentProfileClient({ initialProfile, totalStars = 0 }: Student
             <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-400 via-orange-400 to-amber-300 border-4 border-white shadow-lg flex items-center justify-center text-5xl overflow-hidden select-none">
               {isCustomImage ? (
                 <Image
-                  src={profile.avatar_url!}
+                  src={getMediaProxyUrl(profile.avatar_url)}
                   alt={profile.full_name}
                   width={96}
                   height={96}
+                  loading="eager"
+                  unoptimized
                   className="w-full h-full object-cover"
                 />
               ) : (

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
+import { MarkdownContent } from '@/components/common/MarkdownContent';
 import {
   BookOpen,
   FileText,
@@ -116,22 +117,20 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                     setSelectedSubjectId(subj.id);
                     setSelectedModuleId(subj.modules[0]?.id ?? '');
                   }}
-                  className={`min-h-[48px] lg:w-full shrink-0 flex items-center justify-between p-3 rounded-2xl text-left font-bold text-xs transition-all active:scale-95 cursor-pointer ${
-                    isSelected
-                      ? 'bg-sky-600 text-white shadow-xs font-black'
-                      : 'bg-slate-50 lg:bg-transparent text-slate-700 hover:bg-slate-100 border border-slate-200/60 lg:border-none'
-                  }`}
+                  className={`min-h-[48px] lg:w-full shrink-0 flex items-center justify-between p-3 rounded-2xl text-left font-bold text-xs transition-all active:scale-95 cursor-pointer ${isSelected
+                    ? 'bg-sky-600 text-white shadow-xs font-black'
+                    : 'bg-slate-50 lg:bg-transparent text-slate-700 hover:bg-slate-100 border border-slate-200/60 lg:border-none'
+                    }`}
                 >
                   <div className="flex items-center gap-2">
                     <BookOpen className="w-4 h-4 shrink-0" />
                     <span className="whitespace-nowrap lg:whitespace-normal">{subj.name}</span>
                   </div>
                   <span
-                    className={`text-[10px] px-2 py-0.5 rounded-full ml-2 shrink-0 ${
-                      isSelected
-                        ? 'bg-white/20 text-white font-bold'
-                        : 'bg-slate-200 text-slate-600 font-semibold'
-                    }`}
+                    className={`text-[10px] px-2 py-0.5 rounded-full ml-2 shrink-0 ${isSelected
+                      ? 'bg-white/20 text-white font-bold'
+                      : 'bg-slate-200 text-slate-600 font-semibold'
+                      }`}
                   >
                     {subj.modules.length} Bab
                   </span>
@@ -154,11 +153,10 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                       key={mod.id}
                       type="button"
                       onClick={() => setSelectedModuleId(mod.id)}
-                      className={`min-h-[42px] shrink-0 lg:w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all active:scale-95 cursor-pointer ${
-                        isModSelected
-                          ? 'bg-slate-900 text-white font-black shadow-xs'
-                          : 'bg-slate-100/80 text-slate-700 hover:bg-slate-200 font-medium'
-                      }`}
+                      className={`min-h-[42px] shrink-0 lg:w-full flex items-center justify-between px-3 py-2 rounded-xl text-left text-xs transition-all active:scale-95 cursor-pointer ${isModSelected
+                        ? 'bg-slate-900 text-white font-black shadow-xs'
+                        : 'bg-slate-100/80 text-slate-700 hover:bg-slate-200 font-medium'
+                        }`}
                     >
                       <span className="whitespace-nowrap lg:truncate max-w-[200px]">
                         {mod.order_index}. {cleanModuleTitle(mod.title)}
@@ -212,15 +210,14 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex items-start gap-3 min-w-0">
                           <div
-                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs mt-0.5 ${
-                              isText
-                                ? 'bg-emerald-100 text-emerald-700'
-                                : isPdf
+                            className={`w-10 h-10 sm:w-11 sm:h-11 rounded-2xl flex items-center justify-center shrink-0 shadow-2xs mt-0.5 ${isText
+                              ? 'bg-emerald-100 text-emerald-700'
+                              : isPdf
                                 ? 'bg-sky-100 text-sky-700'
                                 : isVideo
-                                ? 'bg-rose-100 text-rose-700'
-                                : 'bg-amber-100 text-amber-700'
-                            }`}
+                                  ? 'bg-rose-100 text-rose-700'
+                                  : 'bg-amber-100 text-amber-700'
+                              }`}
                           >
                             {isText ? (
                               <BookOpen className="w-5 h-5" />
@@ -235,15 +232,14 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
 
                           <div className="min-w-0 flex-1">
                             <span
-                              className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${
-                                isText
-                                  ? 'bg-emerald-100 text-emerald-900'
-                                  : isPdf
+                              className={`text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md ${isText
+                                ? 'bg-emerald-100 text-emerald-900'
+                                : isPdf
                                   ? 'bg-sky-100 text-sky-900'
                                   : isVideo
-                                  ? 'bg-rose-100 text-rose-900'
-                                  : 'bg-amber-100 text-amber-900'
-                              }`}
+                                    ? 'bg-rose-100 text-rose-900'
+                                    : 'bg-amber-100 text-amber-900'
+                                }`}
                             >
                               Materi {lesson.content_type}
                             </span>
@@ -309,19 +305,18 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                           >
                             <div className="flex items-center justify-between gap-2">
                               <span
-                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${
-                                  asg.type === 'QUIZ_CBT'
-                                    ? 'bg-amber-100 text-amber-900 border border-amber-200'
-                                    : asg.type === 'PHOTO_HOMEWORK'
+                                className={`px-2.5 py-0.5 rounded-full text-[10px] font-black ${asg.type === 'QUIZ_CBT'
+                                  ? 'bg-amber-100 text-amber-900 border border-amber-200'
+                                  : asg.type === 'PHOTO_HOMEWORK'
                                     ? 'bg-sky-100 text-sky-800'
                                     : 'bg-purple-100 text-purple-800'
-                                }`}
+                                  }`}
                               >
                                 {asg.type === 'QUIZ_CBT'
                                   ? '📝 Kuis CBT Pilihan Ganda'
                                   : asg.type === 'PHOTO_HOMEWORK'
-                                  ? '📷 Tugas Foto PR'
-                                  : '🎤 Tugas Suara'}
+                                    ? '📷 Tugas Foto PR'
+                                    : '🎤 Tugas Suara'}
                               </span>
 
                               {/* Status Badge / Score */}
@@ -361,10 +356,10 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                                       ? `Nilai terkoreksi: ${asg.score ?? 0}/100. Bisa diulang dengan soal acak baru.`
                                       : `${asg.quiz_question_count ?? 5} soal pilihan ganda acak dari bank soal.`
                                     : isDone
-                                    ? 'Jawaban Anda telah tersimpan.'
-                                    : asg.type === 'PHOTO_HOMEWORK'
-                                    ? 'Kirim foto buku tulis tugasmu.'
-                                    : 'Rekam suaramu untuk Ibu Guru.'}
+                                      ? 'Jawaban Anda telah tersimpan.'
+                                      : asg.type === 'PHOTO_HOMEWORK'
+                                        ? 'Kirim foto buku tulis tugasmu.'
+                                        : 'Rekam suaramu untuk Ibu Guru.'}
                                 </span>
 
                                 {asg.type === 'QUIZ_CBT' ? (
@@ -377,11 +372,10 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
                                         score: asg.score ?? null,
                                       })
                                     }
-                                    className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0 ${
-                                      isDone
-                                        ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
-                                        : 'bg-purple-600 hover:bg-purple-700 text-white'
-                                    }`}
+                                    className={`min-h-[44px] px-4 py-2 rounded-xl text-xs font-black flex items-center gap-1.5 shadow-2xs transition-all active:scale-95 cursor-pointer shrink-0 ${isDone
+                                      ? 'bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-200'
+                                      : 'bg-purple-600 hover:bg-purple-700 text-white'
+                                      }`}
                                   >
                                     {isDone ? (
                                       <>

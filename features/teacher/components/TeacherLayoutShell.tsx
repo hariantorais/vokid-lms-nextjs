@@ -55,9 +55,9 @@ export function TeacherLayoutShell({
   const pathname = usePathname();
 
   const maxWidthClass = {
-    sm: 'max-w-[440px]',
-    md: 'max-w-2xl',
-    lg: 'max-w-5xl',
+    sm: 'max-w-md md:max-w-3xl lg:max-w-4xl',
+    md: 'max-w-md md:max-w-3xl lg:max-w-4xl',
+    lg: 'max-w-md md:max-w-3xl lg:max-w-5xl',
     full: 'max-w-full',
   }[maxWidth];
 

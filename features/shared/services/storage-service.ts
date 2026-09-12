@@ -31,7 +31,7 @@ export function extractR2KeyFromUrl(url: string | null | undefined): string | nu
 
     const parsed = new URL(url);
     const pathname = parsed.pathname.replace(/^\/+/, '');
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions'];
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
     if (validFolders.some((f) => pathname.startsWith(`${f}/`))) {
       return pathname;
     }
@@ -48,7 +48,7 @@ export function extractR2KeyFromUrl(url: string | null | undefined): string | nu
  */
 export function getMediaProxyUrl(url: string | null | undefined): string {
   if (!url) return '';
-  if (url.includes('.r2.dev') || url.startsWith('materials/') || url.startsWith('audio-prompts/') || url.startsWith('submissions/')) {
+  if (url.includes('.r2.dev') || url.startsWith('materials/') || url.startsWith('audio-prompts/') || url.startsWith('submissions/') || url.startsWith('avatars/')) {
     return `/api/media?url=${encodeURIComponent(url)}`;
   }
   return url;
@@ -102,7 +102,7 @@ export async function uploadFileToR2({
   contentType,
 }: UploadFileToR2Params): Promise<ActionResponse<UploadR2Result>> {
   try {
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions'];
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
     if (!validFolders.includes(folder)) {
       return {
         success: false,

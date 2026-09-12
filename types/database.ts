@@ -118,6 +118,51 @@ export type Database = {
           },
         ]
       }
+      learning_competency_evaluations: {
+        Row: {
+          evaluated_at: string | null
+          id: string
+          lesson_id: string
+          mastery_level: string
+          notes: string | null
+          student_id: string
+          tp_indicator_text: string
+        }
+        Insert: {
+          evaluated_at?: string | null
+          id?: string
+          lesson_id: string
+          mastery_level: string
+          notes?: string | null
+          student_id: string
+          tp_indicator_text: string
+        }
+        Update: {
+          evaluated_at?: string | null
+          id?: string
+          lesson_id?: string
+          mastery_level?: string
+          notes?: string | null
+          student_id?: string
+          tp_indicator_text?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "learning_competency_evaluations_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "learning_competency_evaluations_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lesson_completions: {
         Row: {
           completed_at: string
@@ -154,8 +199,57 @@ export type Database = {
           },
         ]
       }
+      lesson_schedules: {
+        Row: {
+          completed_at: string | null
+          created_at: string | null
+          id: string
+          lesson_id: string
+          scheduled_date: string
+          status: string
+          student_id: string
+          time_block: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id: string
+          scheduled_date: string
+          status?: string
+          student_id: string
+          time_block: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string | null
+          id?: string
+          lesson_id?: string
+          scheduled_date?: string
+          status?: string
+          student_id?: string
+          time_block?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "lesson_schedules_lesson_id_fkey"
+            columns: ["lesson_id"]
+            isOneToOne: false
+            referencedRelation: "lessons"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "lesson_schedules_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       lessons: {
         Row: {
+          allocated_minutes: number | null
           audio_url: string | null
           content_text: string | null
           content_type: Database["public"]["Enums"]["content_type"]
@@ -163,13 +257,19 @@ export type Database = {
           created_at: string
           id: string
           image_url: string | null
+          intro_guide: Json | null
+          joyful_guide: Json | null
           learning_objectives: string | null
+          meaningful_guide: Json | null
+          mindful_guide: Json | null
           module_id: string
           order_index: number
           pdf_url: string | null
+          required_materials: string[] | null
           title: string
         }
         Insert: {
+          allocated_minutes?: number | null
           audio_url?: string | null
           content_text?: string | null
           content_type: Database["public"]["Enums"]["content_type"]
@@ -177,13 +277,19 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          intro_guide?: Json | null
+          joyful_guide?: Json | null
           learning_objectives?: string | null
+          meaningful_guide?: Json | null
+          mindful_guide?: Json | null
           module_id: string
           order_index?: number
           pdf_url?: string | null
+          required_materials?: string[] | null
           title: string
         }
         Update: {
+          allocated_minutes?: number | null
           audio_url?: string | null
           content_text?: string | null
           content_type?: Database["public"]["Enums"]["content_type"]
@@ -191,10 +297,15 @@ export type Database = {
           created_at?: string
           id?: string
           image_url?: string | null
+          intro_guide?: Json | null
+          joyful_guide?: Json | null
           learning_objectives?: string | null
+          meaningful_guide?: Json | null
+          mindful_guide?: Json | null
           module_id?: string
           order_index?: number
           pdf_url?: string | null
+          required_materials?: string[] | null
           title?: string
         }
         Relationships: [
@@ -214,7 +325,9 @@ export type Database = {
           is_published: boolean
           order_index: number
           subject_id: string
+          target_semester: number | null
           title: string
+          week_target: number | null
         }
         Insert: {
           created_at?: string
@@ -222,7 +335,9 @@ export type Database = {
           is_published?: boolean
           order_index?: number
           subject_id: string
+          target_semester?: number | null
           title: string
+          week_target?: number | null
         }
         Update: {
           created_at?: string
@@ -230,7 +345,9 @@ export type Database = {
           is_published?: boolean
           order_index?: number
           subject_id?: string
+          target_semester?: number | null
           title?: string
+          week_target?: number | null
         }
         Relationships: [
           {

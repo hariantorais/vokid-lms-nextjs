@@ -31,6 +31,8 @@ describe('Unit & Integration Test AdaptivePortal (Fase A vs Fase B/C)', () => {
             title: 'Membaca Suku Kata Ba-Bi-Bu',
             order_index: 1,
             is_published: true,
+            target_semester: 1,
+            week_target: 1,
             created_at: new Date().toISOString(),
             lessons: [
               {
@@ -41,6 +43,15 @@ describe('Unit & Integration Test AdaptivePortal (Fase A vs Fase B/C)', () => {
                 content_url: 'https://storage.googleapis.com/vokid-cdn/audio/ba-bi-bu.mp3',
                 content_text: null,
                 learning_objectives: null,
+                allocated_minutes: 70,
+                audio_url: 'https://storage.googleapis.com/vokid-cdn/audio/ba-bi-bu.mp3',
+                image_url: null,
+                pdf_url: null,
+                intro_guide: null,
+                mindful_guide: null,
+                joyful_guide: null,
+                meaningful_guide: null,
+                required_materials: null,
                 order_index: 1,
                 created_at: new Date().toISOString(),
                 assignments: [

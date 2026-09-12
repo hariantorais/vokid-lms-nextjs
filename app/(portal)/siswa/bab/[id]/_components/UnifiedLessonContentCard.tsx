@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Image from 'next/image';
+import { MarkdownContent } from '@/components/common/MarkdownContent';
 import { Target, FileText, ExternalLink, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { AudioPromptPlayer } from './AudioPromptPlayer';
@@ -39,9 +40,13 @@ export function UnifiedLessonContentCard({
                         <Target className="w-4 h-4 text-amber-600 shrink-0" />
                         <span>Target Belajar Kita:</span>
                     </div>
-                    <p className="text-xs font-bold text-amber-950 leading-relaxed pl-5 whitespace-pre-wrap">
-                        {lesson.learning_objectives}
-                    </p>
+                    <div className="pl-5">
+                        <MarkdownContent
+                            content={lesson.learning_objectives}
+                            size="xs"
+                            className="!text-amber-950"
+                        />
+                    </div>
                 </div>
             )}
 
@@ -61,8 +66,12 @@ export function UnifiedLessonContentCard({
 
             {/* 3. Teks Bacaan Materi */}
             {lesson.content_text && (
-                <div className="p-4 rounded-2xl bg-teal-50/40 border border-teal-100 text-slate-800 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap font-medium">
-                    {lesson.content_text}
+                <div className="p-4 rounded-2xl bg-teal-50/40 border border-teal-100">
+                    <MarkdownContent
+                        content={lesson.content_text}
+                        size="sm"
+                        className="!text-slate-800"
+                    />
                 </div>
             )}
 

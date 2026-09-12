@@ -22,7 +22,7 @@ export function KelasDetailClient({ classroomData }: KelasDetailClientProps) {
       badgeText={faseText}
       badgeVariant={isFaseA ? 'amber' : 'sky'}
       backHref="/siswa"
-      activeNavTab="MATERI"
+      activeNavTab="DASHBOARD"
       showBottomNav={true}
       maxWidth="sm"
       starsCount={classroomData.totalStars ?? 0}

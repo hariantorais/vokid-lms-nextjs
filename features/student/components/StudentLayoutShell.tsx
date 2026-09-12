@@ -3,6 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import {
   ArrowLeft,
   Star,
@@ -10,7 +11,10 @@ import {
   BookOpen,
   Trophy,
   User,
+  LogOut,
 } from 'lucide-react';
+import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
+import { logoutAction } from '@/app/(auth)/actions/auth-actions';
 
 interface StudentLayoutShellProps {
   children: React.ReactNode;
@@ -18,13 +22,14 @@ interface StudentLayoutShellProps {
   maxWidth?: 'sm' | 'md' | 'lg' | 'xl' | 'full';
   starsCount?: number;
   userAvatarUrl?: string | null;
-  activeNavTab?: 'KELAS' | 'MATERI' | 'TUGAS' | 'PROFIL';
+  activeNavTab?: 'DASHBOARD' | 'MISI' | 'PROFIL' | 'KELAS' | 'MATERI' | 'TUGAS';
   showBottomNav?: boolean;
   title?: string;
   subtitle?: string;
   badgeText?: string;
-  badgeVariant?: 'teal' | 'amber' | 'sky' | 'emerald' | 'purple';
+  badgeVariant?: 'amber' | 'sky';
   transparentHeader?: boolean;
+  headerAction?: React.ReactNode;
 }
 
 export function StudentLayoutShell({
@@ -33,19 +38,30 @@ export function StudentLayoutShell({
   maxWidth = 'sm',
   starsCount = 0,
   userAvatarUrl,
-  activeNavTab = 'MATERI',
+  activeNavTab,
   showBottomNav = true,
+  headerAction,
 }: StudentLayoutShellProps) {
+  const pathname = usePathname();
+
+  // Deteksi tab aktif otomatis: DASHBOARD, MISI, PROFIL
+  const effectiveNavTab: 'DASHBOARD' | 'MISI' | 'PROFIL' = (() => {
+    if (activeNavTab === 'PROFIL' || activeNavTab === 'MISI' || activeNavTab === 'DASHBOARD') {
+      return activeNavTab;
+    }
+    if (activeNavTab === 'TUGAS') return 'MISI';
+    if (activeNavTab === 'KELAS' || activeNavTab === 'MATERI') return 'DASHBOARD';
+
+    if (!pathname) return 'DASHBOARD';
+    if (pathname.startsWith('/siswa/profil')) return 'PROFIL';
+    if (pathname.startsWith('/siswa/misi') || pathname.includes('/tugas')) return 'MISI';
+    return 'DASHBOARD';
+  })();
+
   const maxWidthClass =
-    maxWidth === 'sm'
-      ? 'max-w-md'
-      : maxWidth === 'md'
-        ? 'max-w-2xl'
-        : maxWidth === 'lg'
-          ? 'max-w-4xl'
-          : maxWidth === 'xl'
-            ? 'max-w-5xl'
-            : 'max-w-full';
+    maxWidth === 'full'
+      ? 'max-w-full px-3 sm:px-6'
+      : 'max-w-md md:max-w-2xl lg:max-w-3xl';
 
   const isCustomImage =
     userAvatarUrl &&
@@ -55,7 +71,7 @@ export function StudentLayoutShell({
     <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col items-center select-none font-sans">
       <div className={`w-full ${maxWidthClass} flex-1 flex flex-col min-h-screen relative pb-24`}>
         {/* ========================================================================= */}
-        {/* HEADER 100% TRANSPARAN (Tanpa Judul, Tombol Back Kiri, Avatar & Bintang Kanan) */}
+        {/* HEADER 100% TRANSPARAN (Tanpa Judul, Tombol Back Kiri, Avatar, Bintang, & Logout Kanan) */}
         {/* ========================================================================= */}
         <header className="sticky top-0 z-40 w-full bg-transparent px-4 sm:px-6 md:px-8 py-3.5 flex items-center justify-between pointer-events-none">
           {/* Sisi Kiri: Tombol Kembali Taktil 3D */}
@@ -73,8 +89,9 @@ export function StudentLayoutShell({
             )}
           </div>
 
-          {/* Sisi Kanan: Avatar Siswa & Jumlah Bintang */}
+          {/* Sisi Kanan: Avatar Siswa, Jumlah Bintang & Tombol Logout */}
           <div className="flex items-center gap-2 pointer-events-auto">
+            {headerAction}
             <Link
               href="/siswa/profil"
               title="Buka Profil & Ganti Avatar"
@@ -83,10 +100,12 @@ export function StudentLayoutShell({
               <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-amber-400 via-orange-400 to-amber-300 flex items-center justify-center text-lg overflow-hidden border border-white shadow-2xs group-hover:scale-105 transition-transform">
                 {isCustomImage ? (
                   <Image
-                    src={userAvatarUrl!}
+                    src={getMediaProxyUrl(userAvatarUrl)}
                     alt="Avatar"
                     width={32}
                     height={32}
+                    loading="eager"
+                    unoptimized
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -101,6 +120,17 @@ export function StudentLayoutShell({
                 </span>
               </div>
             </Link>
+
+            {/* Tombol Cepat Logout Siswa */}
+            <form action={logoutAction}>
+              <button
+                type="submit"
+                title="Keluar dari Akun Siswa"
+                className="w-10 h-10 rounded-2xl bg-white/95 backdrop-blur-md border-2 border-b-4 border-slate-200 hover:border-rose-300 hover:bg-rose-50 text-slate-500 hover:text-rose-600 active:border-b-2 active:translate-y-0.5 flex items-center justify-center shadow-xs transition-all cursor-pointer"
+              >
+                <LogOut className="w-4 h-4 stroke-[2.5]" />
+              </button>
+            </form>
           </div>
         </header>
 
@@ -108,54 +138,49 @@ export function StudentLayoutShell({
         <main className="flex-1 px-4 sm:px-6 md:px-8 pt-1 pb-6 w-full">{children}</main>
 
         {/* ========================================================================= */}
-        {/* BOTTOM NAVIGATION BAR */}
+        {/* BOTTOM NAVIGATION BAR (Game-styled: Dashboard, Misi, Profil) */}
         {/* ========================================================================= */}
         {showBottomNav && (
           <nav className="fixed bottom-0 inset-x-0 z-40 flex justify-center pointer-events-none px-3 pb-3">
             <div className={`w-full ${maxWidthClass} pointer-events-auto`}>
-              <div className="bg-white/95 backdrop-blur-md border-2 border-b-4 border-slate-200/90 rounded-3xl p-1.5 shadow-lg flex items-center justify-around">
+              <div className="bg-white/95 backdrop-blur-md border-2 border-b-4 border-slate-200/90 rounded-3xl p-1.5 shadow-lg flex items-center justify-around gap-1.5">
+                {/* 1. Dashboard Petualangan */}
                 <Link
                   href="/siswa"
-                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'KELAS'
-                      ? 'bg-teal-500 text-white font-black shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900 font-bold'
-                    }`}
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${
+                    effectiveNavTab === 'DASHBOARD'
+                      ? 'bg-gradient-to-r from-teal-500 to-emerald-500 text-white font-black shadow-sm border border-teal-400'
+                      : 'text-slate-500 hover:text-slate-900 font-bold hover:bg-slate-100/70'
+                  }`}
                 >
-                  <Compass className={`w-5 h-5 ${activeNavTab === 'KELAS' ? 'stroke-[2.8]' : ''}`} />
-                  <span className="text-[10px] tracking-wider uppercase">Kelas</span>
+                  <Compass className={`w-5 h-5 ${effectiveNavTab === 'DASHBOARD' ? 'stroke-[2.8] animate-spin-slow' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase font-black">Dashboard</span>
                 </Link>
 
+                {/* 2. Misi & Tantangan */}
                 <Link
-                  href="/siswa"
-                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'MATERI'
-                      ? 'bg-teal-500 text-white font-black shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900 font-bold'
-                    }`}
+                  href="/siswa/misi"
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${
+                    effectiveNavTab === 'MISI'
+                      ? 'bg-gradient-to-r from-amber-500 to-orange-500 text-white font-black shadow-sm border border-amber-400'
+                      : 'text-slate-500 hover:text-slate-900 font-bold hover:bg-slate-100/70'
+                  }`}
                 >
-                  <BookOpen className={`w-5 h-5 ${activeNavTab === 'MATERI' ? 'stroke-[2.8]' : ''}`} />
-                  <span className="text-[10px] tracking-wider uppercase">Materi</span>
+                  <Trophy className={`w-5 h-5 ${effectiveNavTab === 'MISI' ? 'stroke-[2.8] animate-bounce' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase font-black">Misi</span>
                 </Link>
 
-                <Link
-                  href="/siswa"
-                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'TUGAS'
-                      ? 'bg-teal-500 text-white font-black shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900 font-bold'
-                    }`}
-                >
-                  <Trophy className={`w-5 h-5 ${activeNavTab === 'TUGAS' ? 'stroke-[2.8]' : ''}`} />
-                  <span className="text-[10px] tracking-wider uppercase">Misi</span>
-                </Link>
-
+                {/* 3. Profil Karakter */}
                 <Link
                   href="/siswa/profil"
-                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${activeNavTab === 'PROFIL'
-                      ? 'bg-teal-500 text-white font-black shadow-xs'
-                      : 'text-slate-500 hover:text-slate-900 font-bold'
-                    }`}
+                  className={`flex-1 py-2 rounded-2xl flex flex-col items-center justify-center gap-0.5 transition-all active:scale-95 ${
+                    effectiveNavTab === 'PROFIL'
+                      ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white font-black shadow-sm border border-purple-400'
+                      : 'text-slate-500 hover:text-slate-900 font-bold hover:bg-slate-100/70'
+                  }`}
                 >
-                  <User className={`w-5 h-5 ${activeNavTab === 'PROFIL' ? 'stroke-[2.8]' : ''}`} />
-                  <span className="text-[10px] tracking-wider uppercase">Profil</span>
+                  <User className={`w-5 h-5 ${effectiveNavTab === 'PROFIL' ? 'stroke-[2.8]' : ''}`} />
+                  <span className="text-[10px] tracking-wider uppercase font-black">Profil</span>
                 </Link>
               </div>
             </div>

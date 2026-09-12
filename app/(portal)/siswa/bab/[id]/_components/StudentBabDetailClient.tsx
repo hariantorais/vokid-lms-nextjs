@@ -178,7 +178,7 @@ export function StudentBabDetailClient({ data, classId }: StudentBabDetailClient
       backHref={classId ? `/siswa/kelas/${classId}` : '/siswa'}
       activeNavTab="MATERI"
       showBottomNav={true}
-      maxWidth="xl"
+      maxWidth="sm"
       transparentHeader={true}
       starsCount={currentTotalStars}
       userAvatarUrl={data.userAvatarUrl}
