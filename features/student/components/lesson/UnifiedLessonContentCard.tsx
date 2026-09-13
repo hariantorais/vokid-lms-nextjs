@@ -6,7 +6,7 @@ import { MarkdownContent } from '@/components/common/MarkdownContent';
 import { Target, FileText, ExternalLink, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { AudioPromptPlayer } from './AudioPromptPlayer';
-import type { LessonWithAssignment } from '../_services/student-bab.service';
+import { LessonWithAssignment } from '../../services/student-service';
 
 interface UnifiedLessonContentCardProps {
     lesson: LessonWithAssignment;

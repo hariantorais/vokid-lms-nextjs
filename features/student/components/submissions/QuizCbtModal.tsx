@@ -20,12 +20,12 @@ import {
   submitQuizCbtAction,
   type QuizCbtSessionData,
   type QuizEvaluationResult,
-} from '../_actions/quiz-cbt.actions';
+} from '@/features/student/actions/quiz-cbt.actions';
 import {
   triggerPerfectScoreFireworks,
   triggerExcellentCelebration,
   triggerGoodJobCelebration,
-} from '../_utils/quiz-effects';
+} from '@/features/student/utils/quiz-effects';
 
 interface QuizCbtModalProps {
   assignmentId: string;
@@ -188,15 +188,14 @@ export function QuizCbtModal({
             /* Tampilan Hasil Evaluasi & Nilai Instan */
             <div className="py-6 text-center space-y-5 animate-in zoom-in-95 duration-300">
               <div
-                className={`w-20 h-20 rounded-3xl mx-auto flex items-center justify-center shadow-lg ${
-                  result.isPerfect
-                    ? 'bg-gradient-to-tr from-amber-400 to-yellow-300 text-amber-950 ring-4 ring-amber-200'
-                    : result.isExcellent
+                className={`w-20 h-20 rounded-3xl mx-auto flex items-center justify-center shadow-lg ${result.isPerfect
+                  ? 'bg-gradient-to-tr from-amber-400 to-yellow-300 text-amber-950 ring-4 ring-amber-200'
+                  : result.isExcellent
                     ? 'bg-gradient-to-tr from-sky-500 to-indigo-500 text-white ring-4 ring-sky-200'
                     : result.isGood
-                    ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-white ring-4 ring-emerald-200'
-                    : 'bg-gradient-to-tr from-rose-500 to-amber-500 text-white ring-4 ring-rose-200'
-                }`}
+                      ? 'bg-gradient-to-tr from-emerald-500 to-teal-400 text-white ring-4 ring-emerald-200'
+                      : 'bg-gradient-to-tr from-rose-500 to-amber-500 text-white ring-4 ring-rose-200'
+                  }`}
               >
                 {result.isPerfect ? (
                   <Flame className="w-10 h-10 animate-pulse" />
@@ -212,10 +211,10 @@ export function QuizCbtModal({
                   {result.isPerfect
                     ? '🌟 LUAR BIASA! SEMPURNA!'
                     : result.isExcellent
-                    ? '🎉 SANGAT MEMUASKAN!'
-                    : result.isGood
-                    ? '👏 KERJA BAGUS, LULUS!'
-                    : '💪 PERLU MENGULANG'}
+                      ? '🎉 SANGAT MEMUASKAN!'
+                      : result.isGood
+                        ? '👏 KERJA BAGUS, LULUS!'
+                        : '💪 PERLU MENGULANG'}
                 </span>
                 <div className="flex items-baseline justify-center gap-1">
                   <span className="text-4xl sm:text-5xl font-black text-slate-900 tracking-tight">
@@ -227,10 +226,10 @@ export function QuizCbtModal({
                   {result.isPerfect
                     ? 'Keren sekali! Semua jawabanmu benar dan tepat. Terus pertahankan prestasimu!'
                     : result.isExcellent
-                    ? `Hasil belajarmu istimewa! Kamu berhasil menjawab ${result.correctCount} dari ${result.totalQuestions} soal.`
-                    : result.isGood
-                    ? `Kamu lulus KKM (${result.passingScore}) dengan menjawab benar ${result.correctCount} dari ${result.totalQuestions} soal.`
-                    : `Nilaimu belum mencapai batas KKM (${result.passingScore}). Soal berikutnya akan diacak kembali agar kamu makin paham.`}
+                      ? `Hasil belajarmu istimewa! Kamu berhasil menjawab ${result.correctCount} dari ${result.totalQuestions} soal.`
+                      : result.isGood
+                        ? `Kamu lulus KKM (${result.passingScore}) dengan menjawab benar ${result.correctCount} dari ${result.totalQuestions} soal.`
+                        : `Nilaimu belum mencapai batas KKM (${result.passingScore}). Soal berikutnya akan diacak kembali agar kamu makin paham.`}
                 </p>
               </div>
 
@@ -318,13 +317,12 @@ export function QuizCbtModal({
                       key={q.id}
                       type="button"
                       onClick={() => setCurrentIndex(idx)}
-                      className={`w-7 h-7 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${
-                        isCurrent
-                          ? 'bg-purple-600 text-white shadow-xs'
-                          : isAnswered
+                      className={`w-7 h-7 rounded-lg text-xs font-bold shrink-0 transition-all cursor-pointer ${isCurrent
+                        ? 'bg-purple-600 text-white shadow-xs'
+                        : isAnswered
                           ? 'bg-emerald-100 text-emerald-800 border border-emerald-300'
                           : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
-                      }`}
+                        }`}
                     >
                       {idx + 1}
                     </button>
@@ -356,18 +354,16 @@ export function QuizCbtModal({
                       key={opt.key}
                       type="button"
                       onClick={() => handleSelectOption(opt.key as 'A' | 'B' | 'C' | 'D')}
-                      className={`w-full p-3 sm:p-3.5 rounded-2xl text-left border transition-all cursor-pointer flex items-start gap-3 active:scale-[0.99] ${
-                        isSelected
-                          ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs text-purple-950'
-                          : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-800'
-                      }`}
+                      className={`w-full p-3 sm:p-3.5 rounded-2xl text-left border transition-all cursor-pointer flex items-start gap-3 active:scale-[0.99] ${isSelected
+                        ? 'bg-purple-50 border-purple-500 ring-2 ring-purple-500/20 shadow-xs text-purple-950'
+                        : 'bg-white border-slate-200 hover:bg-slate-50 text-slate-800'
+                        }`}
                     >
                       <div
-                        className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 mt-0.5 ${
-                          isSelected
-                            ? 'bg-purple-600 text-white'
-                            : 'bg-slate-100 text-slate-700'
-                        }`}
+                        className={`w-6 h-6 rounded-lg text-xs font-black flex items-center justify-center shrink-0 mt-0.5 ${isSelected
+                          ? 'bg-purple-600 text-white'
+                          : 'bg-slate-100 text-slate-700'
+                          }`}
                       >
                         {opt.key}
                       </div>

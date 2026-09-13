@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { submitAssignmentSchema } from '../_validations/submission-schema';
+import { submitAssignmentSchema } from '../validations/submission-schema';
 import type { Submission } from '@/types/database';
 import type { ActionResponse } from '@/features/shared/types/storage';
 

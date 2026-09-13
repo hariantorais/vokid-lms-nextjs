@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { markLessonAsStudiedSchema } from '@/app/(portal)/siswa/bab/[id]/_validations/lesson-learning-schema';
+import { markLessonAsStudiedSchema } from '@/app/(portal)/siswa/bab/[id]/validations/lesson-learning-schema';
 
 describe('markLessonAsStudiedSchema Validation', () => {
     it('berhasil memvalidasi input dengan format UUID yang benar', () => {

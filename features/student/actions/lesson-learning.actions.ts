@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { markLessonAsStudiedSchema } from '../_validations/lesson-learning-schema';
+import { markLessonAsStudiedSchema } from '../validations/lesson-learning-schema';
 import type { ActionResponse } from '@/features/shared/types/storage';
 
 export async function markLessonAsStudiedAction(

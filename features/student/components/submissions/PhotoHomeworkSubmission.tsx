@@ -10,7 +10,7 @@ import {
   AlertCircle,
   Loader2,
 } from 'lucide-react';
-import { submitAssignmentAction } from '../_actions/submission.actions';
+import { submitAssignmentAction } from '@/features/student/actions/submission.actions';
 import type { Submission } from '@/types/database';
 
 interface PhotoHomeworkSubmissionProps {

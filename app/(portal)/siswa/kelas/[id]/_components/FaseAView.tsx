@@ -13,14 +13,14 @@ import {
   Target,
 } from 'lucide-react';
 import { MarkdownContent } from '@/components/common/MarkdownContent';
-import { AudioPromptPlayer } from '@/features/student/components/AudioPromptPlayer';
-import { VoiceSubmission } from '@/features/student/components/VoiceSubmission';
-import { PhotoHomeworkSubmission } from '@/features/student/components/PhotoHomeworkSubmission';
-import { QuizCbtModal } from '@/features/student/components/QuizCbtModal';
+import { AudioPromptPlayer } from '@/features/student/components/lesson/AudioPromptPlayer';
+import { VoiceSubmission } from '@/features/student/components/submissions/VoiceSubmission';
+import { PhotoHomeworkSubmission } from '@/features/student/components/submissions/PhotoHomeworkSubmission';
+import { QuizCbtModal } from '@/features/student/components/submissions/QuizCbtModal';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { LessonWithAssignment, StudentAssignment } from '@/app/(portal)/siswa/bab/[id]/_services/student-bab.service';
+import type { LessonWithAssignment, StudentAssignment } from '@/app/(portal)/siswa/bab/[id]/services/student-bab.service';
 
 interface FaseAViewProps {
   classroomData: StudentClassroomData;
@@ -96,8 +96,8 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
           <div className="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-3.5 animate-in zoom-in-95">
             <div
               className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-sm ${notice.type === 'success'
-                  ? 'bg-emerald-100 text-emerald-700'
-                  : 'bg-amber-100 text-amber-700 ring-4 ring-amber-50'
+                ? 'bg-emerald-100 text-emerald-700'
+                : 'bg-amber-100 text-amber-700 ring-4 ring-amber-50'
                 }`}
             >
               {notice.type === 'success' ? '🎉' : '🔒'}
@@ -116,8 +116,8 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
               type="button"
               onClick={() => setNotice(null)}
               className={`w-full h-11 rounded-2xl font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer ${notice.type === 'success'
-                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  : 'bg-teal-600 hover:bg-teal-700 text-white'
+                ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                : 'bg-teal-600 hover:bg-teal-700 text-white'
                 }`}
             >
               {notice.type === 'success' ? 'Lanjutkan Belajar 🚀' : 'Mengerti, Siap Belajar! 👍'}
@@ -205,8 +205,8 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
               <div
                 key={assignment.id}
                 className={`bg-white rounded-2xl border p-4 shadow-sm space-y-3 transition-all ${isTaskDone
-                    ? 'border-emerald-300 bg-emerald-50/30'
-                    : 'border-teal-200'
+                  ? 'border-emerald-300 bg-emerald-50/30'
+                  : 'border-teal-200'
                   }`}
               >
                 <div className="flex items-center justify-between">
@@ -385,8 +385,8 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                     setNotice(null);
                   }}
                   className={`h-10 px-3 rounded-xl shrink-0 flex items-center gap-2 text-xs font-black transition-all active:scale-95 cursor-pointer border ${isSelected
-                      ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
-                      : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
+                    ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
+                    : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
                     }`}
                 >
                   <span className="text-sm">{icon}</span>
@@ -424,15 +424,15 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                         <Link
                           href={`/siswa/bab/${mod.id}`}
                           className={`w-full p-4 rounded-3xl border-2 border-b-6 active:border-b-2 active:translate-y-1 flex items-center justify-between gap-3.5 text-left transition-all cursor-pointer shadow-xs hover:shadow-md group ${isCompleted
-                              ? 'bg-emerald-50/20 border-emerald-300 hover:border-emerald-400'
-                              : 'bg-white border-slate-200/90 hover:border-teal-400'
+                            ? 'bg-emerald-50/20 border-emerald-300 hover:border-emerald-400'
+                            : 'bg-white border-slate-200/90 hover:border-teal-400'
                             }`}
                         >
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
                             <div
                               className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border-2 border-b-4 transition-all shadow-xs ${isCompleted
-                                  ? 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-200'
-                                  : 'bg-teal-500 text-white border-teal-600 shadow-teal-200 group-hover:scale-105'
+                                ? 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-200'
+                                : 'bg-teal-500 text-white border-teal-600 shadow-teal-200 group-hover:scale-105'
                                 }`}
                             >
                               {isCompleted ? (

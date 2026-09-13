@@ -11,7 +11,7 @@ import {
   Loader2,
   Volume2,
 } from 'lucide-react';
-import { submitAssignmentAction } from '../_actions/submission.actions';
+import { submitAssignmentAction } from '../../actions/submission.actions';
 import type { Submission } from '@/types/database';
 
 export type VoiceSubmissionStatus =
@@ -112,8 +112,8 @@ export function VoiceSubmission({
       // Deteksi format audio yang didukung
       const selectedMime =
         typeof MediaRecorder !== 'undefined' &&
-        MediaRecorder.isTypeSupported &&
-        MediaRecorder.isTypeSupported('audio/webm')
+          MediaRecorder.isTypeSupported &&
+          MediaRecorder.isTypeSupported('audio/webm')
           ? 'audio/webm'
           : 'audio/mp4';
       setMimeType(selectedMime);

@@ -1,9 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
-import { getStudentBabDetail } from './_services/student-bab.service';
-import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
-import { StudentBabDetailClient } from './_components/StudentBabDetailClient';
-import { cleanModuleTitle } from '@/lib/formatters';
+import { getStudentBabDetail } from '@/features/student/services/student-bab.service';
+import { StudentBabDetailClient } from '@/features/student/components';
 
 export const dynamic = 'force-dynamic';
 

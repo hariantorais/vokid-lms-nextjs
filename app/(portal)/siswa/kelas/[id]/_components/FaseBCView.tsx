@@ -23,13 +23,13 @@ import {
   RotateCcw,
   Target,
 } from 'lucide-react';
-import { VoiceSubmission } from '@/app/(portal)/siswa/bab/[id]/_components/VoiceSubmission';
-import { PhotoHomeworkSubmission } from '@/app/(portal)/siswa/bab/[id]/_components/PhotoHomeworkSubmission';
-import { QuizCbtModal } from '@/app/(portal)/siswa/bab/[id]/_components/QuizCbtModal';
+import { VoiceSubmission } from '@/features/student/components/submissions/VoiceSubmission';
+import { PhotoHomeworkSubmission } from '@/features/student/components/submissions/PhotoHomeworkSubmission';
+import { QuizCbtModal } from '@/features/student/components/submissions/QuizCbtModal';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { LessonWithAssignment, StudentAssignment } from '@/app/(portal)/siswa/bab/[id]/_services/student-bab.service';
+import type { LessonWithAssignment, StudentAssignment } from '@/features/student/services/student-bab.service';
 import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
 
 interface FaseBCViewProps {
