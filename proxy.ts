@@ -52,20 +52,34 @@ export async function proxy(request: NextRequest) {
         return NextResponse.redirect(loginUrl);
     }
 
+    // Ambil role langsung dari tabel profiles jika user terautentikasi
+    let userRole: string | null = null;
+    if (user) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .single();
+
+        userRole = profile?.role ?? user.user_metadata?.role ?? request.cookies.get('vokid_role')?.value ?? null;
+    }
+
     // 2. Proteksi Peran (Role-Based Access Control)
     if (user && isProtectedPath) {
-        const role = user.user_metadata?.role ?? request.cookies.get('vokid_role')?.value;
-
-        // Siswa (Maryam, Asiyah, Khadijah) dilarang masuk ke ruang guru
-        if (pathname.startsWith('/guru') && role !== 'GURU') {
+        // Bukan GURU dilarang masuk ke rute /guru
+        if (pathname.startsWith('/guru') && userRole !== 'GURU') {
             return NextResponse.redirect(new URL('/siswa', request.url));
+        }
+
+        // Akun GURU diarahkan ke /guru jika mengakses /siswa
+        if (pathname.startsWith('/siswa') && userRole === 'GURU') {
+            return NextResponse.redirect(new URL('/guru', request.url));
         }
     }
 
-    // 3. Jika sudah login dan membuka halaman login atau root '/', arahkan ke dasbor yang sesuai
+    // 3. Redirect dari /login atau root '/' sesuai peran
     if ((pathname === '/login' || pathname === '/') && user) {
-        const role = user.user_metadata?.role ?? request.cookies.get('vokid_role')?.value;
-        if (role === 'GURU') {
+        if (userRole === 'GURU') {
             return NextResponse.redirect(new URL('/guru', request.url));
         }
         return NextResponse.redirect(new URL('/siswa', request.url));
@@ -74,7 +88,6 @@ export async function proxy(request: NextRequest) {
     return response;
 }
 
-// Alias default untuk kompatibilitas runtime Next.js
 export default proxy;
 
 export const config = {
