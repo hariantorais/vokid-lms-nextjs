@@ -1,37 +1,37 @@
 'use client';
 
-import React, { useState, useTransition } from 'react';
-import Image from 'next/image';
-import { UploadCloud, Check, Loader2, Sparkles, Star, ArrowLeft } from 'lucide-react';
+import React, { useRef, useState, useTransition } from 'react';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import {
+  Camera,
+  Loader2,
+  Star,
+  Info,
+  HelpCircle,
+  LogOut,
+  ChevronRight,
+  ShieldCheck,
+} from 'lucide-react';
 import { toast } from 'sonner';
-import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
-import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
-import { updateStudentAvatarAction, type StudentProfile } from '../../_actions/profile.actions';
+import { useStudent } from '@/features/student/context/StudentContext';
+import { createClient } from '@/lib/supabase/client';
+import { updateStudentAvatarAction } from '../../_actions/profile.actions';
+import { StudentAvatar } from '../../../../../components/shared/StudentAvatar';
 
-interface StudentProfileClientProps {
-  initialProfile: StudentProfile;
-  totalStars?: number;
-}
+export function StudentProfileClient() {
+  const router = useRouter();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-const PRESET_AVATARS = [
-  '🦁', '🐯', '🐼', '🦊', '🐰', '🐨', '🐵', '🦄', '🚀', '⭐', '🌈', '🎨'
-];
+  // Ambil state global dari Context
+  const { studentId, studentName, avatarUrl, totalStars, setAvatarUrl } = useStudent();
 
-export function StudentProfileClient({ initialProfile, totalStars = 0 }: StudentProfileClientProps) {
-  const [profile, setProfile] = useState<StudentProfile>(initialProfile);
   const [isUploading, setIsUploading] = useState(false);
   const [isPending, startTransition] = useTransition();
 
-  const handlePresetSelect = (emoji: string) => {
-    startTransition(async () => {
-      const res = await updateStudentAvatarAction(emoji);
-      if (!res.success) {
-        toast.error(res.error);
-        return;
-      }
-      setProfile((prev) => ({ ...prev, avatar_url: emoji }));
-      toast.success('Avatar berhasil diperbarui!');
-    });
+  const handleAvatarClick = () => {
+    if (isUploading || isPending) return;
+    fileInputRef.current?.click();
   };
 
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -39,7 +39,7 @@ export function StudentProfileClient({ initialProfile, totalStars = 0 }: Student
     if (!file) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Berkas harus berupa gambar (JPG/PNG/WEBP)');
+      toast.error('Berkas harus berupa gambar (JPG, PNG, atau WEBP).');
       return;
     }
 
@@ -70,135 +70,154 @@ export function StudentProfileClient({ initialProfile, totalStars = 0 }: Student
           toast.error(updateRes.error);
           return;
         }
-        setProfile((prev) => ({ ...prev, avatar_url: data.url }));
-        toast.success('Foto profil berhasil diunggah dan disimpan!');
+        // Update state global: Avatar di header & di profil langsung berubah bersamaan
+        setAvatarUrl(data.url);
+        toast.success('Foto profil berhasil diperbarui!');
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Gagal mengunggah avatar.';
       toast.error(msg);
     } finally {
       setIsUploading(false);
+      if (fileInputRef.current) fileInputRef.current.value = '';
     }
   };
 
-  const isCustomImage =
-    profile.avatar_url &&
-    (profile.avatar_url.startsWith('http') || profile.avatar_url.startsWith('/'));
+  const handleLogout = async () => {
+    try {
+      const supabase = createClient();
+      await supabase.auth.signOut();
+      toast.success('Berhasil keluar akun.');
+      router.push('/login');
+      router.refresh();
+    } catch {
+      toast.error('Gagal keluar akun.');
+    }
+  };
 
   return (
-    <StudentLayoutShell
-      title="Profil Siswa"
-      backHref="/siswa"
-      activeNavTab="PROFIL"
-      showBottomNav={true}
-      maxWidth="sm"
-      starsCount={totalStars}
-      userAvatarUrl={profile.avatar_url}
-    >
-      <div className="space-y-4">
-        {/* Card Profil Utama */}
-        <section className="bg-white rounded-3xl p-5 border-2 border-b-6 border-slate-200/90 shadow-sm flex flex-col items-center text-center space-y-3">
-          {/* Tampilan Avatar Aktif */}
-          <div className="relative">
-            <div className="w-24 h-24 rounded-3xl bg-gradient-to-tr from-amber-400 via-orange-400 to-amber-300 border-4 border-white shadow-lg flex items-center justify-center text-5xl overflow-hidden select-none">
-              {isCustomImage ? (
-                <Image
-                  src={getMediaProxyUrl(profile.avatar_url)}
-                  alt={profile.full_name}
-                  width={96}
-                  height={96}
-                  loading="eager"
-                  unoptimized
-                  className="w-full h-full object-cover"
-                />
-              ) : (
-                <span>{profile.avatar_url || '🦁'}</span>
-              )}
+    <div className="space-y-4 select-none pb-8">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        className="hidden"
+        onChange={handleFileUpload}
+        disabled={isUploading || isPending}
+      />
+
+      {/* KARTU IDENTITAS */}
+      <section className="bg-white rounded-3xl p-5 sm:p-6 border-2 border-b-6 border-slate-200/90 shadow-xs flex flex-col items-center text-center space-y-3">
+        <div className="relative group">
+          <button
+            type="button"
+            onClick={handleAvatarClick}
+            disabled={isUploading || isPending}
+            className="relative cursor-pointer rounded-3xl transition-transform active:scale-95 focus:outline-none"
+            title="Klik untuk ganti foto profil"
+          >
+            <StudentAvatar
+              avatarUrl={avatarUrl}
+              studentName={studentId || studentName}
+              size="xl"
+            />
+
+            <div className="absolute -bottom-1 -right-1 w-8 h-8 rounded-xl bg-teal-500 hover:bg-teal-600 border-2 border-white text-white flex items-center justify-center shadow-md transition-transform group-hover:scale-110">
+              <Camera className="w-4 h-4 stroke-[2.5]" />
             </div>
 
             {(isUploading || isPending) && (
-              <div className="absolute inset-0 rounded-3xl bg-black/40 backdrop-blur-xs flex items-center justify-center text-white">
-                <Loader2 className="w-6 h-6 animate-spin" />
+              <div className="absolute inset-0 rounded-3xl bg-black/50 backdrop-blur-2xs flex flex-col items-center justify-center text-white z-10">
+                <Loader2 className="w-8 h-8 animate-spin" />
+                <span className="text-[10px] font-bold mt-1">Mengunggah...</span>
               </div>
             )}
-          </div>
+          </button>
+        </div>
 
-          <div className="space-y-0.5">
-            <h2 className="text-base sm:text-lg font-black text-slate-900">
-              {profile.full_name}
-            </h2>
-            <p className="text-xs font-semibold text-slate-500">
-              Petualang Belajar SD
-            </p>
-          </div>
+        <div className="space-y-0.5">
+          <h2 className="text-base sm:text-lg font-black text-slate-900">
+            {studentName}
+          </h2>
+          <p className="text-xs font-bold text-slate-500">
+            Petualang Belajar SD
+          </p>
+        </div>
 
-          <div className="inline-flex items-center gap-1.5 px-3.5 py-1 rounded-xl bg-amber-100/80 border border-amber-300 text-amber-900 text-xs font-black shadow-2xs">
-            <Star className="w-4 h-4 fill-amber-500 text-amber-600" />
-            <span>{totalStars} Total Bintang Diperoleh</span>
-          </div>
-        </section>
+        <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-2xl bg-amber-50 border border-amber-200 text-amber-900 text-xs font-black shadow-2xs">
+          <Star className="w-4 h-4 fill-amber-500 text-amber-600" />
+          <span>{totalStars} Total Bintang Diperoleh</span>
+        </div>
+      </section>
 
-        {/* Upload Foto Avatar Kustom */}
-        <section className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-b-6 border-slate-200/90 shadow-sm space-y-3">
-          <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-            <UploadCloud className="w-4 h-4 text-teal-600" />
-            <span>Upload Foto Avatar</span>
-          </h3>
-          <label className="border-2 border-dashed border-teal-300 hover:border-teal-500 bg-teal-50/40 hover:bg-teal-50/70 rounded-2xl p-4 flex flex-col items-center justify-center text-center cursor-pointer transition-all active:scale-98">
-            <input
-              type="file"
-              accept="image/*"
-              disabled={isUploading || isPending}
-              className="hidden"
-              onChange={handleFileUpload}
-            />
-            <div className="w-10 h-10 rounded-xl bg-teal-500 text-white flex items-center justify-center mb-1.5 shadow-2xs">
-              {isUploading ? (
-                <Loader2 className="w-5 h-5 animate-spin" />
-              ) : (
-                <UploadCloud className="w-5 h-5" />
-              )}
+      {/* MENU AKUN */}
+      <section className="bg-white rounded-3xl p-2 border-2 border-b-6 border-slate-200/90 shadow-xs divide-y divide-slate-100">
+        <Link
+          href="/siswa/tentang"
+          className="flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition-colors group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-teal-50 text-teal-600 flex items-center justify-center border border-teal-200/60 shrink-0">
+              <Info className="w-5 h-5 stroke-[2.5]" />
             </div>
-            <span className="text-xs font-bold text-teal-950">
-              {isUploading ? 'Sedang mengunggah...' : 'Pilih Foto dari Perangkat (Maksimal 5MB)'}
-            </span>
-          </label>
-        </section>
-
-        {/* Pilihan Karakter / Avatar Preset Ceria */}
-        <section className="bg-white rounded-3xl p-4 sm:p-5 border-2 border-b-6 border-slate-200/90 shadow-sm space-y-3">
-          <h3 className="text-xs sm:text-sm font-black text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
-            <Sparkles className="w-4 h-4 text-amber-500" />
-            <span>Atau Pilih Karakter Lucu</span>
-          </h3>
-
-          <div className="grid grid-cols-4 sm:grid-cols-6 gap-2.5">
-            {PRESET_AVATARS.map((emoji) => {
-              const isSelected = profile.avatar_url === emoji;
-              return (
-                <button
-                  key={emoji}
-                  type="button"
-                  onClick={() => handlePresetSelect(emoji)}
-                  disabled={isPending || isUploading}
-                  className={`h-14 rounded-2xl border-2 flex items-center justify-center text-2xl transition-all cursor-pointer relative ${
-                    isSelected
-                      ? 'border-b-4 border-teal-600 bg-teal-50 ring-2 ring-teal-400 scale-105'
-                      : 'border-b-4 border-slate-200 bg-white hover:bg-slate-50 active:translate-y-0.5'
-                  }`}
-                >
-                  <span>{emoji}</span>
-                  {isSelected && (
-                    <div className="absolute -top-1.5 -right-1.5 w-4 h-4 rounded-full bg-teal-600 text-white flex items-center justify-center">
-                      <Check className="w-2.5 h-2.5 stroke-[3]" />
-                    </div>
-                  )}
-                </button>
-              );
-            })}
+            <div className="text-left">
+              <h4 className="text-xs sm:text-sm font-black text-slate-800 group-hover:text-teal-700 transition-colors">
+                Tentang Aplikasi
+              </h4>
+              <p className="text-[11px] font-bold text-slate-400">
+                Versi & pengembang platform
+              </p>
+            </div>
           </div>
-        </section>
-      </div>
-    </StudentLayoutShell>
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+        </Link>
+
+        <Link
+          href="/siswa/bantuan"
+          className="flex items-center justify-between p-3.5 hover:bg-slate-50 rounded-2xl transition-colors group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center border border-amber-200/60 shrink-0">
+              <HelpCircle className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div className="text-left">
+              <h4 className="text-xs sm:text-sm font-black text-slate-800 group-hover:text-amber-700 transition-colors">
+                Bantuan Petualang
+              </h4>
+              <p className="text-[11px] font-bold text-slate-400">
+                Panduan belajar & misi
+              </p>
+            </div>
+          </div>
+          <ChevronRight className="w-5 h-5 text-slate-400 group-hover:text-slate-600 group-hover:translate-x-0.5 transition-all" />
+        </Link>
+
+        <div className="flex items-center justify-between p-3.5 text-slate-600">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-slate-100 text-slate-500 flex items-center justify-center border border-slate-200 shrink-0">
+              <ShieldCheck className="w-5 h-5 stroke-[2.5]" />
+            </div>
+            <div className="text-left">
+              <h4 className="text-xs sm:text-sm font-black text-slate-800">
+                Status Akun
+              </h4>
+              <p className="text-[11px] font-bold text-emerald-600 flex items-center gap-1">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
+                Aktif Terdaftar
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <button
+        type="button"
+        onClick={handleLogout}
+        className="w-full bg-rose-50 hover:bg-rose-100/80 active:translate-y-0.5 border-2 border-b-4 border-rose-300 text-rose-700 rounded-2xl p-3.5 flex items-center justify-center gap-2 text-xs sm:text-sm font-black transition-all cursor-pointer shadow-2xs"
+      >
+        <LogOut className="w-4 h-4 stroke-[2.5]" />
+        <span>Keluar dari Akun</span>
+      </button>
+    </div>
   );
 }

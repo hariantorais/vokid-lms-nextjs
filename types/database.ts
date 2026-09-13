@@ -363,6 +363,9 @@ export type Database = {
         Row: {
           avatar_url: string | null
           created_at: string
+          equipped_badge_icon: string
+          equipped_title: string
+          equipped_trophy_tier: string
           full_name: string
           id: string
           role: Database["public"]["Enums"]["user_role"]
@@ -370,6 +373,9 @@ export type Database = {
         Insert: {
           avatar_url?: string | null
           created_at?: string
+          equipped_badge_icon?: string
+          equipped_title?: string
+          equipped_trophy_tier?: string
           full_name: string
           id: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -377,6 +383,9 @@ export type Database = {
         Update: {
           avatar_url?: string | null
           created_at?: string
+          equipped_badge_icon?: string
+          equipped_title?: string
+          equipped_trophy_tier?: string
           full_name?: string
           id?: string
           role?: Database["public"]["Enums"]["user_role"]
@@ -531,6 +540,10 @@ export type Database = {
     }
     Functions: {
       is_teacher: { Args: never; Returns: boolean }
+      reset_student_progress: {
+        Args: { target_student_id: string }
+        Returns: undefined
+      }
     }
     Enums: {
       assignment_type: "VOICE_TASK" | "PHOTO_HOMEWORK" | "QUIZ_CBT"

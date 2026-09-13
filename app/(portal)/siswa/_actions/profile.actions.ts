@@ -48,7 +48,9 @@ export async function getStudentProfileAction(): Promise<ActionResponse<StudentP
   }
 }
 
-export async function updateStudentAvatarAction(avatarUrl: string): Promise<ActionResponse<{ avatarUrl: string }>> {
+export async function updateStudentAvatarAction(
+  avatarUrl: string
+): Promise<ActionResponse<{ avatarUrl: string }>> {
   try {
     const supabase = await createClient();
     const {
@@ -74,8 +76,7 @@ export async function updateStudentAvatarAction(avatarUrl: string): Promise<Acti
       return { success: false, error: `Gagal memperbarui avatar: ${error.message}` };
     }
 
-    revalidatePath('/siswa');
-    revalidatePath('/siswa/profil');
+    revalidatePath('/siswa', 'layout');
 
     return {
       success: true,
