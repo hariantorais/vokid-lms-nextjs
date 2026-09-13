@@ -16,7 +16,7 @@ import type {
   Subject,
   ClassRecord,
   Profile,
-} from '@/types/database';
+} from '@/types';
 
 function parsePayload(input: unknown): Record<string, unknown> {
   if (input instanceof FormData) {

@@ -15,7 +15,7 @@ import {
   Lock,
 } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
-import type { UserRole } from '@/types/database';
+import type { UserRole } from '@/types';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -132,8 +132,8 @@ export default function LoginPage() {
               setErrorMessage(null);
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${selectedRole === 'SISWA'
-                ? 'bg-amber-400 text-slate-950 shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-amber-400 text-slate-950 shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
               }`}
           >
             <GraduationCap className="w-4 h-4" />
@@ -146,8 +146,8 @@ export default function LoginPage() {
               setErrorMessage(null);
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${selectedRole === 'GURU'
-                ? 'bg-teal-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-teal-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
               }`}
           >
             <BookOpen className="w-4 h-4" />
@@ -160,8 +160,8 @@ export default function LoginPage() {
               setErrorMessage(null);
             }}
             className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-xl font-black text-xs transition-all cursor-pointer ${selectedRole === 'ORANG_TUA'
-                ? 'bg-emerald-600 text-white shadow-xs'
-                : 'text-slate-600 hover:text-slate-900'
+              ? 'bg-emerald-600 text-white shadow-xs'
+              : 'text-slate-600 hover:text-slate-900'
               }`}
           >
             <Heart className="w-4 h-4" />
@@ -172,10 +172,10 @@ export default function LoginPage() {
         {/* Role Banner Guide */}
         <div
           className={`p-3.5 rounded-2xl border mb-5 ${selectedRole === 'SISWA'
-              ? 'bg-amber-50/70 border-amber-200 text-amber-950'
-              : selectedRole === 'GURU'
-                ? 'bg-teal-50/70 border-teal-200 text-teal-950'
-                : 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
+            ? 'bg-amber-50/70 border-amber-200 text-amber-950'
+            : selectedRole === 'GURU'
+              ? 'bg-teal-50/70 border-teal-200 text-teal-950'
+              : 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
             }`}
         >
           <p className="text-xs font-extrabold flex items-center gap-1.5">
@@ -252,10 +252,10 @@ export default function LoginPage() {
             type="submit"
             disabled={isPending}
             className={`w-full min-h-[50px] rounded-2xl font-black text-xs sm:text-sm flex items-center justify-center gap-2 border-2 border-b-6 active:border-b-2 active:translate-y-1 shadow-sm transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed mt-2 ${selectedRole === 'SISWA'
-                ? 'bg-amber-400 hover:bg-amber-500 border-amber-600 text-slate-950'
-                : selectedRole === 'GURU'
-                  ? 'bg-teal-600 hover:bg-teal-700 border-teal-800 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-700 border-emerald-800 text-white'
+              ? 'bg-amber-400 hover:bg-amber-500 border-amber-600 text-slate-950'
+              : selectedRole === 'GURU'
+                ? 'bg-teal-600 hover:bg-teal-700 border-teal-800 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 border-emerald-800 text-white'
               }`}
           >
             {isPending ? (

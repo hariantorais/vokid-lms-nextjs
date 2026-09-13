@@ -4,7 +4,7 @@ import React from 'react';
 import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
 import { AdaptivePortal } from './AdaptivePortal';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { GradeLevel } from '@/types/database';
+import type { GradeLevel } from '@/types';
 
 interface KelasDetailClientProps {
   classroomData: StudentClassroomData;

@@ -5,15 +5,16 @@ import type {
   ContentType,
   AssignmentType,
   SubmissionStatus,
-  Profile,
   ClassRoom,
+  Profile,
   Subject,
   Module,
   Lesson,
   Assignment,
   Submission,
-  Database,
-} from '@/types/database';
+} from '@/types';
+
+
 import { createClient as createBrowserClient } from '@/lib/supabase/client';
 
 describe('Vokid Vitest & Environment Setup', () => {

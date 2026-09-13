@@ -25,7 +25,7 @@ export type LkpdItemType =
   | 'RULES_CARD'
   | 'SYMBOL_CARD'
   | 'SELF_REFLECTION'
-  // ⚡ Bahasa Indonesia (Baru - Literasi)
+  // Bahasa Indonesia (Literasi)
   | 'TRACE_LETTER'
   | 'MATCH_SYLLABLE'
   | 'READ_AND_MATCH'
@@ -34,7 +34,7 @@ export type LkpdItemType =
   | 'WRITING_LINES';
 
 // =============================================================================
-// DATA INTERFACES (existing)
+// DATA INTERFACES
 // =============================================================================
 
 export interface PictCountData {
@@ -189,7 +189,7 @@ export interface SelfReflectionData {
   }>;
 }
 
-// ⚡ Bahasa Indonesia Interfaces (Baru - Literasi)
+// Bahasa Indonesia (Literasi) Interfaces
 export interface TraceLetterData {
   letters?: Array<{
     letter: string;
@@ -300,8 +300,7 @@ export function parseLkpdQuestion(input: unknown, index: number): LkpdItem {
 }
 
 // =============================================================================
-// VISUAL COMPONENTS (Matematika + Bahasa Inggris + Seni Budaya + Pancasila)
-// [Kode sebelumnya tetap sama - hanya menambahkan 6 komponen baru di bawah]
+// VISUAL COMPONENTS
 // =============================================================================
 
 export function PictCountVisual({ data }: { data: PictCountData }) {
@@ -797,15 +796,11 @@ export function SelfReflectionVisual({ data }: { data: SelfReflectionData }) {
 }
 
 // =============================================================================
-// ⚡ BAHASA INDONESIA VISUAL COMPONENTS (BARU)
+// BAHASA INDONESIA VISUAL COMPONENTS
 // =============================================================================
 
-/**
- * TRACE_LETTER: Menebalkan huruf a-z dengan panduan titik
- */
 export function TraceLetterVisual({ data }: { data: TraceLetterData }) {
   const letters = data.letters || [];
-  const showDots = data.showGuideDots !== false;
 
   return (
     <div className="border-2 border-black p-4 bg-white space-y-4 print:break-inside-avoid">
@@ -817,35 +812,20 @@ export function TraceLetterVisual({ data }: { data: TraceLetterData }) {
       <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {letters.map((item, idx) => (
           <div key={idx} className="border-2 border-black rounded-lg p-3 bg-white space-y-2">
-            {/* Ikon & Kata */}
             {item.icon && (
               <div className="flex items-center gap-2 border-b border-dashed border-slate-300 pb-2">
                 <span className="text-3xl">{item.icon}</span>
-                {item.word && (
-                  <span className="text-xs font-black text-slate-700">{item.word}</span>
-                )}
+                {item.word && <span className="text-xs font-black text-slate-700">{item.word}</span>}
               </div>
             )}
-
-            {/* Huruf besar (untuk ditirukan) */}
             <div className="text-center py-1">
-              <span className="font-mono text-2xl font-black text-slate-800">
-                {item.letter.toUpperCase()}
-              </span>
-              <span className="font-mono text-2xl font-black text-slate-800 ml-2">
-                {item.letter.toLowerCase()}
-              </span>
+              <span className="font-mono text-2xl font-black text-slate-800">{item.letter.toUpperCase()}</span>
+              <span className="font-mono text-2xl font-black text-slate-800 ml-2">{item.letter.toLowerCase()}</span>
             </div>
-
-            {/* Garis untuk menebalkan */}
             <div className="space-y-2">
               <div className="border-b-2 border-dashed border-slate-400 h-10 flex items-center px-2">
-                <span className="font-mono text-2xl font-black text-slate-300 select-none">
-                  {item.letter.toUpperCase()}
-                </span>
-                <span className="font-mono text-2xl font-black text-slate-300 select-none ml-2">
-                  {item.letter.toLowerCase()}
-                </span>
+                <span className="font-mono text-2xl font-black text-slate-300 select-none">{item.letter.toUpperCase()}</span>
+                <span className="font-mono text-2xl font-black text-slate-300 select-none ml-2">{item.letter.toLowerCase()}</span>
               </div>
               <div className="border-b-2 border-dashed border-slate-400 h-10" />
             </div>
@@ -859,9 +839,6 @@ export function TraceLetterVisual({ data }: { data: TraceLetterData }) {
   );
 }
 
-/**
- * MATCH_SYLLABLE: Menyambung 2 suku kata menjadi kata
- */
 export function MatchSyllableVisual({ data }: { data: MatchSyllableData }) {
   const syllables = data.syllables || [];
 
@@ -876,22 +853,18 @@ export function MatchSyllableVisual({ data }: { data: MatchSyllableData }) {
         {syllables.map((item, idx) => (
           <div key={idx} className="border-2 border-black rounded-lg p-3 bg-white">
             <div className="flex items-center justify-center gap-2 flex-wrap">
-              {/* Suku kata 1 */}
               <div className="px-4 py-2 border-2 border-black rounded-lg bg-amber-50 min-w-[60px] text-center">
                 <span className="font-mono text-xl font-black text-black">{item.part1}</span>
               </div>
               <span className="text-2xl font-black text-slate-400">+</span>
-              {/* Suku kata 2 */}
               <div className="px-4 py-2 border-2 border-black rounded-lg bg-sky-50 min-w-[60px] text-center">
                 <span className="font-mono text-xl font-black text-black">{item.part2}</span>
               </div>
               <span className="text-2xl font-black text-slate-400">=</span>
-              {/* Hasil (garis kosong) */}
               <div className="px-4 py-2 border-2 border-dashed border-slate-400 rounded-lg bg-white min-w-[80px] text-center">
                 <span className="font-mono text-xl font-black text-slate-300">?</span>
               </div>
             </div>
-            {/* Ikon kata */}
             {item.icon && (
               <div className="text-center mt-2">
                 <span className="text-3xl">{item.icon}</span>
@@ -907,9 +880,6 @@ export function MatchSyllableVisual({ data }: { data: MatchSyllableData }) {
   );
 }
 
-/**
- * READ_AND_MATCH: Baca kata → cocokkan dengan gambar
- */
 export function ReadAndMatchVisual({ data }: { data: ReadAndMatchData }) {
   const words = data.words || [];
 
@@ -921,45 +891,27 @@ export function ReadAndMatchVisual({ data }: { data: ReadAndMatchData }) {
         </span>
       </div>
       <div className="grid grid-cols-2 gap-4">
-        {/* Kolom Kata */}
         <div className="space-y-2">
-          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">
-            Kata
-          </span>
+          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">Kata</span>
           {words.map((item, idx) => (
-            <div
-              key={idx}
-              className="flex items-center gap-2 border-2 border-black rounded-lg px-3 py-2 bg-white min-h-[44px]"
-            >
+            <div key={idx} className="flex items-center gap-2 border-2 border-black rounded-lg px-3 py-2 bg-white min-h-[44px]">
               <span className="w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-black shrink-0">
                 {String.fromCharCode(65 + idx)}
               </span>
-              <span className="font-mono text-sm font-black text-black">
-                {item.word}
-              </span>
+              <span className="font-mono text-sm font-black text-black">{item.word}</span>
             </div>
           ))}
         </div>
-
-        {/* Kolom Gambar */}
         <div className="space-y-2">
-          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">
-            Gambar
-          </span>
-          {words
-            .slice()
-            .reverse()
-            .map((item, idx) => (
-              <div
-                key={idx}
-                className="flex items-center gap-2 border-2 border-black rounded-lg px-3 py-2 bg-white min-h-[44px]"
-              >
-                <span className="w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-black shrink-0">
-                  {words.length - idx}
-                </span>
-                <span className="text-2xl">{item.icon}</span>
-              </div>
-            ))}
+          <span className="text-[9px] font-black uppercase tracking-wider text-slate-500 block">Gambar</span>
+          {words.slice().reverse().map((item, idx) => (
+            <div key={idx} className="flex items-center gap-2 border-2 border-black rounded-lg px-3 py-2 bg-white min-h-[44px]">
+              <span className="w-5 h-5 rounded-full border-2 border-black flex items-center justify-center text-[10px] font-black shrink-0">
+                {words.length - idx}
+              </span>
+              <span className="text-2xl">{item.icon}</span>
+            </div>
+          ))}
         </div>
       </div>
       <p className="text-[9px] italic text-slate-500">
@@ -969,9 +921,6 @@ export function ReadAndMatchVisual({ data }: { data: ReadAndMatchData }) {
   );
 }
 
-/**
- * FILL_THE_WORD: Melengkapi kata rumpang
- */
 export function FillTheWordVisual({ data }: { data: FillTheWordData }) {
   return (
     <div className="border-2 border-black p-4 bg-white space-y-3 print:break-inside-avoid">
@@ -999,9 +948,6 @@ export function FillTheWordVisual({ data }: { data: FillTheWordData }) {
   );
 }
 
-/**
- * READING_CARD: Kartu baca kalimat pendek
- */
 export function ReadingCardVisual({ data }: { data: ReadingCardData }) {
   const sentences = data.sentences || [];
 
@@ -1014,17 +960,12 @@ export function ReadingCardVisual({ data }: { data: ReadingCardData }) {
       </div>
       <div className="space-y-3">
         {sentences.map((item, idx) => (
-          <div
-            key={idx}
-            className="flex items-center gap-3 border-2 border-black rounded-lg p-3 bg-white"
-          >
+          <div key={idx} className="flex items-center gap-3 border-2 border-black rounded-lg p-3 bg-white">
             <span className="w-8 h-8 rounded-full border-2 border-black bg-amber-400 flex items-center justify-center text-xs font-black text-black shrink-0">
               {idx + 1}
             </span>
             {item.icon && <span className="text-2xl shrink-0">{item.icon}</span>}
-            <span className="text-base font-black text-black leading-snug flex-1">
-              {item.text}
-            </span>
+            <span className="text-base font-black text-black leading-snug flex-1">{item.text}</span>
           </div>
         ))}
       </div>
@@ -1037,9 +978,6 @@ export function ReadingCardVisual({ data }: { data: ReadingCardData }) {
   );
 }
 
-/**
- * WRITING_LINES: Garis untuk menulis kalimat
- */
 export function WritingLinesVisual({ data }: { data: WritingLinesData }) {
   const lines = data.lines || 3;
   const prompt = data.prompt || 'Tulis di sini:';
@@ -1051,25 +989,19 @@ export function WritingLinesVisual({ data }: { data: WritingLinesData }) {
         <span>{prompt}</span>
       </div>
 
-      {/* Contoh tulisan (jika ada) */}
       {data.example && (
         <div className="border-2 border-black rounded-lg p-3 bg-amber-50">
           <span className="text-[9px] font-black uppercase tracking-wider text-slate-600 block mb-1">
             Contoh:
           </span>
-          <span className="font-mono text-sm font-bold text-slate-700">
-            {data.example}
-          </span>
+          <span className="font-mono text-sm font-bold text-slate-700">{data.example}</span>
         </div>
       )}
 
-      {/* Garis untuk menulis */}
       <div className="border-2 border-black rounded-lg p-4 bg-white space-y-6">
         {Array.from({ length: lines }, (_, idx) => (
           <div key={idx} className="flex items-end gap-2">
-            <span className="text-[10px] font-black text-slate-400 w-4">
-              {idx + 1}.
-            </span>
+            <span className="text-[10px] font-black text-slate-400 w-4">{idx + 1}.</span>
             <div className="flex-1 border-b-2 border-dotted border-slate-500 h-8" />
           </div>
         ))}
@@ -1101,7 +1033,6 @@ export function LkpdItemRenderer({ item, index }: { item: LkpdItem; index: numbe
     item.type === 'RULES_CARD' ||
     item.type === 'SYMBOL_CARD' ||
     item.type === 'SELF_REFLECTION' ||
-    // Bahasa Indonesia
     item.type === 'TRACE_LETTER' ||
     item.type === 'MATCH_SYLLABLE' ||
     item.type === 'READ_AND_MATCH' ||
@@ -1145,7 +1076,7 @@ export function LkpdItemRenderer({ item, index }: { item: LkpdItem; index: numbe
           {item.type === 'SYMBOL_CARD' && item.data && <SymbolCardVisual data={item.data as SymbolCardData} />}
           {item.type === 'SELF_REFLECTION' && item.data && <SelfReflectionVisual data={item.data as SelfReflectionData} />}
 
-          {/* ⚡ Bahasa Indonesia */}
+          {/* Bahasa Indonesia */}
           {item.type === 'TRACE_LETTER' && item.data && <TraceLetterVisual data={item.data as TraceLetterData} />}
           {item.type === 'MATCH_SYLLABLE' && item.data && <MatchSyllableVisual data={item.data as MatchSyllableData} />}
           {item.type === 'READ_AND_MATCH' && item.data && <ReadAndMatchVisual data={item.data as ReadAndMatchData} />}

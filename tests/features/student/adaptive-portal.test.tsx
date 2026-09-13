@@ -5,7 +5,6 @@ import '@testing-library/jest-dom/vitest';
 import { AdaptivePortal } from '@/features/student/components/AdaptivePortal';
 import { AudioPromptPlayer } from '@/features/student/components/AudioPromptPlayer';
 import type { StudentClassroomData } from '@/features/student/services/student-service';
-import type { GradeLevel } from '@/types/database';
 
 describe('Unit & Integration Test AdaptivePortal (Fase A vs Fase B/C)', () => {
   const mockClassroomData: StudentClassroomData = {

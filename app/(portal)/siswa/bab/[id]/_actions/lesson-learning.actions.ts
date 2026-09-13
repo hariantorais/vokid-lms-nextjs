@@ -29,19 +29,14 @@ export async function markLessonAsStudiedAction(
             error: authError,
         } = await supabase.auth.getUser();
 
-        let studentId: string;
         if (!user || authError) {
-            if (process.env.NODE_ENV === 'development') {
-                studentId = '22222222-2222-2222-2222-222222222222';
-            } else {
-                return {
-                    success: false,
-                    error: 'Sesi belajar siswa berakhir. Silakan login kembali.',
-                };
-            }
-        } else {
-            studentId = user.id;
+            return {
+                success: false,
+                error: 'Sesi belajar siswa berakhir. Silakan login kembali.',
+            };
         }
+
+        const studentId = user.id;
 
         const { data: lesson, error: lessonError } = await supabase
             .from('lessons')

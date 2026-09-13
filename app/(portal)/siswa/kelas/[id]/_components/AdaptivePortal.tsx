@@ -4,7 +4,7 @@ import React from 'react';
 import { FaseAView } from './FaseAView';
 import { FaseBCView } from './FaseBCView';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { GradeLevel } from '@/types/database';
+import type { GradeLevel } from '@/types';
 
 interface AdaptivePortalProps {
   classroomData: StudentClassroomData;

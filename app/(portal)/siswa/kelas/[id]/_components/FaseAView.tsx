@@ -3,27 +3,20 @@
 import React, { useState } from 'react';
 import Link from 'next/link';
 import {
-  BookOpen,
-  Mic,
-  Camera,
   Star,
   CheckCircle2,
-  Video,
-  X,
-  ChevronRight,
   Check,
   Lock,
   Play,
   ArrowLeft,
-  ChevronDown,
-  Sparkles,
-  Trophy,
+  ChevronRight,
   Target,
 } from 'lucide-react';
-import { AudioPromptPlayer } from '@/app/(portal)/siswa/bab/[id]/_components/AudioPromptPlayer';
-import { VoiceSubmission } from '@/app/(portal)/siswa/bab/[id]/_components/VoiceSubmission';
-import { PhotoHomeworkSubmission } from '@/app/(portal)/siswa/bab/[id]/_components/PhotoHomeworkSubmission';
-import { QuizCbtModal } from '@/app/(portal)/siswa/bab/[id]/_components/QuizCbtModal';
+import { MarkdownContent } from '@/components/common/MarkdownContent';
+import { AudioPromptPlayer } from '@/features/student/components/AudioPromptPlayer';
+import { VoiceSubmission } from '@/features/student/components/VoiceSubmission';
+import { PhotoHomeworkSubmission } from '@/features/student/components/PhotoHomeworkSubmission';
+import { QuizCbtModal } from '@/features/student/components/QuizCbtModal';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
@@ -33,50 +26,22 @@ interface FaseAViewProps {
   classroomData: StudentClassroomData;
 }
 
-/**
- * FaseAView - Ruangguru (Dafa & Lulu) UX & UI Edition
- * 
- * UX Flow:
- * 1. Screen A: Bab List (Accordion / Journey Map):
- *    - Child sees list of Chapters with progress ring & lock status.
- *    - Tapping an unlocked chapter expands its Lessons list cleanly.
- * 2. Screen B: Active Lesson Focused View:
- *    - Tapping a lesson opens the dedicated lesson player (Video / Storybook).
- *    - Right below the content is the single focused Mission (Voice Task or Photo Homework).
- *    - Back button seamlessly returns to the chapter outline.
- * 3. Feedback Toast / Celebration when a task is finished (+50 Bintang & next step unlocked).
- */
 export function FaseAView({ classroomData }: FaseAViewProps) {
   const { subjects } = classroomData;
 
-  // Selected subject
   const [selectedSubjectId, setSelectedSubjectId] = useState(subjects[0]?.id ?? '');
   const activeSubject = subjects.find((s) => s.id === selectedSubjectId) ?? subjects[0];
   const activeModules = activeSubject?.modules ?? [];
 
-  // Active Expanded Bab (Accordion)
-  const [expandedModuleId, setExpandedModuleId] = useState<string>(activeModules[0]?.id ?? '');
-
-  // Focused Lesson Active Player (When child taps a lesson)
   const [focusedLesson, setFocusedLesson] = useState<LessonWithAssignment | null>(null);
-
-  // Modal Sheet for reading storybook
-  const [readingLesson, setReadingLesson] = useState<LessonWithAssignment | null>(null);
-
-  // Active expanded assignment form
-  const [isTaskFormOpen, setIsTaskFormOpen] = useState<boolean>(true);
-
-  // Toast notification for locked attempts
   const [notice, setNotice] = useState<{ type: 'locked' | 'success'; message: string } | null>(null);
 
-  // Active Quiz CBT Modal
   const [activeQuizModal, setActiveQuizModal] = useState<{
     id: string;
     title: string;
     score?: number | null;
   } | null>(null);
 
-  // Interaction states for submitted tasks
   const [submittedTasks, setSubmittedTasks] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};
     for (const subj of subjects) {
@@ -93,9 +58,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
     return initial;
   });
 
-  // Helper: Cek apakah modul tertentu sudah benar-benar tuntas
-  // Syarat: Harus memiliki materi DAN seluruh tugas di dalamnya sudah dikerjakan.
-  // Jika bab kosong (tidak ada materi), TIDAK BOLEH dianggap selesai!
   const checkIsModuleCompleted = (mod: typeof activeModules[0]): boolean => {
     if (!mod || mod.lessons.length === 0) return false;
 
@@ -108,13 +70,9 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
       });
     });
 
-    // Jika memiliki penugasan, seluruh penugasan harus sudah dikumpulkan.
-    // Jika tidak ada penugasan tertulis (hanya bacaan/video), bab selesai jika memiliki materi.
     return totalAsg > 0 ? doneAsg === totalAsg : mod.lessons.length > 0;
   };
 
-  // Helper: Cek status terkunci untuk tiap Bab
-  // Bab 1 terbuka jika ada. Bab n terbuka jika Bab n-1 sudah tuntas!
   const isModuleUnlocked = (modIndex: number): boolean => {
     if (modIndex === 0) return true;
     const prevMod = activeModules[modIndex - 1];
@@ -122,19 +80,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
     return checkIsModuleCompleted(prevMod);
   };
 
-  // Helper: Cek apakah materi tertentu sudah terbuka
-  const isLessonUnlocked = (lessons: LessonWithAssignment[], lIdx: number): boolean => {
-    if (lIdx === 0) return true;
-    const prevLesson = lessons[lIdx - 1];
-    if (!prevLesson) return true;
-    if (prevLesson.assignments.length === 0) return true;
-    return prevLesson.assignments.every((asg: StudentAssignment) => submittedTasks[asg.id]);
-  };
-
-  const activeModule = activeModules.find((m) => m.id === expandedModuleId) ?? activeModules[0];
-  const activeLessons = activeModule?.lessons ?? [];
-
-  // Hitung total bintang diperoleh
   let totalSubmittedCount = 0;
   Object.values(submittedTasks).forEach((v) => {
     if (v) totalSubmittedCount++;
@@ -142,7 +87,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
 
   return (
     <div className="w-full space-y-3.5 select-none font-sans">
-      {/* Pop-up Modal Terkunci (Ruangguru Kids Style Modal) */}
       {notice && (
         <div
           role="dialog"
@@ -150,13 +94,11 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
           className="fixed inset-0 z-50 bg-slate-950/50 backdrop-blur-xs flex items-center justify-center p-4 animate-in fade-in"
         >
           <div className="bg-white w-full max-w-xs rounded-3xl p-5 shadow-2xl border border-slate-100 flex flex-col items-center text-center space-y-3.5 animate-in zoom-in-95">
-            {/* Animated Icon Circle */}
             <div
-              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-sm ${
-                notice.type === 'success'
+              className={`w-14 h-14 rounded-2xl flex items-center justify-center text-2xl shadow-sm ${notice.type === 'success'
                   ? 'bg-emerald-100 text-emerald-700'
                   : 'bg-amber-100 text-amber-700 ring-4 ring-amber-50'
-              }`}
+                }`}
             >
               {notice.type === 'success' ? '🎉' : '🔒'}
             </div>
@@ -173,11 +115,10 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             <button
               type="button"
               onClick={() => setNotice(null)}
-              className={`w-full h-11 rounded-2xl font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer ${
-                notice.type === 'success'
+              className={`w-full h-11 rounded-2xl font-black text-xs shadow-xs active:scale-95 transition-all cursor-pointer ${notice.type === 'success'
                   ? 'bg-emerald-600 hover:bg-emerald-700 text-white'
                   : 'bg-teal-600 hover:bg-teal-700 text-white'
-              }`}
+                }`}
             >
               {notice.type === 'success' ? 'Lanjutkan Belajar 🚀' : 'Mengerti, Siap Belajar! 👍'}
             </button>
@@ -185,10 +126,9 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
         </div>
       )}
 
-      {/* VIEW A: JIKA SEDANG MEMBUKA 1 MATERI SECARA FOKUS (Ruangguru Lesson View) */}
+      {/* VIEW A: JIKA SEDANG MEMBUKA 1 MATERI SECARA FOKUS */}
       {focusedLesson ? (
         <div className="space-y-3 animate-in fade-in">
-          {/* Top Bar Kembali ke Daftar Bab */}
           <button
             type="button"
             onClick={() => setFocusedLesson(null)}
@@ -198,23 +138,22 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             <span>Kembali ke Pilihan Bab</span>
           </button>
 
-          {/* Kartu Konten Utama Materi */}
           <div className="bg-white rounded-2xl border border-slate-100 p-4 shadow-sm space-y-3.5">
             <div className="flex items-center gap-2">
               <span className="text-xl">
                 {focusedLesson.content_type === 'VIDEO'
                   ? '🎬'
                   : focusedLesson.content_type === 'AUDIO'
-                  ? '🎧'
-                  : '📖'}
+                    ? '🎧'
+                    : '📖'}
               </span>
               <div className="min-w-0 flex-1">
                 <span className="text-[10px] font-black uppercase text-teal-700 bg-teal-50 px-2 py-0.5 rounded">
                   {focusedLesson.content_type === 'VIDEO'
                     ? 'Video Belajar'
                     : focusedLesson.content_type === 'AUDIO'
-                    ? 'Cerita Suara'
-                    : 'Buku Cerita'}
+                      ? 'Cerita Suara'
+                      : 'Buku Cerita'}
                 </span>
                 <h3 className="text-base font-black text-slate-900 mt-0.5 leading-snug">
                   {focusedLesson.title}
@@ -222,20 +161,20 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
               </div>
             </div>
 
-            {/* Target Belajar Kita Hari Ini (Tujuan Pembelajaran Fase A) */}
             {focusedLesson.learning_objectives && (
               <div className="p-3.5 rounded-2xl bg-gradient-to-r from-teal-50 to-emerald-50/70 border border-teal-200/90 shadow-2xs">
                 <div className="flex items-center gap-1.5 text-teal-800 font-black text-[11px] uppercase tracking-wider mb-1">
                   <Target className="w-4 h-4 text-teal-600 shrink-0" />
                   <span>🎯 Target Belajar Kita:</span>
                 </div>
-                <p className="text-xs font-bold text-teal-950 leading-relaxed pl-5 whitespace-pre-wrap">
-                  {focusedLesson.learning_objectives}
-                </p>
+                <MarkdownContent
+                  content={focusedLesson.learning_objectives}
+                  size="xs"
+                  className="pl-5 !text-teal-950 font-bold"
+                />
               </div>
             )}
 
-            {/* Content Display: Video / Audio / Reader */}
             {focusedLesson.content_type === 'VIDEO' && focusedLesson.content_url && (
               <div className="pt-1">
                 <VideoPlayer url={focusedLesson.content_url} title={focusedLesson.title} />
@@ -243,8 +182,11 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             )}
 
             {focusedLesson.content_type === 'TEXT' && (
-              <div className="p-4 rounded-xl bg-teal-50/50 border border-teal-100 text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
-                {focusedLesson.content_text ?? 'Belum ada teks bacaan.'}
+              <div className="p-4 rounded-xl bg-teal-50/40 border border-teal-100">
+                <MarkdownContent
+                  content={focusedLesson.content_text ?? 'Belum ada teks bacaan.'}
+                  size="sm"
+                />
               </div>
             )}
 
@@ -256,18 +198,16 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             )}
           </div>
 
-          {/* Misi / Penugasan Terkait Materi Ini (Ruangguru Mission Card) */}
           {focusedLesson.assignments.map((assignment) => {
             const isTaskDone = submittedTasks[assignment.id];
 
             return (
               <div
                 key={assignment.id}
-                className={`bg-white rounded-2xl border p-4 shadow-sm space-y-3 transition-all ${
-                  isTaskDone
+                className={`bg-white rounded-2xl border p-4 shadow-sm space-y-3 transition-all ${isTaskDone
                     ? 'border-emerald-300 bg-emerald-50/30'
                     : 'border-teal-200'
-                }`}
+                  }`}
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
@@ -275,15 +215,15 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                       {assignment.type === 'QUIZ_CBT'
                         ? '📝'
                         : assignment.type === 'VOICE_TASK'
-                        ? '🎤'
-                        : '📷'}
+                          ? '🎤'
+                          : '📷'}
                     </span>
                     <h4 className="text-xs font-black text-slate-900 uppercase tracking-wider">
                       {assignment.type === 'QUIZ_CBT'
                         ? 'Misi Kuis CBT'
                         : assignment.type === 'VOICE_TASK'
-                        ? 'Misi Suara'
-                        : 'Misi Foto PR'}
+                          ? 'Misi Suara'
+                          : 'Misi Foto PR'}
                     </h4>
                   </div>
 
@@ -308,7 +248,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                   {assignment.prompt}
                 </p>
 
-                {/* Audio Prompt Guru jika ada */}
                 {assignment.instruction_audio_url && (
                   <AudioPromptPlayer
                     audioUrl={assignment.instruction_audio_url}
@@ -316,7 +255,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                   />
                 )}
 
-                {/* Status Selesai / Form Pengerjaan */}
                 {isTaskDone ? (
                   <div className="p-3 rounded-xl bg-emerald-100/70 border border-emerald-200 text-emerald-900 text-xs font-black flex items-center justify-between gap-2">
                     <span>
@@ -402,9 +340,8 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
           })}
         </div>
       ) : (
-        /* VIEW B: DAFTAR BAB & MATERI (Ruangguru Chapter Journey Accordion) */
+        /* VIEW B: DAFTAR BAB */
         <div className="space-y-3.5">
-          {/* Header Progress Card: Dafa Lulu Maskot */}
           <section className="bg-white rounded-2xl p-3.5 shadow-sm border border-slate-100 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2.5 min-w-0 flex-1">
               <div className="w-10 h-10 rounded-xl bg-teal-50 flex items-center justify-center text-2xl shrink-0">
@@ -432,7 +369,7 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             </div>
           </section>
 
-          {/* Pilih Mata Pelajaran (Horizontal Chip Carousel) */}
+          {/* Navigasi Mata Pelajaran */}
           <section className="flex gap-2 overflow-x-auto pb-0.5 no-scrollbar">
             {subjects.map((subj, sIdx) => {
               const isSelected = subj.id === activeSubject?.id;
@@ -445,14 +382,12 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                   type="button"
                   onClick={() => {
                     setSelectedSubjectId(subj.id);
-                    setExpandedModuleId(subj.modules[0]?.id ?? '');
                     setNotice(null);
                   }}
-                  className={`h-10 px-3 rounded-xl shrink-0 flex items-center gap-2 text-xs font-black transition-all active:scale-95 cursor-pointer border ${
-                    isSelected
+                  className={`h-10 px-3 rounded-xl shrink-0 flex items-center gap-2 text-xs font-black transition-all active:scale-95 cursor-pointer border ${isSelected
                       ? 'bg-teal-600 text-white border-teal-600 shadow-xs'
                       : 'bg-white text-slate-700 border-slate-200 hover:bg-slate-50'
-                  }`}
+                    }`}
                 >
                   <span className="text-sm">{icon}</span>
                   <span className="truncate max-w-[120px]">{subj.name}</span>
@@ -461,7 +396,7 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
             })}
           </section>
 
-          {/* Daftar Bab (Peta Ekspedisi Pos Bab Bergaya Game Adventure) */}
+          {/* Daftar Bab */}
           <section className="space-y-3">
             <div className="flex items-center justify-between px-1">
               <h3 className="text-xs sm:text-sm font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
@@ -484,28 +419,21 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
                   const isCompleted = checkIsModuleCompleted(mod);
 
                   return (
-                    <div
-                      key={mod.id}
-                      className="transition-all"
-                    >
-                      {/* Klik Bab langsung membuka halaman materi khusus di /siswa/bab/[id] */}
+                    <div key={mod.id} className="transition-all">
                       {isUnlocked ? (
                         <Link
                           href={`/siswa/bab/${mod.id}`}
-                          className={`w-full p-4 rounded-3xl border-2 border-b-6 active:border-b-2 active:translate-y-1 flex items-center justify-between gap-3.5 text-left transition-all cursor-pointer shadow-xs hover:shadow-md group ${
-                            isCompleted
+                          className={`w-full p-4 rounded-3xl border-2 border-b-6 active:border-b-2 active:translate-y-1 flex items-center justify-between gap-3.5 text-left transition-all cursor-pointer shadow-xs hover:shadow-md group ${isCompleted
                               ? 'bg-emerald-50/20 border-emerald-300 hover:border-emerald-400'
                               : 'bg-white border-slate-200/90 hover:border-teal-400'
-                          }`}
+                            }`}
                         >
                           <div className="flex items-center gap-3.5 min-w-0 flex-1">
-                            {/* 3D Round Node */}
                             <div
-                              className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border-2 border-b-4 transition-all shadow-xs ${
-                                isCompleted
+                              className={`w-12 h-12 rounded-2xl flex items-center justify-center font-black text-sm shrink-0 border-2 border-b-4 transition-all shadow-xs ${isCompleted
                                   ? 'bg-emerald-500 text-white border-emerald-600 shadow-emerald-200'
                                   : 'bg-teal-500 text-white border-teal-600 shadow-teal-200 group-hover:scale-105'
-                              }`}
+                                }`}
                             >
                               {isCompleted ? (
                                 <Check className="w-5 h-5 stroke-[3.5]" />
@@ -576,7 +504,6 @@ export function FaseAView({ classroomData }: FaseAViewProps) {
         </div>
       )}
 
-      {/* Interactive Quiz CBT Modal */}
       {activeQuizModal && (
         <QuizCbtModal
           isOpen={Boolean(activeQuizModal)}

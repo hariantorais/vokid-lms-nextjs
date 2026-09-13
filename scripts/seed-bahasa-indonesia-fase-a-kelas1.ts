@@ -1,20 +1,17 @@
-// seed-pendidikan-pancasila-fase-a-kelas1.ts
+// seed-bahasa-indonesia-fase-a-kelas1.ts
 // =============================================================================
-// UNIFIER SEEDER — Pendidikan Pancasila Fase A Kelas 1
-// Menggabungkan 3 batch (4 Bab, 13 Pertemuan) menjadi satu alur seeding
+// UNIFIER SEEDER — Bahasa Indonesia Fase A Kelas 1
 // Pola mengikuti seed-bahasa-inggris yang sudah terbukti berhasil
 // =============================================================================
 
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
-import { PKN_BATCH_1 } from './data/pkn-batch-1';
-import { PKN_BATCH_2 } from './data/pkn-batch-2';
-import { PKN_BATCH_3 } from './data/pkn-batch-3';
+import { BAHASA_INDONESIA_BATCH_1 } from './data/bahasa-indonesia-batch-1';
+import { BAHASA_INDONESIA_BATCH_2 } from './data/bahasa-indonesia-batch-2';
+import { BAHASA_INDONESIA_BATCH_3 } from './data/bahasa-indonesia-batch-3';
+import { BAHASA_INDONESIA_BATCH_4 } from './data/bahasa-indonesia-batch-4';
 
-// -----------------------------------------------------------------------------
-// Muat variabel lingkungan dari .env.local atau .env tanpa dotenv
-// -----------------------------------------------------------------------------
 function loadEnv(): void {
     const envPaths = [
         path.resolve(process.cwd(), '.env.local'),
@@ -28,10 +25,7 @@ function loadEnv(): void {
                 const trimmed = line.trim();
                 if (trimmed && !trimmed.startsWith('#') && trimmed.includes('=')) {
                     const [key, ...values] = trimmed.split('=');
-                    const val = values
-                        .join('=')
-                        .trim()
-                        .replace(/^["'](.*)["']$/, '$1');
+                    const val = values.join('=').trim().replace(/^["'](.*)["']$/, '$1');
                     if (key && !process.env[key.trim()]) {
                         process.env[key.trim()] = val;
                     }
@@ -45,13 +39,10 @@ loadEnv();
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const serviceKey =
-    process.env.SUPABASE_SERVICE_ROLE_KEY ||
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !serviceKey) {
-    console.error(
-        'Kredensial NEXT_PUBLIC_SUPABASE_URL atau SUPABASE_SERVICE_ROLE_KEY belum diset.'
-    );
+    console.error('Kredensial NEXT_PUBLIC_SUPABASE_URL atau SUPABASE_SERVICE_ROLE_KEY belum diset.');
     process.exit(1);
 }
 
@@ -59,29 +50,18 @@ const supabase = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
 });
 
-// -----------------------------------------------------------------------------
-// Konstanta
-// -----------------------------------------------------------------------------
-const CLASS_ID = '11111111-1111-1111-1111-111111111111';
-const SUBJECT_CODE = 'PKN-1';
-const SUBJECT_NAME = 'Pendidikan Pancasila';
-
-// -----------------------------------------------------------------------------
-// Fungsi Utama
-// -----------------------------------------------------------------------------
-async function seedPendidikanPancasila() {
+async function seedBahasaIndonesia() {
     console.log('================================================================');
-    console.log('🇮🇩 SEEDING PENDIDIKAN PANCASILA FASE A KELAS 1 (4 BAB / 13 PERTEMUAN)');
+    console.log('🇮🇩 SEEDING BAHASA INDONESIA FASE A KELAS 1 (8 BAB / 24 PERTEMUAN)');
     console.log('   Karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah');
     console.log('================================================================');
 
-    // =========================================================================
     // 1. Pastikan Kelas 1 SD Terdaftar (Aman untuk mapel lain)
-    // =========================================================================
+    const classId = '11111111-1111-1111-1111-111111111111';
     const { error: classErr } = await supabase.from('classes').upsert(
         {
-            id: CLASS_ID,
-            name: 'Kelas 1 SD (Fase A)',
+            id: classId,
+            name: 'Kelas 1 SD (Fase A)',  // ← Samakan dengan BI & BING
             grade_level: 1,
             academic_year: '2026/2027',
         },
@@ -90,20 +70,17 @@ async function seedPendidikanPancasila() {
 
     if (classErr) {
         console.error('Gagal mendaftarkan kelas:', classErr.message);
-        process.exit(1);
+        process.exit(1);  // ← process.exit bukan throw
     }
-    console.log(`✓ Kelas 1 SD siap (ID: ${CLASS_ID})`);
+    console.log(`✓ Kelas 1 SD siap (ID: ${classId})`);
 
-    // =========================================================================
-    // 2. ISOLASI MAPEL: Hanya bersihkan Mapel PKN (PKN-1)
-    // =========================================================================
-    console.log('\n🧹 Membersihkan modul Pendidikan Pancasila lama (PKN-1) tanpa mengganggu mapel lain...');
-
+    // 2. ISOLASI MAPEL: Hanya bersihkan Mapel Bahasa Indonesia (BIN-1)
+    console.log('\n🧹 Membersihkan modul Bahasa Indonesia lama (BIN-1) tanpa mengganggu mapel lain...');
     const { data: existingSubject } = await supabase
         .from('subjects')
         .select('id')
-        .eq('class_id', CLASS_ID)
-        .eq('code', SUBJECT_CODE)
+        .eq('class_id', classId)
+        .eq('code', 'BIN-1')
         .maybeSingle();
 
     let subjectId: string;
@@ -126,19 +103,9 @@ async function seedPendidikanPancasila() {
             const lessonIds = (existingLessons ?? []).map((l) => l.id);
 
             if (lessonIds.length > 0) {
-                // Hapus relasi lain terlebih dahulu
-                await supabase
-                    .from('lesson_schedules')
-                    .delete()
-                    .in('lesson_id', lessonIds);
-                await supabase
-                    .from('learning_competency_evaluations')
-                    .delete()
-                    .in('lesson_id', lessonIds);
-                await supabase
-                    .from('lesson_completions')
-                    .delete()
-                    .in('lesson_id', lessonIds);
+                await supabase.from('lesson_schedules').delete().in('lesson_id', lessonIds);
+                await supabase.from('learning_competency_evaluations').delete().in('lesson_id', lessonIds);
+                await supabase.from('lesson_completions').delete().in('lesson_id', lessonIds);
 
                 const { data: existingAssignments } = await supabase
                     .from('assignments')
@@ -148,14 +115,8 @@ async function seedPendidikanPancasila() {
                 const assignmentIds = (existingAssignments ?? []).map((a) => a.id);
 
                 if (assignmentIds.length > 0) {
-                    await supabase
-                        .from('quiz_questions')
-                        .delete()
-                        .in('assignment_id', assignmentIds);
-                    await supabase
-                        .from('submissions')
-                        .delete()
-                        .in('assignment_id', assignmentIds);
+                    await supabase.from('quiz_questions').delete().in('assignment_id', assignmentIds);
+                    await supabase.from('submissions').delete().in('assignment_id', assignmentIds);
                     await supabase.from('assignments').delete().in('id', assignmentIds);
                 }
 
@@ -164,50 +125,46 @@ async function seedPendidikanPancasila() {
 
             await supabase.from('modules').delete().in('id', moduleIds);
         }
-        console.log('✓ Modul Pendidikan Pancasila lama berhasil dibersihkan.');
+        console.log('✓ Modul Bahasa Indonesia lama berhasil dibersihkan.');
     } else {
         const { data: newSubject, error: subjErr } = await supabase
             .from('subjects')
             .insert({
-                class_id: CLASS_ID,
-                name: SUBJECT_NAME,
-                code: SUBJECT_CODE,
+                class_id: classId,
+                name: 'Bahasa Indonesia',
+                code: 'BIN-1',
             })
             .select('id')
             .single();
 
         if (subjErr || !newSubject) {
-            console.error('Gagal membuat mapel Pendidikan Pancasila:', subjErr?.message);
+            console.error('Gagal membuat mapel Bahasa Indonesia:', subjErr?.message);
             process.exit(1);
         }
         subjectId = newSubject.id;
-        console.log(`✓ Mata Pelajaran Pendidikan Pancasila baru terdaftar (ID: ${subjectId})`);
+        console.log(`✓ Mata Pelajaran Bahasa Indonesia baru terdaftar (ID: ${subjectId})`);
     }
 
-    // =========================================================================
-    // 3. Gabungkan 3 Batch Lengkap (4 Bab / 13 Pertemuan)
-    // =========================================================================
+    // 3. Gabungkan 4 Batch Lengkap (8 Bab / 24 Pertemuan)
     const allBatches = [
-        ...PKN_BATCH_1,
-        ...PKN_BATCH_2,
-        ...PKN_BATCH_3,
+        ...BAHASA_INDONESIA_BATCH_1,
+        ...BAHASA_INDONESIA_BATCH_2,
+        ...BAHASA_INDONESIA_BATCH_3,
+        ...BAHASA_INDONESIA_BATCH_4,
     ];
 
     let totalLessonsCreated = 0;
-    let totalAssignmentsCreated = 0;
     let totalQuizzesCreated = 0;
 
     for (const chapter of allBatches) {
-        console.log(
-            `\n📦 Menyimpan ${chapter.title} (Semester: ${chapter.target_semester}, Pekan: ${chapter.week_target})...`
-        );
+        console.log(`\n📦 Menyimpan ${chapter.title} (Semester: ${chapter.target_semester}, Pekan: ${chapter.week_target})...`);
 
         const { data: modData, error: modErr } = await supabase
             .from('modules')
             .insert({
                 subject_id: subjectId,
                 title: chapter.title,
-                order_index: chapter.order_index,
+                order_index: chapter.order_index,  // ← Pakai order_index
                 target_semester: chapter.target_semester,
                 week_target: chapter.week_target,
                 is_published: true,
@@ -259,10 +216,8 @@ async function seedPendidikanPancasila() {
                         lesson_id: lessonId,
                         type: asg.type,
                         prompt: asg.prompt,
-                        quiz_question_count: asg.quiz_questions
-                            ? asg.quiz_questions.length
-                            : null,
-                        passing_score: asg.passing_score ?? 70,
+                        quiz_question_count: asg.quiz_questions ? asg.quiz_questions.length : 5,
+                        passing_score: 70,
                     })
                     .select('id')
                     .single();
@@ -271,8 +226,6 @@ async function seedPendidikanPancasila() {
                     console.error(`Gagal membuat tugas ${asg.type}:`, asgErr?.message);
                     continue;
                 }
-
-                totalAssignmentsCreated++;
 
                 if (asg.type === 'QUIZ_CBT' && asg.quiz_questions) {
                     totalQuizzesCreated += asg.quiz_questions.length;
@@ -288,54 +241,19 @@ async function seedPendidikanPancasila() {
                         order_index: qIdx + 1,
                     }));
 
-                    const { error: quizErr } = await supabase
-                        .from('quiz_questions')
-                        .insert(questionsPayload);
-
-                    if (quizErr) {
-                        console.error(
-                            `Gagal menyimpan soal kuis:`,
-                            quizErr.message
-                        );
-                    } else {
-                        console.log(
-                            `        📝 Bank Soal CBT (${questionsPayload.length} soal) berhasil ditambahkan.`
-                        );
-                    }
+                    await supabase.from('quiz_questions').insert(questionsPayload);
                 }
             }
         }
     }
 
-    // =========================================================================
-    // 4. Ringkasan Akhir
-    // =========================================================================
     console.log('\n================================================================');
-    console.log('🎉 SEEDING PENDIDIKAN PANCASILA SELESAI 100%!');
-    console.log('================================================================');
-    console.log(`📊 Statistik:`);
-    console.log(`   📚 Modul (Bab)       : ${allBatches.length} / ${allBatches.length}`);
-    console.log(`   📖 Pertemuan         : ${totalLessonsCreated}`);
-    console.log(`   📝 Tugas             : ${totalAssignmentsCreated}`);
-    console.log(`   ❓ Soal Kuis CBT     : ${totalQuizzesCreated}`);
-    console.log('');
-    console.log('📖 Cakupan 4 Bab:');
-    console.log('   Bab 1: Aku dan Teman-Temanku');
-    console.log('   Bab 2: Aku Patuh pada Aturan');
-    console.log('   Bab 3: Aku Mengenal Indonesia');
-    console.log('   Bab 4: Aku dan Lingkunganku');
-    console.log('');
-    console.log('🌟 Karakter pendamping: Maryam, Asiya, Fatimah, Maheer, Khadijah');
-    console.log('✅ Konten 100% ramah anak (komik + cerita + gambar)');
-    console.log('✅ Field guru terpisah di JSON (tidak muncul di content_text)');
-    console.log('✅ Durasi 45 menit per pertemuan (ramah anak)');
+    console.log('🎉 SEEDING BAHASA INDONESIA LENGKAP BERHASIL 100%!');
+    console.log(`Total: 8 Bab, ${totalLessonsCreated} Pertemuan Ajar, dan ${totalQuizzesCreated} Butir Soal CBT.`);
     console.log('================================================================\n');
 }
 
-// -----------------------------------------------------------------------------
-// Jalankan
-// -----------------------------------------------------------------------------
-seedPendidikanPancasila().catch((err) => {
-    console.error('Terjadi kesalahan fatal saat seeding Pendidikan Pancasila:', err);
+seedBahasaIndonesia().catch((err) => {
+    console.error('Terjadi kesalahan fatal saat seeding Bahasa Indonesia:', err);
     process.exit(1);
 });

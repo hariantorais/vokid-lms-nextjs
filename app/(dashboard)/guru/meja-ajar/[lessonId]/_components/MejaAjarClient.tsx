@@ -29,7 +29,7 @@ import {
   completeLessonSessionAction,
   type TeachingDeskData,
 } from '@/features/teacher/actions/acceleration-actions';
-import type { PedagogicLessonGuide, LearningCompetencyEvaluation } from '@/types/database';
+import type { PedagogicLessonGuide, LearningCompetencyEvaluation } from '@/types';
 
 interface PhaseConfig {
   id: 'intro' | 'mindful' | 'joyful' | 'meaningful' | 'reflection';
@@ -288,11 +288,10 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                   key={phase.id}
                   type="button"
                   onClick={() => handleSelectPhase(idx)}
-                  className={`py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${
-                    isCurrent
-                      ? `${phase.color.active} font-black shadow-md scale-102`
-                      : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium'
-                  }`}
+                  className={`py-2 px-1 rounded-xl flex flex-col items-center gap-1 transition-all cursor-pointer ${isCurrent
+                    ? `${phase.color.active} font-black shadow-md scale-102`
+                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 font-medium'
+                    }`}
                 >
                   <Icon className="w-3.5 h-3.5" />
                   <span className="text-[10px] sm:text-[11px] leading-tight text-center truncate max-w-full">
@@ -330,11 +329,10 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
               <button
                 type="button"
                 onClick={handleToggleTimer}
-                className={`h-11 px-5 rounded-2xl font-black text-sm flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-lg ${
-                  isRunning
-                    ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/30'
-                    : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-900/30'
-                }`}
+                className={`h-11 px-5 rounded-2xl font-black text-sm flex items-center gap-2 transition-all cursor-pointer active:scale-95 shadow-lg ${isRunning
+                  ? 'bg-rose-600 hover:bg-rose-500 text-white shadow-rose-900/30'
+                  : 'bg-amber-500 hover:bg-amber-400 text-slate-950 shadow-amber-900/30'
+                  }`}
               >
                 {isRunning ? (
                   <>
@@ -577,10 +575,10 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                 {(meaningfulGuide?.reflection_questions && meaningfulGuide.reflection_questions.length > 0
                   ? meaningfulGuide.reflection_questions
                   : [
-                      'Apa hal yang paling menyenangkan yang kamu coba hari ini?',
-                      'Bagian mana yang tadi terasa sedikit menantang?',
-                      'Bagaimana perasaanmu sekarang? (Senang, Bangga, Semangat!)',
-                    ]
+                    'Apa hal yang paling menyenangkan yang kamu coba hari ini?',
+                    'Bagian mana yang tadi terasa sedikit menantang?',
+                    'Bagaimana perasaanmu sekarang? (Senang, Bangga, Semangat!)',
+                  ]
                 ).map((q, qIdx) => (
                   <li key={qIdx}>{q}</li>
                 ))}
@@ -618,18 +616,16 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                     key={mIdx}
                     type="button"
                     onClick={() => toggleMaterialCheck(mIdx)}
-                    className={`p-3 rounded-2xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${
-                      isChecked
-                        ? 'bg-emerald-50/60 border-emerald-300 text-emerald-950 font-bold'
-                        : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium'
-                    }`}
+                    className={`p-3 rounded-2xl border text-left flex items-center gap-2.5 transition-all cursor-pointer ${isChecked
+                      ? 'bg-emerald-50/60 border-emerald-300 text-emerald-950 font-bold'
+                      : 'bg-slate-50 border-slate-200 text-slate-700 hover:bg-slate-100 font-medium'
+                      }`}
                   >
                     <div
-                      className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 ${
-                        isChecked
-                          ? 'bg-emerald-600 border-emerald-600 text-white'
-                          : 'border-slate-300 bg-white'
-                      }`}
+                      className={`w-5 h-5 rounded-lg border flex items-center justify-center shrink-0 ${isChecked
+                        ? 'bg-emerald-600 border-emerald-600 text-white'
+                        : 'border-slate-300 bg-white'
+                        }`}
                     >
                       {isChecked && <Check className="w-3 h-3 stroke-3" />}
                     </div>
@@ -688,13 +684,12 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                         <p className="text-xs font-bold text-slate-900 truncate">{st.full_name}</p>
                         <p className="text-[10px] text-slate-400">
                           {evalData
-                            ? `Status: ${
-                                isProficient
-                                  ? 'Mahir / Tuntas'
-                                  : isNeedsHelp
-                                    ? 'Perlu Bimbingan'
-                                    : 'Berkembang'
-                              }`
+                            ? `Status: ${isProficient
+                              ? 'Mahir / Tuntas'
+                              : isNeedsHelp
+                                ? 'Perlu Bimbingan'
+                                : 'Berkembang'
+                            }`
                             : 'Belum dievaluasi'}
                         </p>
                       </div>
@@ -706,11 +701,10 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                         type="button"
                         disabled={isEvaluating}
                         onClick={() => handleEvaluateOneTap(st.id, 'NEEDS_HELP')}
-                        className={`h-8 px-3 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                          isNeedsHelp
-                            ? 'bg-rose-600 text-white shadow-xs'
-                            : 'bg-white border border-rose-200 text-rose-700 hover:bg-rose-50'
-                        }`}
+                        className={`h-8 px-3 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${isNeedsHelp
+                          ? 'bg-rose-600 text-white shadow-xs'
+                          : 'bg-white border border-rose-200 text-rose-700 hover:bg-rose-50'
+                          }`}
                       >
                         <HelpCircle className="w-3.5 h-3.5" />
                         <span>Perlu Bimbingan</span>
@@ -720,11 +714,10 @@ export function MejaAjarClient({ initialData }: MejaAjarClientProps) {
                         type="button"
                         disabled={isEvaluating}
                         onClick={() => handleEvaluateOneTap(st.id, 'PROFICIENT')}
-                        className={`h-8 px-3 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${
-                          isProficient
-                            ? 'bg-emerald-600 text-white shadow-xs'
-                            : 'bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50'
-                        }`}
+                        className={`h-8 px-3 rounded-xl text-xs font-bold flex items-center gap-1 transition-all cursor-pointer ${isProficient
+                          ? 'bg-emerald-600 text-white shadow-xs'
+                          : 'bg-white border border-emerald-200 text-emerald-700 hover:bg-emerald-50'
+                          }`}
                       >
                         <CheckCircle2 className="w-3.5 h-3.5" />
                         <span>Mahir 🌟</span>

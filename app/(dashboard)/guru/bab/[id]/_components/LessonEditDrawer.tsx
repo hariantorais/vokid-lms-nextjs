@@ -10,46 +10,9 @@ import {
   UploadCloud,
   CheckCircle2,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { MobileDrawer } from '@/features/teacher/components/MobileDrawer';
-import type { Lesson } from '@/types/database';
-
-export const uploadPdfFile = async (file: File): Promise<string | null> => {
-  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-    toast.error('Berkas harus berupa dokumen PDF (.pdf)');
-    return null;
-  }
-
-  const maxSize = 20 * 1024 * 1024; // 20MB
-  if (file.size > maxSize) {
-    toast.error('Ukuran berkas PDF maksimal 20MB.');
-    return null;
-  }
-
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', file.name);
-    formData.append('folder', 'materials');
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.success || !data.url) {
-      throw new Error(data.error || 'Gagal mengunggah PDF ke Cloudflare R2.');
-    }
-
-    toast.success(`Berkas PDF "${file.name}" berhasil diunggah ke R2!`);
-    return data.url as string;
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengunggah PDF.';
-    toast.error(msg);
-    return null;
-  }
-};
+import type { Lesson } from '@/types';
+import { uploadPdfFile } from '@/tests/features/teacher/utils/file-upload';
 
 interface LessonEditDrawerProps {
   editingLesson: Lesson | null;
@@ -57,7 +20,7 @@ interface LessonEditDrawerProps {
   editLessonTitle: string;
   setEditLessonTitle: (title: string) => void;
   editLessonType: Lesson['content_type'];
-  setEditLessonType: (type: Lesson['content_type']) => void;
+  setEditLessonType?: (type: Lesson['content_type']) => void;
   editLessonText: string;
   setEditLessonText: (text: string) => void;
   editLessonUrl: string;
@@ -130,48 +93,33 @@ export function LessonEditDrawer({
           />
         </div>
 
-        <div>
-          <label className="block text-[11px] font-bold text-slate-700 uppercase tracking-wider mb-1.5">
-            Format Konten
+        <div className="flex items-center gap-2 py-1">
+          <label className="text-[11px] font-bold text-slate-700 uppercase tracking-wider">
+            Format Konten :
           </label>
-          <div className="grid grid-cols-3 gap-1.5">
-            <button
-              type="button"
-              onClick={() => setEditLessonType('TEXT')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                editLessonType === 'TEXT'
-                  ? 'bg-sky-50 border-sky-400 text-sky-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+          <span
+            className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold border ${editLessonType === 'TEXT'
+              ? 'bg-sky-50 text-sky-700 border-sky-200'
+              : editLessonType === 'VIDEO'
+                ? 'bg-amber-50 text-amber-700 border-amber-200'
+                : 'bg-rose-50 text-rose-700 border-rose-200'
               }`}
-            >
-              <BookOpen className="w-3.5 h-3.5 text-sky-600 shrink-0" />
-              <span>Teks</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditLessonType('VIDEO')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                editLessonType === 'VIDEO'
-                  ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <Video className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-              <span>Video</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setEditLessonType('PDF')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                editLessonType === 'PDF'
-                  ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
-            >
-              <FileText className="w-3.5 h-3.5 text-rose-600 shrink-0" />
-              <span>PDF</span>
-            </button>
-          </div>
+          >
+            {editLessonType === 'TEXT' ? (
+              <BookOpen className="w-3.5 h-3.5 text-sky-600" />
+            ) : editLessonType === 'VIDEO' ? (
+              <Video className="w-3.5 h-3.5 text-amber-600" />
+            ) : (
+              <FileText className="w-3.5 h-3.5 text-rose-600" />
+            )}
+            <span>
+              {editLessonType === 'TEXT'
+                ? 'Teks'
+                : editLessonType === 'VIDEO'
+                  ? 'Video'
+                  : 'PDF'}
+            </span>
+          </span>
         </div>
 
         {editLessonType === 'TEXT' ? (

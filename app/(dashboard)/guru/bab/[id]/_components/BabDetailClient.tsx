@@ -28,9 +28,9 @@ import {
   CheckCircle2,
   Loader2,
 } from 'lucide-react';
-import { uploadPdfFile } from './LessonCreateDrawer';
 import type { BabDetailData } from '../_services/bab-detail.service';
 import type { Lesson } from '@/types/database';
+import { uploadPdfFile } from '@/tests/features/teacher/utils/file-upload';
 
 interface BabDetailClientProps {
   data: BabDetailData;
@@ -81,7 +81,7 @@ export function BabDetailClient({ data }: BabDetailClientProps) {
     isOpen: false,
     title: '',
     description: '',
-    onConfirm: () => {},
+    onConfirm: () => { },
   });
 
   const resetCreateLessonForm = () => {
@@ -368,11 +368,10 @@ export function BabDetailClient({ data }: BabDetailClientProps) {
               <button
                 type="button"
                 onClick={() => setNewLessonType('TEXT')}
-                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  newLessonType === 'TEXT'
-                    ? 'bg-sky-50 border-sky-400 text-sky-900 shadow-xs ring-2 ring-sky-400/20'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'TEXT'
+                  ? 'bg-sky-50 border-sky-400 text-sky-900 shadow-xs ring-2 ring-sky-400/20'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
               >
                 <BookOpen className="w-4 h-4 text-sky-600 shrink-0" />
                 <span>Teks</span>
@@ -380,11 +379,10 @@ export function BabDetailClient({ data }: BabDetailClientProps) {
               <button
                 type="button"
                 onClick={() => setNewLessonType('VIDEO')}
-                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  newLessonType === 'VIDEO'
-                    ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-xs ring-2 ring-amber-400/20'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'VIDEO'
+                  ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-xs ring-2 ring-amber-400/20'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
               >
                 <Video className="w-4 h-4 text-amber-600 shrink-0" />
                 <span>Video</span>
@@ -392,11 +390,10 @@ export function BabDetailClient({ data }: BabDetailClientProps) {
               <button
                 type="button"
                 onClick={() => setNewLessonType('PDF')}
-                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                  newLessonType === 'PDF'
-                    ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-xs ring-2 ring-rose-400/20'
-                    : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-                }`}
+                className={`py-2.5 px-3 rounded-2xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'PDF'
+                  ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-xs ring-2 ring-rose-400/20'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                  }`}
               >
                 <FileText className="w-4 h-4 text-rose-600 shrink-0" />
                 <span>PDF</span>

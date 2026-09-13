@@ -40,15 +40,12 @@ export interface QuizEvaluationResult {
   passed: boolean;
   passingScore: number;
   isPerfect: boolean;
-  isExcellent: boolean; // >= 80
-  isGood: boolean;      // 60 - 79
-  isNeedsRetry: boolean; // < 60
+  isExcellent: boolean;
+  isGood: boolean;
+  isNeedsRetry: boolean;
   submissionId: string;
 }
 
-/**
- * Helper fisher-yates shuffle
- */
 function shuffleArray<T>(array: T[]): T[] {
   const arr = [...array];
   for (let i = arr.length - 1; i > 0; i--) {
@@ -58,16 +55,12 @@ function shuffleArray<T>(array: T[]): T[] {
   return arr;
 }
 
-/**
- * Server Action: Mengambil bank soal acak untuk sesi Kuis CBT Siswa
- */
 export async function getQuizSessionForStudentAction(
   assignmentId: string
 ): Promise<ActionResponse<QuizCbtSessionData>> {
   try {
     const supabase = await createClient();
 
-    // 1. Ambil data penugasan
     const { data: assignment, error: asgError } = await supabase
       .from('assignments')
       .select('id, type, prompt, quiz_question_count, passing_score')
@@ -82,7 +75,6 @@ export async function getQuizSessionForStudentAction(
       return { success: false, error: 'Penugasan ini bukan format Kuis CBT Pilihan Ganda.' };
     }
 
-    // 2. Ambil seluruh pool pertanyaan kuis
     const { data: rawQuestions, error: qError } = await supabase
       .from('quiz_questions')
       .select('id, question_text, option_a, option_b, option_c, option_d, order_index')
@@ -102,7 +94,6 @@ export async function getQuizSessionForStudentAction(
       };
     }
 
-    // 3. Batasi kuota soal sesuai pengaturan guru
     const targetCount = assignment.quiz_question_count ?? allQuestions.length;
     const shuffled = shuffleArray(allQuestions);
     const selectedQuestions = shuffled.slice(0, Math.min(targetCount, shuffled.length));
@@ -125,9 +116,6 @@ export async function getQuizSessionForStudentAction(
   }
 }
 
-/**
- * Server Action: Koreksi Otomatis & Penyerahan Kuis CBT Siswa
- */
 export async function submitQuizCbtAction(
   payload: SubmitQuizAnswerInput
 ): Promise<ActionResponse<QuizEvaluationResult>> {
@@ -139,25 +127,20 @@ export async function submitQuizCbtAction(
 
     const supabase = await createClient();
 
-    // 1. Verifikasi Autentikasi Sesi Siswa (dengan dev fallback)
+    // 1. Verifikasi Autentikasi Pengguna
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
 
-    let studentId: string;
     if (!user || authError) {
-      if (process.env.NODE_ENV === 'development') {
-        studentId = '22222222-2222-2222-2222-222222222222'; // Budi Pratama (Seed Dev)
-      } else {
-        return {
-          success: false,
-          error: 'Sesi belajar siswa telah berakhir. Silakan login kembali.',
-        };
-      }
-    } else {
-      studentId = user.id;
+      return {
+        success: false,
+        error: 'Sesi belajar siswa telah berakhir. Silakan login kembali.',
+      };
     }
+
+    const studentId = user.id;
 
     // 2. Ambil penugasan dan kriteria kelulusan
     const { data: assignment, error: asgError } = await supabase

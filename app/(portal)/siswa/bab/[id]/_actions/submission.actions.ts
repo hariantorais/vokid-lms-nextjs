@@ -42,39 +42,33 @@ export async function submitAssignmentAction(
 
     const supabase = await createClient();
 
-    // 1. Verifikasi Autentikasi Pengguna (dengan guardrail dev fallback)
+    // 1. Verifikasi Autentikasi Pengguna
     const {
       data: { user },
       error: authError,
     } = await supabase.auth.getUser();
 
-    let studentId: string;
-
     if (!user || authError) {
-      if (process.env.NODE_ENV === 'development') {
-        studentId = '22222222-2222-2222-2222-222222222222'; // Budi Pratama (Seed Dev)
-      } else {
-        return {
-          success: false,
-          error: 'Sesi siswa tidak valid atau telah kedaluwarsa. Silakan login kembali.',
-        };
-      }
-    } else {
-      studentId = user.id;
+      return {
+        success: false,
+        error: 'Sesi siswa tidak valid atau telah kedaluwarsa. Silakan login kembali.',
+      };
+    }
 
-      // 2. Verifikasi Profil Siswa jika sesi aktif
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id, role')
-        .eq('id', user.id)
-        .single();
+    const studentId = user.id;
 
-      if (profile && profile.role !== 'SISWA') {
-        return {
-          success: false,
-          error: 'Akses ditolak. Pengiriman tugas hanya dapat dilakukan oleh akun Siswa.',
-        };
-      }
+    // 2. Verifikasi Profil Siswa
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('id, role')
+      .eq('id', user.id)
+      .single();
+
+    if (profile && profile.role !== 'SISWA') {
+      return {
+        success: false,
+        error: 'Akses ditolak. Pengiriman tugas hanya dapat dilakukan oleh akun Siswa.',
+      };
     }
 
     // 3. Verifikasi Keberadaan Tugas dan Ambil Info Kelas

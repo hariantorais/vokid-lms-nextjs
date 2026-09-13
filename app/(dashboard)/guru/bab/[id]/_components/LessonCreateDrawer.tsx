@@ -10,47 +10,10 @@ import {
   UploadCloud,
   CheckCircle2,
 } from 'lucide-react';
-import { toast } from 'sonner';
 import { MobileDrawer } from '@/features/teacher/components/MobileDrawer';
 import type { ModuleWithLessonsAndAssignments } from '@/features/teacher/types/curriculum';
-import type { Lesson } from '@/types/database';
-
-export const uploadPdfFile = async (file: File): Promise<string | null> => {
-  if (file.type !== 'application/pdf' && !file.name.toLowerCase().endsWith('.pdf')) {
-    toast.error('Berkas harus berupa dokumen PDF (.pdf)');
-    return null;
-  }
-
-  const maxSize = 20 * 1024 * 1024; // 20MB
-  if (file.size > maxSize) {
-    toast.error('Ukuran berkas PDF maksimal 20MB.');
-    return null;
-  }
-
-  try {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('fileName', file.name);
-    formData.append('folder', 'materials');
-
-    const res = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
-
-    const data = await res.json();
-    if (!res.ok || !data.success || !data.url) {
-      throw new Error(data.error || 'Gagal mengunggah PDF ke Cloudflare R2.');
-    }
-
-    toast.success(`Berkas PDF "${file.name}" berhasil diunggah ke R2!`);
-    return data.url as string;
-  } catch (err: unknown) {
-    const msg = err instanceof Error ? err.message : 'Terjadi kesalahan saat mengunggah PDF.';
-    toast.error(msg);
-    return null;
-  }
-};
+import type { Lesson } from '@/types';
+import { uploadPdfFile } from '@/tests/features/teacher/utils/file-upload';
 
 interface LessonCreateDrawerProps {
   isOpen: boolean;
@@ -141,11 +104,10 @@ export function LessonCreateDrawer({
             <button
               type="button"
               onClick={() => setNewLessonType('TEXT')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                newLessonType === 'TEXT'
-                  ? 'bg-sky-50 border-sky-400 text-sky-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'TEXT'
+                ? 'bg-sky-50 border-sky-400 text-sky-900 shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
             >
               <BookOpen className="w-3.5 h-3.5 text-sky-600 shrink-0" />
               <span>Teks</span>
@@ -153,11 +115,10 @@ export function LessonCreateDrawer({
             <button
               type="button"
               onClick={() => setNewLessonType('VIDEO')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                newLessonType === 'VIDEO'
-                  ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'VIDEO'
+                ? 'bg-amber-50 border-amber-400 text-amber-900 shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
             >
               <Video className="w-3.5 h-3.5 text-amber-600 shrink-0" />
               <span>Video</span>
@@ -165,11 +126,10 @@ export function LessonCreateDrawer({
             <button
               type="button"
               onClick={() => setNewLessonType('PDF')}
-              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-                newLessonType === 'PDF'
-                  ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-2xs'
-                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
-              }`}
+              className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5 ${newLessonType === 'PDF'
+                ? 'bg-rose-50 border-rose-400 text-rose-900 shadow-2xs'
+                : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50'
+                }`}
             >
               <FileText className="w-3.5 h-3.5 text-rose-600 shrink-0" />
               <span>PDF</span>

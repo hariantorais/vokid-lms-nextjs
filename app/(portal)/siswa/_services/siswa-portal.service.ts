@@ -44,10 +44,9 @@ export async function getStudentClassrooms(): Promise<ActionResponse<StudentPort
         .eq('student_id', activeStudentId);
 
       if (allSubs && allSubs.length > 0) {
-        // Hanya hitung bintang dari tugas/pos yang sudah selesai/dinilai secara sah
         for (const sub of allSubs) {
           const sc = sub.score ?? sub.grade;
-          if (typeof sc === 'number') {
+          if (typeof sc === 'number' && !Number.isNaN(sc)) {
             if (sc >= 85) totalStars += 3;
             else if (sc >= 60) totalStars += 2;
             else if (sc > 0) totalStars += 1;

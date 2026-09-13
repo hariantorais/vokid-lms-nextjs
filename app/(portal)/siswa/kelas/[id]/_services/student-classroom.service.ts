@@ -136,12 +136,15 @@ export async function getStudentClassroom(
         .select('grade, score, status')
         .eq('student_id', activeStudentId);
 
+      // SESUDAH (Akurat: hanya menghitung bintang dari nilai riil yang sudah diberikan):
       if (allSubs && allSubs.length > 0) {
         for (const sub of allSubs) {
-          const sc = sub.score ?? sub.grade ?? 80;
-          if (sc >= 85) totalStarsEarned += 3;
-          else if (sc >= 60) totalStarsEarned += 2;
-          else totalStarsEarned += 1;
+          const sc = sub.score ?? sub.grade;
+          if (typeof sc === 'number' && !Number.isNaN(sc)) {
+            if (sc >= 85) totalStarsEarned += 3;
+            else if (sc >= 60) totalStarsEarned += 2;
+            else if (sc > 0) totalStarsEarned += 1;
+          }
         }
       }
 
@@ -176,12 +179,13 @@ export async function getStudentClassroom(
                 .filter((a) => a.lesson_id === les.id)
                 .map((asg) => {
                   const sub = subMap.get(asg.id);
+                  const resolvedScore = sub?.score ?? sub?.grade ?? null;
                   return {
                     ...asg,
                     hasSubmitted: Boolean(sub),
                     submissionId: sub?.id,
-                    grade: sub?.grade ?? sub?.score ?? null,
-                    score: sub?.score ?? sub?.grade ?? null,
+                    grade: resolvedScore,
+                    score: resolvedScore,
                     submissionStatus: sub?.status ?? null,
                     submittedAt: sub?.submitted_at ?? null,
                   };
