@@ -95,7 +95,7 @@ export function PathNodePopover({
                                         ) : (
                                             <span className="text-amber-700 flex items-center gap-1" >
                                                 <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-500" />
-                                                Hadiah + 50 Bintang
+                                                Hadiah Bintang
                                             </span>
                                         )
                                     }

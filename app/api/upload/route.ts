@@ -1,3 +1,4 @@
+// app/api/upload/route.ts
 import { NextRequest, NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
 import { uploadFileToR2, type R2Folder } from '@/features/shared/services/storage-service';
@@ -34,7 +35,15 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
+    // Daftar folder yang diizinkan, termasuk 'voice'
+    const validFolders: R2Folder[] = [
+      'materials',
+      'audio-prompts',
+      'submissions',
+      'avatars',
+      'submissions/voices',
+    ];
+
     const folder = (
       typeof folderInput === 'string' && validFolders.includes(folderInput as R2Folder)
         ? folderInput
@@ -44,7 +53,7 @@ export async function POST(req: NextRequest) {
     const fileObj = file as Blob & { name?: string };
     const customFileName = formData.get('fileName') || formData.get('filename');
     const resolvedName =
-      (typeof customFileName === 'string' && customFileName.trim().length > 0)
+      typeof customFileName === 'string' && customFileName.trim().length > 0
         ? customFileName.trim()
         : fileObj.name;
 

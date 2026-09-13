@@ -9,6 +9,8 @@ import {
   Loader2,
   CheckCircle2,
   MessageSquare,
+  Sparkles,
+  RefreshCw,
 } from 'lucide-react';
 import { TeacherFeedbackRecorder } from './TeacherFeedbackRecorder';
 import { gradeSubmissionAction } from '../actions/grading-actions';
@@ -29,6 +31,7 @@ export function GradingForm({
   status,
 }: GradingFormProps) {
   const router = useRouter();
+  const [currentStatus, setCurrentStatus] = useState<'PENDING' | 'GRADED'>(status);
   const [grade, setGrade] = useState<number | string>(
     initialGrade !== null && initialGrade !== undefined ? initialGrade : 85
   );
@@ -39,6 +42,8 @@ export function GradingForm({
     initialFeedbackAudioUrl ?? null
   );
   const [isPending, startTransition] = useTransition();
+
+  const isGraded = currentStatus === 'GRADED';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -63,7 +68,13 @@ export function GradingForm({
           return;
         }
 
-        toast.success('Nilai dan umpan balik berhasil disimpan!');
+        // Langsung ubah status antarmuka seketika
+        setCurrentStatus('GRADED');
+        toast.success(
+          isGraded
+            ? 'Penilaian & umpan balik berhasil diperbarui!'
+            : 'Nilai dan umpan balik berhasil disimpan! Tugas selesai diperiksa.'
+        );
         router.refresh();
       } catch (err: unknown) {
         console.error('[GradingForm] Submit error:', err);
@@ -80,36 +91,53 @@ export function GradingForm({
     <form
       data-testid="grading-form"
       onSubmit={handleSubmit}
-      className="p-6 rounded-3xl bg-white border border-slate-200 shadow-xs space-y-6"
+      className={`p-5 sm:p-6 rounded-3xl border-2 transition-all space-y-6 shadow-xs ${isGraded
+          ? 'bg-gradient-to-b from-emerald-50/40 via-white to-white border-emerald-300 ring-2 ring-emerald-100'
+          : 'bg-white border-slate-200'
+        }`}
     >
+      {/* Header Card Dinamis */}
       <div className="flex items-center justify-between border-b border-slate-100 pb-4">
-        <div className="flex items-center gap-2">
-          <div className="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center font-bold">
-            <Award className="w-5 h-5" />
+        <div className="flex items-center gap-2.5">
+          <div
+            className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black transition-colors ${isGraded
+                ? 'bg-emerald-100 text-emerald-800'
+                : 'bg-amber-100 text-amber-800'
+              }`}
+          >
+            {isGraded ? <Sparkles className="w-5 h-5" /> : <Award className="w-5 h-5" />}
           </div>
           <div>
-            <h3 className="font-extrabold text-base text-slate-900">
-              Formulir Evaluasi & Nilai Guru
+            <h3 className="font-black text-sm sm:text-base text-slate-900">
+              {isGraded ? 'Hasil Evaluasi & Nilai Guru' : 'Formulir Penilaian & Koreksi'}
             </h3>
-            <p className="text-xs text-slate-500 font-medium">
-              Kurikulum Merdeka • Penilaian Formatif
+            <p className="text-xs text-slate-500 font-semibold">
+              {isGraded
+                ? 'Penilaian sudah tersimpan dan dapat diubah sewaktu-waktu'
+                : 'Kurikulum Merdeka • Berikan penilaian formatif dan saran'}
             </p>
           </div>
         </div>
 
-        {status === 'GRADED' && (
-          <span className="px-3 py-1 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1">
-            <CheckCircle2 className="w-3.5 h-3.5" />
-            <span>Sudah Dinilai</span>
-          </span>
+        {/* Badge Status */}
+        {isGraded ? (
+          <div className="px-3.5 py-1.5 rounded-2xl bg-emerald-100 border border-emerald-300 text-emerald-900 text-xs font-black flex items-center gap-1.5 shadow-2xs">
+            <CheckCircle2 className="w-4 h-4 text-emerald-600" />
+            <span>Sudah Dinilai ✓</span>
+          </div>
+        ) : (
+          <div className="px-3 py-1 rounded-2xl bg-amber-100 border border-amber-300 text-amber-900 text-xs font-bold flex items-center gap-1">
+            <span className="w-2 h-2 rounded-full bg-amber-500 animate-ping" />
+            <span>Menunggu Penilaian</span>
+          </div>
         )}
       </div>
 
-      {/* Input Nilai Angka (0-100) */}
-      <div>
+      {/* Input Nilai Skala 0 - 100 */}
+      <div className="space-y-1.5">
         <label
           htmlFor="grade-input"
-          className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5"
+          className="block text-xs font-black text-slate-700 uppercase tracking-wider"
         >
           Nilai Siswa (Skala 0–100) <span className="text-rose-500">*</span>
         </label>
@@ -123,17 +151,22 @@ export function GradingForm({
             required
             value={grade}
             onChange={(e) => setGrade(e.target.value)}
-            className="w-32 px-4 py-3 rounded-xl border border-slate-300 font-black text-xl text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            className={`w-36 px-4 py-2.5 rounded-2xl border-2 font-black text-2xl focus:outline-none transition-all ${isGraded
+                ? 'border-emerald-300 bg-emerald-50/50 text-emerald-950 focus:ring-2 focus:ring-emerald-400'
+                : 'border-slate-300 bg-white text-slate-900 focus:ring-2 focus:ring-sky-500'
+              }`}
           />
-          <span className="text-sm font-bold text-slate-500">/ 100 Poin</span>
+          <span className="text-xs sm:text-sm font-bold text-slate-500">
+            / 100 Poin
+          </span>
         </div>
       </div>
 
       {/* Input Catatan Teks Guru */}
-      <div>
+      <div className="space-y-1.5">
         <label
           htmlFor="feedback-text"
-          className="block text-xs font-extrabold text-slate-700 uppercase tracking-wider mb-1.5 flex items-center gap-1.5"
+          className="block text-xs font-black text-slate-700 uppercase tracking-wider flex items-center gap-1.5"
         >
           <MessageSquare className="w-3.5 h-3.5 text-slate-400" />
           <span>Catatan / Umpan Balik Teks Guru (Opsional)</span>
@@ -145,15 +178,15 @@ export function GradingForm({
           maxLength={1000}
           value={feedbackText}
           onChange={(e) => setFeedbackText(e.target.value)}
-          placeholder="Contoh: Lafal membaca Ba-Bi-Bu sudah sangat lantang dan tepat! Pertahankan semangat belajarnya ya."
-          className="w-full px-4 py-3 rounded-xl border border-slate-300 text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          placeholder="Contoh: Lafal membaca sudah sangat lantang dan tepat! Pertahankan semangat belajarnya ya..."
+          className="w-full p-3.5 rounded-2xl border border-slate-300 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-400 leading-relaxed"
         />
-        <p className="text-[11px] text-slate-400 text-right mt-1">
+        <p className="text-[10.5px] text-slate-400 text-right">
           Maksimal 1000 karakter
         </p>
       </div>
 
-      {/* Perekam Audio Umpan Balik Guru */}
+      {/* Perekam Ulasan Suara Guru */}
       <TeacherFeedbackRecorder
         submissionId={submissionId}
         initialAudioUrl={initialFeedbackAudioUrl}
@@ -161,18 +194,26 @@ export function GradingForm({
         disabled={isPending}
       />
 
-      {/* Tombol Simpan & Kirim Penilaian */}
-      <div className="pt-2 flex items-center justify-end gap-3 border-t border-slate-100">
+      {/* Tombol Aksi Simpan / Perbarui Nilai */}
+      <div className="pt-2 flex items-center justify-end border-t border-slate-100">
         <button
           data-testid="submit-grading-btn"
           type="submit"
           disabled={isPending}
-          className="min-h-[52px] px-8 py-3 rounded-2xl bg-sky-600 hover:bg-sky-700 active:scale-95 text-white font-black text-sm flex items-center justify-center gap-2 shadow-md shadow-sky-200 transition-all cursor-pointer disabled:opacity-50"
+          className={`min-h-[50px] px-7 py-3 rounded-2xl text-white font-black text-xs sm:text-sm flex items-center justify-center gap-2 transition-all cursor-pointer disabled:opacity-50 active:scale-95 shadow-md ${isGraded
+              ? 'bg-emerald-600 hover:bg-emerald-700 border-b-4 border-emerald-800 shadow-emerald-200'
+              : 'bg-sky-600 hover:bg-sky-700 border-b-4 border-sky-800 shadow-sky-200'
+            }`}
         >
           {isPending ? (
             <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              <span>Menyimpan Penilaian...</span>
+              <Loader2 className="w-4 h-4 animate-spin" />
+              <span>{isGraded ? 'Menyimpan Perubahan...' : 'Menyimpan Penilaian...'}</span>
+            </>
+          ) : isGraded ? (
+            <>
+              <RefreshCw className="w-4 h-4" />
+              <span>Perbarui Nilai & Ulasan</span>
             </>
           ) : (
             <>

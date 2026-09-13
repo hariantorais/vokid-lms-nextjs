@@ -2,7 +2,7 @@ import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
 import { getR2Client, getR2BucketName, getR2PublicDomain } from '@/lib/storage/r2';
 import type { ActionResponse } from '../types/storage';
 
-export type R2Folder = 'materials' | 'audio-prompts' | 'submissions' | 'avatars';
+export type R2Folder = 'materials' | 'audio-prompts' | 'submissions' | 'avatars' | 'submissions/voices';
 
 export interface UploadFileToR2Params {
   folder: R2Folder;
@@ -31,7 +31,7 @@ export function extractR2KeyFromUrl(url: string | null | undefined): string | nu
 
     const parsed = new URL(url);
     const pathname = parsed.pathname.replace(/^\/+/, '');
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars', 'submissions/voices'];
     if (validFolders.some((f) => pathname.startsWith(`${f}/`))) {
       return pathname;
     }
@@ -102,7 +102,7 @@ export async function uploadFileToR2({
   contentType,
 }: UploadFileToR2Params): Promise<ActionResponse<UploadR2Result>> {
   try {
-    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars'];
+    const validFolders: R2Folder[] = ['materials', 'audio-prompts', 'submissions', 'avatars', 'submissions/voices'];
     if (!validFolders.includes(folder)) {
       return {
         success: false,

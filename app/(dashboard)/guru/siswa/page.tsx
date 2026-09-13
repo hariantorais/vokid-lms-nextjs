@@ -14,8 +14,6 @@ export default async function GuruSiswaPage() {
   return (
     <TeacherStudentsView
       students={students}
-      classrooms={classrooms}
-      defaultClassId={defaultClassId}
     />
   );
 }

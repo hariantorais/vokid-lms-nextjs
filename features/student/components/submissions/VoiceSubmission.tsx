@@ -32,7 +32,6 @@ export function VoiceSubmission({
   onSuccess,
   disabled = false,
 }: VoiceSubmissionProps) {
-  // 1. Lifecycle State Machine
   const [status, setStatus] = useState<VoiceSubmissionStatus>('IDLE');
   const [recordingDuration, setRecordingDuration] = useState<number>(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -40,14 +39,12 @@ export function VoiceSubmission({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<'audio/webm' | 'audio/mp4'>('audio/webm');
 
-  // References for MediaRecorder & Timers
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const streamRef = useRef<MediaStream | null>(null);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const [, startTransition] = useTransition();
 
-  // Helper cleanup functions
   const stopTracks = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
@@ -62,7 +59,6 @@ export function VoiceSubmission({
     }
   };
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
       clearTimer();
@@ -73,7 +69,6 @@ export function VoiceSubmission({
     };
   }, [audioUrl]);
 
-  // 3. Logika Timer
   useEffect(() => {
     if (status === 'RECORDING') {
       setRecordingDuration(0);
@@ -92,7 +87,6 @@ export function VoiceSubmission({
     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // 2. Logika Merekam Nyata (MediaRecorder API)
   const startRecording = async () => {
     setErrorMessage(null);
     audioChunksRef.current = [];
@@ -105,11 +99,9 @@ export function VoiceSubmission({
         throw new Error('Perangkat mikrofon tidak didukung di browser ini.');
       }
 
-      // Meminta izin mikrofon nyata
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      // Deteksi format audio yang didukung
       const selectedMime =
         typeof MediaRecorder !== 'undefined' &&
           MediaRecorder.isTypeSupported &&
@@ -136,7 +128,7 @@ export function VoiceSubmission({
         stopTracks();
       };
 
-      recorder.start(200); // Kumpulkan potongan tiap 200ms
+      recorder.start(200);
       setStatus('RECORDING');
     } catch (err: unknown) {
       console.error('[VoiceSubmission] getUserMedia/MediaRecorder error:', err);
@@ -171,7 +163,6 @@ export function VoiceSubmission({
     setStatus('IDLE');
   };
 
-  // 5. Integrasi Server & Storage
   const handleUploadAndSubmit = () => {
     if (!audioBlob) {
       setErrorMessage('Berkas rekaman suara tidak ditemukan.');
@@ -188,7 +179,7 @@ export function VoiceSubmission({
 
         const formData = new FormData();
         formData.append('file', audioBlob, fileName);
-        formData.append('folder', 'submissions');
+        formData.append('folder', 'submissions/voices');
 
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
@@ -205,7 +196,6 @@ export function VoiceSubmission({
 
         const r2PublicUrl: string = uploadData.url;
 
-        // Panggil Server Action submitAssignmentAction dengan URL publik R2
         const response = await submitAssignmentAction({
           assignmentId,
           fileUrl: r2PublicUrl,
@@ -217,7 +207,10 @@ export function VoiceSubmission({
           throw new Error(response.error);
         }
 
+        // Simpan URL publik hasil upload agar pratinjau tetap aktif setelah submit
+        setAudioUrl(r2PublicUrl);
         setStatus('SUCCESS');
+
         if (onSuccess) {
           onSuccess(response.data);
         }
@@ -238,7 +231,7 @@ export function VoiceSubmission({
       data-testid="voice-submission"
       className="p-3.5 rounded-2xl bg-amber-50/50 border border-amber-200 space-y-3"
     >
-      {/* Recording status indicator if recording */}
+      {/* Recording indicator */}
       {status === 'RECORDING' && (
         <div className="flex items-center justify-center gap-2 py-1 px-3 bg-rose-100 border border-rose-300 text-rose-700 rounded-full font-black text-xs animate-pulse">
           <span className="w-2.5 h-2.5 rounded-full bg-rose-600 animate-ping" />
@@ -246,7 +239,7 @@ export function VoiceSubmission({
         </div>
       )}
 
-      {/* Pesan Error */}
+      {/* Error message */}
       {errorMessage && (
         <div className="p-2.5 bg-rose-50 border border-rose-200 rounded-xl flex items-center gap-2 text-rose-700 text-xs font-bold">
           <AlertCircle className="w-4 h-4 shrink-0" />
@@ -254,7 +247,6 @@ export function VoiceSubmission({
         </div>
       )}
 
-      {/* 4. Tampilan Antarmuka */}
       {/* A. Status: 'IDLE' */}
       {status === 'IDLE' && (
         <div className="flex flex-col items-center justify-center py-2 space-y-2">
@@ -302,7 +294,6 @@ export function VoiceSubmission({
               <Volume2 className="w-4 h-4 text-orange-600" />
               <span>Dengarkan Ulang Rekamanmu:</span>
             </div>
-            {/* Pratinjau Audio HTML5 Nyata */}
             <audio
               data-testid="audio-preview"
               src={audioUrl}
@@ -353,16 +344,34 @@ export function VoiceSubmission({
 
       {/* E. Status: 'SUCCESS' */}
       {status === 'SUCCESS' && (
-        <div className="min-h-[72px] p-5 bg-emerald-50 border-2 border-emerald-300 rounded-3xl flex items-center gap-3 text-emerald-900">
-          <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0" />
-          <div>
-            <p className="font-black text-base">
-              Tugas suara berhasil dikirim! Menunggu dinilai guru.
-            </p>
-            <p className="text-xs font-bold text-emerald-700">
-              Hebat sekali! Kamu sudah menyelesaikan tugas rekaman suara ini.
-            </p>
+        <div className="space-y-3 animate-in fade-in duration-300">
+          <div className="min-h-[72px] p-5 bg-emerald-50 border-2 border-emerald-300 rounded-3xl flex items-center gap-3 text-emerald-900">
+            <CheckCircle2 className="w-8 h-8 text-emerald-600 shrink-0" />
+            <div>
+              <p className="font-black text-base">
+                Tugas suara berhasil dikirim! Menunggu dinilai guru.
+              </p>
+              <p className="text-xs font-bold text-emerald-700">
+                Hebat sekali! Kamu sudah menyelesaikan tugas rekaman suara ini.
+              </p>
+            </div>
           </div>
+
+          {/* Pratinjau Suara Jawaban yang Baru Saja Dikirim */}
+          {audioUrl && (
+            <div className="p-3.5 bg-white rounded-2xl border border-emerald-200 space-y-1.5 shadow-2xs">
+              <div className="flex items-center gap-2 text-xs font-black text-emerald-950">
+                <Volume2 className="w-4 h-4 text-emerald-600" />
+                <span>Rekaman Suara Jawabanmu:</span>
+              </div>
+              <audio
+                controls
+                preload="metadata"
+                src={audioUrl}
+                className="w-full h-10 rounded-xl"
+              />
+            </div>
+          )}
         </div>
       )}
     </div>

@@ -9,6 +9,7 @@ import { createClient } from '@/lib/supabase/server';
 import { GradingForm } from '@/features/teacher/components/GradingForm';
 import { SubmissionImageViewer } from '@/features/teacher/components/SubmissionImageViewer';
 import { TeacherLayoutShell } from '@/features/teacher/components/TeacherLayoutShell';
+import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
 
 export const dynamic = 'force-dynamic';
 
@@ -74,6 +75,9 @@ export default async function TeacherGradingPage({ params }: TeacherGradingPageP
     submission.file_url.endsWith('.webm') ||
     submission.file_url.endsWith('.mp3') ||
     submission.file_url.endsWith('.mp4');
+
+  // Melewatkan file melalui proxy internal bila bucket masih private
+  const resolvedMediaUrl = getMediaProxyUrl(submission.file_url);
 
   const formattedDate = new Date(submission.submitted_at).toLocaleDateString('id-ID', {
     day: 'numeric',
@@ -146,7 +150,7 @@ export default async function TeacherGradingPage({ params }: TeacherGradingPageP
           </div>
 
           <a
-            href={submission.file_url}
+            href={resolvedMediaUrl}
             target="_blank"
             rel="noreferrer"
             className="text-xs font-bold text-sky-600 hover:underline"
@@ -156,20 +160,31 @@ export default async function TeacherGradingPage({ params }: TeacherGradingPageP
         </div>
 
         {isAudioSubmission ? (
-          <div className="p-4 sm:p-5 rounded-2xl bg-purple-50/60 border border-purple-200 space-y-2">
-            <p className="text-xs font-bold text-purple-900">
-              Dengarkan jawaban siswa di bawah:
-            </p>
+          <div className="p-4 sm:p-5 rounded-2xl bg-purple-50/60 border border-purple-200 space-y-3">
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-bold text-purple-900">
+                Dengarkan jawaban suara siswa:
+              </p>
+              <span className="text-[10px] font-bold text-purple-700 bg-purple-100 px-2 py-0.5 rounded-md">
+                Audio Rekaman
+              </span>
+            </div>
+
+            {/* Pasang src langsung di tag <audio> dengan crossOrigin anonymous */}
             <audio
               data-testid="student-audio-work"
               controls
-              src={submission.file_url}
+              preload="metadata"
+              crossOrigin="anonymous"
+              src={resolvedMediaUrl}
               className="w-full h-11 rounded-xl"
-            />
+            >
+              Browser kamu tidak mendukung pemutar audio langsung.
+            </audio>
           </div>
         ) : (
           <SubmissionImageViewer
-            src={submission.file_url}
+            src={resolvedMediaUrl}
             alt={`Pengerjaan Tugas Siswa - ${studentName}`}
           />
         )}

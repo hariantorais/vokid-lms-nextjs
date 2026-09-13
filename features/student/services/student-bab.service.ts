@@ -9,6 +9,9 @@ export interface StudentAssignment extends Assignment {
   score?: number | null;
   submissionStatus?: 'PENDING' | 'GRADED' | 'RESUBMIT' | null;
   submittedAt?: string | null;
+  fileUrl?: string | null;
+  teacherNotes?: string | null;
+  teacherAudioUrl?: string | null;
 }
 
 export interface LessonWithAssignment extends Lesson {
@@ -39,6 +42,9 @@ interface StudentSubmissionSummary {
   grade: number | null;
   score: number | null;
   submitted_at: string;
+  file_url: string | null;
+  teacher_feedback_text: string | null;
+  teacher_feedback_audio_url: string | null;
 }
 
 /**
@@ -140,11 +146,11 @@ export async function getStudentBabDetail(
         }
       }
 
-      // D. Ambil submissions siswa untuk tugas di bab ini
+      // D. Ambil submissions siswa untuk tugas di bab ini lengkap dengan file dan feedback guru
       if (assignmentIds.length > 0) {
         const { data: subsData } = await supabase
           .from('submissions')
-          .select('id, assignment_id, status, grade, score, submitted_at')
+          .select('id, assignment_id, status, grade, score, submitted_at, file_url, teacher_feedback_text, teacher_feedback_audio_url')
           .eq('student_id', activeStudentId)
           .in('assignment_id', assignmentIds);
 
@@ -175,6 +181,9 @@ export async function getStudentBabDetail(
             score: sub?.score ?? sub?.grade ?? null,
             submissionStatus: sub?.status ?? null,
             submittedAt: sub?.submitted_at ?? null,
+            fileUrl: sub?.file_url ?? null,
+            teacherNotes: sub?.teacher_feedback_text ?? null,
+            teacherAudioUrl: sub?.teacher_feedback_audio_url ?? null,
           };
         }),
     }));

@@ -9,8 +9,9 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
-  UploadCloud,
 } from 'lucide-react';
+import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
+
 interface TeacherFeedbackRecorderProps {
   submissionId: string;
   initialAudioUrl?: string | null;
@@ -59,7 +60,7 @@ export function TeacherFeedbackRecorder({
     return () => {
       clearTimer();
       stopTracks();
-      if (audioUrl && !initialAudioUrl) {
+      if (audioUrl && !initialAudioUrl && audioUrl.startsWith('blob:')) {
         URL.revokeObjectURL(audioUrl);
       }
     };
@@ -89,7 +90,7 @@ export function TeacherFeedbackRecorder({
 
     try {
       if (typeof window === 'undefined' || !navigator?.mediaDevices?.getUserMedia) {
-        throw new Error('Perangkat mikrofon tidak didukung di peramban ini.');
+        throw new Error('Perangkat mikrofon tidak didukung di browser ini.');
       }
 
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -97,8 +98,8 @@ export function TeacherFeedbackRecorder({
 
       const selectedMime =
         typeof MediaRecorder !== 'undefined' &&
-        MediaRecorder.isTypeSupported &&
-        MediaRecorder.isTypeSupported('audio/webm')
+          MediaRecorder.isTypeSupported &&
+          MediaRecorder.isTypeSupported('audio/webm')
           ? 'audio/webm'
           : 'audio/mp4';
       setMimeType(selectedMime);
@@ -120,8 +121,7 @@ export function TeacherFeedbackRecorder({
         setStatus('recorded');
         stopTracks();
 
-        // Otomatis upload setelah rekaman selesai
-        handleUpload(blob, selectedMime, objectUrl);
+        handleUpload(blob, selectedMime);
       };
 
       recorder.start(200);
@@ -149,7 +149,7 @@ export function TeacherFeedbackRecorder({
   };
 
   const resetRecording = () => {
-    if (audioUrl && !initialAudioUrl) {
+    if (audioUrl && !initialAudioUrl && audioUrl.startsWith('blob:')) {
       URL.revokeObjectURL(audioUrl);
     }
     setAudioUrl(null);
@@ -160,7 +160,7 @@ export function TeacherFeedbackRecorder({
     onAudioReady(null);
   };
 
-  const handleUpload = (blobToUpload: Blob, format: string, previewFallbackUrl: string) => {
+  const handleUpload = (blobToUpload: Blob, format: string) => {
     setStatus('uploading');
     setErrorMessage(null);
 
@@ -171,7 +171,8 @@ export function TeacherFeedbackRecorder({
 
         const formData = new FormData();
         formData.append('file', blobToUpload, fileName);
-        formData.append('folder', 'audio-prompts');
+        // Mengarahkan ke target folder: submissions/voices
+        formData.append('folder', 'submissions/voices');
 
         const uploadRes = await fetch('/api/upload', {
           method: 'POST',
@@ -181,10 +182,7 @@ export function TeacherFeedbackRecorder({
         const uploadData = await uploadRes.json();
 
         if (!uploadRes.ok || !uploadData.success || !uploadData.url) {
-          console.warn('[TeacherFeedbackRecorder] R2 upload warning, using local preview:', uploadData.error);
-          onAudioReady(previewFallbackUrl);
-          setStatus('ready');
-          return;
+          throw new Error(uploadData.error || 'Gagal mengunggah feedback audio ke R2.');
         }
 
         const r2PublicUrl = uploadData.url;
@@ -193,8 +191,10 @@ export function TeacherFeedbackRecorder({
         onAudioReady(r2PublicUrl);
       } catch (err: unknown) {
         console.error('[TeacherFeedbackRecorder] Upload exception:', err);
-        onAudioReady(previewFallbackUrl);
-        setStatus('ready');
+        const msg = err instanceof Error ? err.message : 'Gagal menyimpan rekaman guru.';
+        setErrorMessage(msg);
+        setStatus('recorded');
+        onAudioReady(null);
       }
     });
   };
@@ -294,8 +294,10 @@ export function TeacherFeedbackRecorder({
             </div>
             <audio
               data-testid="teacher-audio-preview"
-              src={audioUrl}
+              src={audioUrl.startsWith('blob:') ? audioUrl : getMediaProxyUrl(audioUrl)}
               controls
+              preload="metadata"
+              crossOrigin="anonymous"
               className="w-full h-10 rounded-lg"
             />
           </div>
