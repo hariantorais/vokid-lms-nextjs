@@ -8,12 +8,14 @@ export default async function GuruSiswaPage() {
   const result = await getTeacherStudentsData();
 
   const students = result.success ? result.data.students : [];
+  const totalCount = result.success ? result.data.totalCount : 0;
   const classrooms = result.success ? result.data.classrooms : [];
-  const defaultClassId = classrooms[0]?.id;
 
   return (
     <TeacherStudentsView
       students={students}
+      totalCount={totalCount}
+      classrooms={classrooms}
     />
   );
 }

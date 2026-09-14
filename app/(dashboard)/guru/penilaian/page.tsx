@@ -1,19 +1,16 @@
 import React from 'react';
-import { getTeacherDashboardData } from '@/features/teacher/services/teacher-service';
-import { TeacherPenilaianView } from '@/features/teacher/components/TeacherPenilaianView';
+import { getTeacherGradingListData } from '@/features/teacher/services/teacher-service';
+import { TeacherGradingListView } from '@/features/teacher/components/TeacherGradingListView';
 
 export const dynamic = 'force-dynamic';
 
-export default async function GuruPenilaianPage() {
-  const result = await getTeacherDashboardData();
+export default async function GuruPenilaianListPage() {
+  const result = await getTeacherGradingListData();
 
-  const queue = result.success ? result.data.pendingReviewQueue : [];
-  const defaultClassId = result.success && result.data.classrooms[0] ? result.data.classrooms[0].id : undefined;
+  const items = result.success ? result.data.items : [];
+  const counts = result.success
+    ? result.data.counts
+    : { pending: 0, graded: 0, total: 0 };
 
-  return (
-    <TeacherPenilaianView
-      queue={queue}
-      defaultClassId={defaultClassId}
-    />
-  );
+  return <TeacherGradingListView items={items} counts={counts} />;
 }

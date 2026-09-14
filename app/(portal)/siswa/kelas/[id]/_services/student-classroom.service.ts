@@ -1,9 +1,11 @@
 import { createClient } from '@/lib/supabase/server';
 import type { ClassRecord, Subject, Module } from '@/types/database';
 import type { ActionResponse } from '@/features/shared/types/storage';
-import type { StudentAssignment, LessonWithAssignment } from '../bab/[moduleId]/_services/student-bab.service';
+import type { StudentAssignment, LessonWithAssignment } from '@/features/student/types/learning-path';
+
 
 export type { StudentAssignment, LessonWithAssignment };
+
 
 export interface StudentClassroomData {
   totalStars?: number;

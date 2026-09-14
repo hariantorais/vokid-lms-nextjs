@@ -29,8 +29,11 @@ import { QuizCbtModal } from '@/features/student/components/submissions/QuizCbtM
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { LessonWithAssignment, StudentAssignment } from '@/features/student/services/student-bab.service';
 import { getMediaProxyUrl } from '@/features/shared/services/storage-service';
+import type {
+  LessonWithAssignment,
+  StudentAssignment,
+} from '@/features/student/types/learning-path';
 
 interface FaseBCViewProps {
   classroomData: StudentClassroomData;
@@ -56,7 +59,6 @@ export function FaseBCView({ classroomData }: FaseBCViewProps) {
 
   // Mobile Native Reading Sheet state
   const [readingLesson, setReadingLesson] = useState<LessonWithAssignment | null>(null);
-
   // Submission status toggle dihidrasi langsung dari server data
   const [submittedTasks, setSubmittedTasks] = useState<Record<string, boolean>>(() => {
     const initial: Record<string, boolean> = {};

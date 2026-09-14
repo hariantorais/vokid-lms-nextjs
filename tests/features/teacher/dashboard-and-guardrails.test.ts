@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import { getTeacherDashboardData } from '@/features/teacher/services/teacher-service';
 import { createModuleAction } from '@/features/teacher/actions/teacher-actions';
 import { gradeSubmissionAction } from '@/features/teacher/actions/grading-actions';
-import { submitAssignmentAction } from '@/features/student/actions/submission-actions';
+import { submitAssignmentAction } from '@/features/student/actions/submission.actions';
 
 // Mock Next.js cache revalidatePath
 vi.mock('next/cache', () => ({

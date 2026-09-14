@@ -20,7 +20,7 @@ import { QuizCbtModal } from '@/features/student/components/submissions/QuizCbtM
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { StudentClassroomData } from '../_services/student-classroom.service';
-import type { LessonWithAssignment, StudentAssignment } from '@/app/(portal)/siswa/bab/[id]/services/student-bab.service';
+import type { LessonWithAssignment, StudentAssignment } from '@/features/student/types/learning-path';
 
 interface FaseAViewProps {
   classroomData: StudentClassroomData;

@@ -14,6 +14,8 @@ import { MobileDrawer } from './MobileDrawer';
 import { StudentAvatar } from '@/components/shared/StudentAvatar';
 import type { StudentListItem } from '../services/teacher-service';
 import type { ClassRecord } from '@/types/database';
+import Link from 'next/link';
+import { Printer } from 'lucide-react';
 
 interface TeacherStudentsViewProps {
   students: StudentListItem[];
@@ -211,6 +213,24 @@ export function TeacherStudentsView({
             </div>
 
             {/* Tombol Tutup */}
+            {/* Tombol Cetak / Lihat Rapor Siswa */}
+            <div className="pt-3 space-y-2">
+              <Link
+                href={`/guru/siswa/${activeStudent.id}/rapor`}
+                className="w-full h-12 rounded-2xl bg-indigo-600 hover:bg-indigo-700 active:scale-98 text-white font-black text-xs sm:text-sm transition-all flex items-center justify-center gap-2 shadow-md shadow-indigo-200"
+              >
+                <Printer className="w-4 h-4" />
+                <span>Lihat & Cetak Rapor Siswa</span>
+              </Link>
+
+              <button
+                type="button"
+                onClick={() => setActiveStudent(null)}
+                className="w-full h-11 rounded-2xl bg-slate-100 hover:bg-slate-200 active:scale-98 text-slate-700 font-bold text-xs transition-all cursor-pointer"
+              >
+                Tutup
+              </button>
+            </div>
             <div className="pt-2">
               <button
                 type="button"
