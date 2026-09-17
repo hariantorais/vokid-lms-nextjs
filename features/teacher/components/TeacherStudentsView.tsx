@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { TeacherLayoutShell } from './TeacherLayoutShell';
 import { MobileDrawer } from './MobileDrawer';
-import { StudentAvatar } from '@/components/shared/StudentAvatar';
+import { StudentAvatar } from '@/features/student/components';
 import type { StudentListItem } from '../services/teacher-service';
 import type { ClassRecord } from '@/types/database';
 import Link from 'next/link';

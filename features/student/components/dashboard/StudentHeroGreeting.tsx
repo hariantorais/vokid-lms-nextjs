@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Sparkles } from 'lucide-react';
-import { StudentAvatar } from '@/components/shared/StudentAvatar';
+import { StudentAvatar } from '../StudentAvatar';
 
 interface StudentHeroGreetingProps {
     studentName: string;

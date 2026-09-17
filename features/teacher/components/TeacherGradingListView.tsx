@@ -12,7 +12,7 @@ import {
     ChevronRight,
 } from 'lucide-react';
 import { TeacherLayoutShell } from './TeacherLayoutShell';
-import { StudentAvatar } from '@/components/shared/StudentAvatar';
+import { StudentAvatar } from '@/features/student/components';
 import type { TeacherGradingListItem } from '../services/teacher-service';
 
 interface TeacherGradingListViewProps {

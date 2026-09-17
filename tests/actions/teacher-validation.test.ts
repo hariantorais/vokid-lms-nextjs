@@ -4,7 +4,7 @@ import {
   createAssignmentSchema,
   type CreateLessonInput,
   type CreateAssignmentInput,
-} from '@/lib/validations/teacher';
+} from '@/features/teacher/validations';
 
 describe('Unit Test Validasi Zod Guru - createLessonSchema', () => {
   const validUUID = 'aaaaaaaa-1111-0000-0000-000000000001';

@@ -6,7 +6,7 @@ import {
   createModuleSchema,
   updateModuleSchema,
   updateAssignmentSchema,
-} from '@/lib/validations/teacher';
+} from '../validations';
 import { cleanModuleTitle } from '@/lib/formatters';
 import type { ActionResponse } from '@/features/shared/types/storage';
 import type { ClassRecord, Subject, Module, Lesson, Assignment } from '@/types/database';

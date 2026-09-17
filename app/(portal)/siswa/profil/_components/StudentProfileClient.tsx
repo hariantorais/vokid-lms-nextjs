@@ -17,7 +17,7 @@ import { toast } from 'sonner';
 import { useStudent } from '@/features/student/context/StudentContext';
 import { createClient } from '@/lib/supabase/client';
 import { updateStudentAvatarAction } from '../../_actions/profile.actions';
-import { StudentAvatar } from '../../../../../components/shared/StudentAvatar';
+import { StudentAvatar } from '@/features/student/components';
 
 export function StudentProfileClient() {
   const router = useRouter();

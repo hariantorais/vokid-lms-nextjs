@@ -3,7 +3,8 @@
 import React from 'react';
 import Image from 'next/image';
 import { MarkdownContent } from '@/components/common/MarkdownContent';
-import { Target, FileText, ExternalLink, CheckCircle2, Sparkles, Loader2 } from 'lucide-react';
+import Link from 'next/link';
+import { Target, FileText, ExternalLink, CheckCircle2, Sparkles, Loader2, Presentation } from 'lucide-react';
 import { VideoPlayer } from '@/features/common/components/VideoPlayer';
 import { AudioPromptPlayer } from './AudioPromptPlayer';
 import { LessonWithAssignment } from '../../services/student-service';
@@ -107,9 +108,18 @@ export function UnifiedLessonContentCard({
             )}
 
             {/* ========================================================================= */}
-            {/* TOMBOL GERBANG: SAYA SUDAH MEMPELAJARI MATERI */}
+            {/* TOMBOL GERBANG: SAYA SUDAH MEMPELAJARI MATERI & MODE SLIDE LAYAR PENUH */}
             {/* ========================================================================= */}
-            <div className="pt-2">
+            <div className="pt-2 space-y-2.5">
+                {/* Tombol Link Mode Layar Penuh */}
+                <Link
+                    href={`/siswa/pelajaran/${lesson.id}/slide`}
+                    className="w-full min-h-[48px] rounded-2xl bg-amber-400 hover:bg-amber-300 border-2 border-b-6 border-amber-700 active:border-b-2 active:translate-y-1 text-amber-950 text-xs sm:text-sm font-black flex items-center justify-center gap-2 shadow-sm transition-all"
+                >
+                    <Presentation className="w-4 h-4 text-amber-900" />
+                    <span>Buka Materi Layar Penuh ➔</span>
+                </Link>
+
                 {isStudied ? (
                     <div className="p-3.5 rounded-2xl bg-emerald-100/80 border-2 border-emerald-300 text-emerald-950 text-xs font-black flex items-center justify-center gap-2 shadow-2xs animate-in zoom-in-95">
                         <CheckCircle2 className="w-4 h-4 text-emerald-700 shrink-0" />

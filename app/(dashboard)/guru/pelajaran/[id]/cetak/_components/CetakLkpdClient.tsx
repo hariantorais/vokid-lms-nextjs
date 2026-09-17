@@ -14,7 +14,7 @@ import {
 } from 'lucide-react';
 import type { TeachingDeskData } from '@/features/teacher/actions/acceleration-actions';
 import type { PedagogicLessonGuide, WorksheetPrintReady } from '@/types';
-import { LkpdItemRenderer, parseLkpdQuestion, type LkpdItem } from '@/components/lkpd/LkpdRenderer';
+import { LkpdItemRenderer, parseLkpdQuestion, type LkpdItem } from '@/features/teacher/components/lkpd/LkpdRenderer';
 
 interface CetakLkpdClientProps {
   data: TeachingDeskData;

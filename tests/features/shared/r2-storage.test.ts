@@ -1,7 +1,7 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { NextRequest } from 'next/server';
 import { uploadFileToR2 } from '@/features/shared/services/storage-service';
-import { getR2Client, getR2BucketName, getR2PublicDomain, resetR2Client } from '@/lib/storage/r2';
+import { getR2Client, getR2BucketName, getR2PublicDomain, resetR2Client } from '@/features/shared/services/r2-client';
 import { POST } from '@/app/api/upload/route';
 
 // Mock Supabase server client for auth check

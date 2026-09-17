@@ -17,7 +17,7 @@ import {
 import { toast } from 'sonner';
 import { StudentLayoutShell } from '@/features/student/components/StudentLayoutShell';
 import { equipStudentTitleAction } from '@/features/student/actions/title.actions';
-import { StudentAvatar } from '@/components/shared/StudentAvatar';
+import { StudentAvatar } from '@/features/student/components';
 import { TrophyTier } from '@/features/student/types/trophy';
 
 

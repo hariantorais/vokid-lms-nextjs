@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { useStudent } from '../context/StudentContext';
-import { StudentAvatar } from '@/components/shared/StudentAvatar';
+import { StudentAvatar } from './StudentAvatar';
 
 export function StudentHeaderHUD() {
     const { studentId, studentName, avatarUrl, totalStars } = useStudent();

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Printer, Star } from 'lucide-react';
+import { ArrowLeft, Printer } from 'lucide-react';
 import type { StudentReportData } from '../services/teacher-service';
 
 interface StudentReportPrintViewProps {
@@ -10,7 +10,7 @@ interface StudentReportPrintViewProps {
 }
 
 export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
-    const { student, subjectsReport, overallAverage, reportDate } = data;
+    const { student, teacherName, subjectsReport, overallAverage, reportDate } = data;
 
     const handlePrint = () => {
         window.print();
@@ -18,7 +18,7 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
 
     return (
         <div className="min-h-screen bg-slate-100 py-6 px-4 sm:px-6 print:p-0 print:bg-white text-slate-900">
-            {/* Action Bar (Hanya tampil di browser, disembunyikan saat cetak) */}
+            {/* Action Bar */}
             <div className="max-w-4xl mx-auto mb-6 flex items-center justify-between print:hidden">
                 <Link
                     href="/guru/siswa"
@@ -38,7 +38,7 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
                 </button>
             </div>
 
-            {/* Lembar Dokumen Rapor (Standar Kertas A4) */}
+            {/* Lembar Dokumen Rapor */}
             <div className="max-w-4xl mx-auto bg-white p-8 sm:p-12 rounded-3xl shadow-sm border border-slate-200 print:border-none print:shadow-none print:p-6 print:rounded-none">
                 {/* KOP RAPOR */}
                 <div className="border-b-4 border-double border-slate-900 pb-5 mb-6 text-center">
@@ -77,28 +77,7 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
                     </div>
                 </div>
 
-                {/* REKAP BINTANG & PRESTASI BELAJAR */}
-                <div className="grid grid-cols-3 gap-3 mb-6">
-                    <div className="p-3.5 rounded-2xl border border-amber-200 bg-amber-50/50 text-center print:border-slate-300">
-                        <div className="flex items-center justify-center gap-1.5 text-amber-900 font-black text-lg">
-                            <Star className="w-5 h-5 fill-amber-400 text-amber-500" />
-                            <span>{student.totalStars}</span>
-                        </div>
-                        <span className="text-[10.5px] font-bold text-amber-800">Total Bintang Emas</span>
-                    </div>
-
-                    <div className="p-3.5 rounded-2xl border border-sky-200 bg-sky-50/50 text-center print:border-slate-300">
-                        <span className="text-lg font-black text-sky-900 block">{student.completedLessonsCount} Pos</span>
-                        <span className="text-[10.5px] font-bold text-sky-800">Materi Ditaklukkan</span>
-                    </div>
-
-                    <div className="p-3.5 rounded-2xl border border-emerald-200 bg-emerald-50/50 text-center print:border-slate-300">
-                        <span className="text-lg font-black text-emerald-900 block">{overallAverage} Poin</span>
-                        <span className="text-[10.5px] font-bold text-emerald-800">Rerata Nilai Tugas</span>
-                    </div>
-                </div>
-
-                {/* TABEL CAPAIAN KOMPETENSI / NILAI MATA PELAJARAN */}
+                {/* TABEL CAPAIAN KOMPETENSI / NILAI SEMUA MATA PELAJARAN */}
                 <div className="mb-6">
                     <h3 className="text-xs font-black uppercase tracking-wider text-slate-800 mb-2">
                         A. Capaian Nilai Formatif &amp; Sumatif
@@ -110,40 +89,84 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
                                 <tr className="bg-slate-100 border-b border-slate-300 text-slate-700 font-black">
                                     <th className="py-2.5 px-3 w-10 text-center border-r border-slate-300">No</th>
                                     <th className="py-2.5 px-3 border-r border-slate-300">Mata Pelajaran</th>
-                                    <th className="py-2.5 px-3 w-20 text-center border-r border-slate-300">Nilai Akhir</th>
-                                    <th className="py-2.5 px-3 w-28 text-center border-r border-slate-300">Predikat</th>
+                                    <th className="py-2.5 px-3 w-20 text-center border-r border-slate-300"> Total Bab</th>
+                                    <th className="py-2.5 px-3 w-28 text-center border-r border-slate-300">Tugas</th>
+                                    <th className="py-2.5 px-3 w-20 text-center border-r border-slate-300">Nilai</th>
+                                    <th className="py-2.5 px-3 w-24 text-center border-r border-slate-300">Predikat</th>
                                     <th className="py-2.5 px-3">Capaian Kompetensi</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y divide-slate-200">
                                 {subjectsReport.length === 0 ? (
                                     <tr>
-                                        <td colSpan={5} className="py-6 text-center text-slate-400 font-bold">
-                                            Belum ada catatan nilai tugas pada mata pelajaran.
+                                        <td colSpan={7} className="py-6 text-center text-slate-400 font-bold">
+                                            Belum ada mata pelajaran terdaftar.
                                         </td>
                                     </tr>
                                 ) : (
-                                    subjectsReport.map((sub, idx) => (
-                                        <tr key={sub.subjectId} className="hover:bg-slate-50/50">
-                                            <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold">
-                                                {idx + 1}
-                                            </td>
-                                            <td className="py-2.5 px-3 border-r border-slate-200 font-black text-slate-900">
-                                                {sub.subjectName}
-                                            </td>
-                                            <td className="py-2.5 px-3 text-center border-r border-slate-200 font-black text-slate-900 text-sm">
-                                                {sub.averageScore}
-                                            </td>
-                                            <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold text-slate-700">
-                                                {sub.predicate}
-                                            </td>
-                                            <td className="py-2.5 px-3 text-[11px] text-slate-600 font-medium leading-relaxed">
-                                                {sub.description}
-                                            </td>
-                                        </tr>
-                                    ))
+                                    subjectsReport.map((sub, idx) => {
+                                        const isAllCompleted =
+                                            sub.totalTasks > 0 && sub.completedTasks === sub.totalTasks;
+
+                                        return (
+                                            <tr key={sub.subjectId} className="hover:bg-slate-50/50">
+                                                <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold">
+                                                    {idx + 1}
+                                                </td>
+                                                <td className="py-2.5 px-3 border-r border-slate-200 font-black text-slate-900">
+                                                    {sub.subjectName}
+                                                </td>
+                                                {/* Kolom Total Bab */}
+                                                <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold text-slate-700">
+                                                    {sub.totalModules}
+                                                </td>
+                                                {/* Kolom Progres Tugas */}
+                                                <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold">
+                                                    <span
+                                                        className={`inline-block px-2 py-0.5 rounded-lg text-xs ${isAllCompleted
+                                                            ? 'bg-emerald-50 text-emerald-800 font-black'
+                                                            : sub.completedTasks > 0
+                                                                ? 'bg-amber-50 text-amber-800'
+                                                                : 'bg-slate-100 text-slate-500'
+                                                            }`}
+                                                    >
+                                                        {sub.completedTasks} / {sub.totalTasks} Tugas
+                                                    </span>
+                                                </td>
+                                                <td className="py-2.5 px-3 text-center border-r border-slate-200 font-black text-slate-900 text-sm">
+                                                    {sub.completedTasks > 0 ? sub.averageScore : '-'}
+                                                </td>
+                                                <td className="py-2.5 px-3 text-center border-r border-slate-200 font-bold text-slate-700">
+                                                    {sub.predicate}
+                                                </td>
+                                                <td className="py-2.5 px-3 text-[11px] text-slate-600 font-medium leading-relaxed">
+                                                    {sub.description}
+                                                </td>
+                                            </tr>
+                                        );
+                                    })
                                 )}
                             </tbody>
+                            {/* Baris Rata-Rata Keseluruhan */}
+                            {subjectsReport.length > 0 && (
+                                <tfoot>
+                                    <tr className="bg-slate-50 border-t-2 border-slate-300 font-black text-slate-900">
+                                        <td colSpan={4} className="py-3 px-3 text-right border-r border-slate-300 uppercase tracking-wider text-[11px]">
+                                            Nilai Rata-Rata Keseluruhan
+                                        </td>
+                                        <td className="py-3 px-3 text-center border-r border-slate-300 text-base text-emerald-700">
+                                            {overallAverage}
+                                        </td>
+                                        <td colSpan={2} className="py-3 px-3 text-[11px] text-slate-600 font-bold">
+                                            {overallAverage >= 85
+                                                ? 'Predikat Umum: Memuaskan / Sangat Baik'
+                                                : overallAverage >= 70
+                                                    ? 'Predikat Umum: Baik'
+                                                    : 'Predikat Umum: Perlu Bimbingan'}
+                                        </td>
+                                    </tr>
+                                </tfoot>
+                            )}
                         </table>
                     </div>
                 </div>
@@ -158,7 +181,7 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
                     </p>
                 </div>
 
-                {/* TANDA TANGAN (LEMBAR PENGESAHAN) */}
+                {/* TANDA TANGAN */}
                 <div className="grid grid-cols-2 text-center text-xs font-bold pt-4 text-slate-800 break-inside-avoid">
                     <div>
                         <p>Mengetahui,</p>
@@ -171,8 +194,8 @@ export function StudentReportPrintView({ data }: StudentReportPrintViewProps) {
                         <p>Batam, {reportDate}</p>
                         <p className="font-semibold text-slate-500">Guru Wali Kelas</p>
                         <div className="h-20" />
-                        <p className="font-black text-slate-900 underline">Ibu Guru Vokid, S.Pd.</p>
-                        <p className="text-[10px] text-slate-500">NIP. 19920815 202601 2 001</p>
+                        <p className="font-black text-slate-900 underline">{teacherName}</p>
+                        <p className="text-[10px] text-slate-500">Wali Kelas {student.className}</p>
                     </div>
                 </div>
             </div>

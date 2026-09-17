@@ -1,5 +1,5 @@
 import { PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { getR2Client, getR2BucketName, getR2PublicDomain } from '@/lib/storage/r2';
+import { getR2Client, getR2BucketName, getR2PublicDomain } from './r2-client';
 import type { ActionResponse } from '../types/storage';
 
 export type R2Folder = 'materials' | 'audio-prompts' | 'submissions' | 'avatars' | 'submissions/voices';

@@ -1,7 +1,7 @@
 import React from 'react';
 import { notFound } from 'next/navigation';
 import { getStudentReportData } from '@/features/teacher/services/teacher-service';
-import { StudentReportPrintView } from '@/features/teacher/components/StudentPrintView';
+import { StudentReportPrintView } from '@/features/teacher/components/StudentReportPrintView';
 
 export const dynamic = 'force-dynamic';
 

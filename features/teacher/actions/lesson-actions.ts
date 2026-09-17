@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 import { createClient } from '@/lib/supabase/server';
-import { createLessonSchema } from '@/lib/validations/teacher';
+import { createLessonSchema } from '../validations';
 import type { Lesson } from '@/types/database';
 import type { ActionResponse } from '@/features/shared/types/storage';
 import { deleteFileFromR2 } from '@/features/shared/services/storage-service';

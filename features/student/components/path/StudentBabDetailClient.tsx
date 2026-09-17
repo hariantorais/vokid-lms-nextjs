@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useTransition, useMemo } from 'react';
+import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { cleanModuleTitle } from '@/lib/formatters';
 import { markLessonAsStudiedAction } from '@/features/student/actions/lesson-learning.actions';
@@ -18,6 +19,7 @@ interface StudentBabDetailClientProps {
 }
 
 export function StudentBabDetailClient({ data, classId }: StudentBabDetailClientProps) {
+  const router = useRouter();
   const { module, nextModule } = data;
   const lessons = module.lessons ?? [];
 
@@ -184,7 +186,11 @@ export function StudentBabDetailClient({ data, classId }: StudentBabDetailClient
                 onClosePreview={() => setPreviewNode(null)}
                 onFocusNode={(node) => {
                   setPreviewNode(null);
-                  setFocusedNode(node);
+                  if (node.nodeType === 'LESSON') {
+                    router.push(`/siswa/pelajaran/${node.lesson.id}/slide`);
+                  } else {
+                    setFocusedNode(node);
+                  }
                 }}
               />
             </section>
