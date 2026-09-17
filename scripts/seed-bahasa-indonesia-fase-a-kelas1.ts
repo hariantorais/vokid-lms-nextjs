@@ -1,16 +1,12 @@
 // seed-bahasa-indonesia-fase-a-kelas1.ts
 // =============================================================================
-// UNIFIER SEEDER — Bahasa Indonesia Fase A Kelas 1
-// Pola mengikuti seed-bahasa-inggris yang sudah terbukti berhasil
+// UNIFIER SEEDER — Bahasa Indonesia Fase A Kelas 1 (8 Bab / 24 Pertemuan)
 // =============================================================================
 
 import { createClient } from '@supabase/supabase-js';
 import fs from 'fs';
 import path from 'path';
-import { BAHASA_INDONESIA_BATCH_1 } from './data/bahasa-indonesia-batch-1';
-import { BAHASA_INDONESIA_BATCH_2 } from './data/bahasa-indonesia-batch-2';
-import { BAHASA_INDONESIA_BATCH_3 } from './data/bahasa-indonesia-batch-3';
-import { BAHASA_INDONESIA_BATCH_4 } from './data/bahasa-indonesia-batch-4';
+import { ALL_BAHASA_INDONESIA_MODULES } from './data/bahasa-indonesia';
 
 function loadEnv(): void {
     const envPaths = [
@@ -56,12 +52,12 @@ async function seedBahasaIndonesia() {
     console.log('   Karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah');
     console.log('================================================================');
 
-    // 1. Pastikan Kelas 1 SD Terdaftar (Aman untuk mapel lain)
+    // 1. Pastikan Kelas 1 SD Terdaftar
     const classId = '11111111-1111-1111-1111-111111111111';
     const { error: classErr } = await supabase.from('classes').upsert(
         {
             id: classId,
-            name: 'Kelas 1 SD (Fase A)',  // ← Samakan dengan BI & BING
+            name: 'Kelas 1 SD (Fase A)',
             grade_level: 1,
             academic_year: '2026/2027',
         },
@@ -70,7 +66,7 @@ async function seedBahasaIndonesia() {
 
     if (classErr) {
         console.error('Gagal mendaftarkan kelas:', classErr.message);
-        process.exit(1);  // ← process.exit bukan throw
+        process.exit(1);
     }
     console.log(`✓ Kelas 1 SD siap (ID: ${classId})`);
 
@@ -145,13 +141,8 @@ async function seedBahasaIndonesia() {
         console.log(`✓ Mata Pelajaran Bahasa Indonesia baru terdaftar (ID: ${subjectId})`);
     }
 
-    // 3. Gabungkan 4 Batch Lengkap (8 Bab / 24 Pertemuan)
-    const allBatches = [
-        ...BAHASA_INDONESIA_BATCH_1,
-        ...BAHASA_INDONESIA_BATCH_2,
-        ...BAHASA_INDONESIA_BATCH_3,
-        ...BAHASA_INDONESIA_BATCH_4,
-    ];
+    // 3. Gunakan Seluruh Modul Terpusat (Bab 1 - Bab 8)
+    const allBatches = ALL_BAHASA_INDONESIA_MODULES;
 
     let totalLessonsCreated = 0;
     let totalQuizzesCreated = 0;
@@ -164,7 +155,7 @@ async function seedBahasaIndonesia() {
             .insert({
                 subject_id: subjectId,
                 title: chapter.title,
-                order_index: chapter.order_index,  // ← Pakai order_index
+                order_index: chapter.order_index,
                 target_semester: chapter.target_semester,
                 week_target: chapter.week_target,
                 is_published: true,

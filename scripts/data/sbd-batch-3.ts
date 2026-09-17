@@ -2,7 +2,7 @@
 // Bab 5-6: Seni Tari (Waktu & Tenaga) & Seni Teater (Pantomim) (Semester 2)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 5: SENI TARI — AYO MENARI DENGAN WAKTU & TENAGA

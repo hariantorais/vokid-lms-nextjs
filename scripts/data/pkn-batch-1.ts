@@ -2,7 +2,7 @@
 // Bab 1-2: Aku dan Teman-Temanku & Aku Patuh pada Aturan (Semester 1)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 1: AKU DAN TEMAN-TEMANKU

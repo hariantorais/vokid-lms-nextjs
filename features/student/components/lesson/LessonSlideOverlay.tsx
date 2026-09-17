@@ -35,145 +35,118 @@ interface LessonSlideOverlayProps {
 }
 
 /**
+ * Membersihkan komentar HTML dengan segala variasi penutup (minus ganda, em-dash, tanda panah unicode, entitas)
+ */
+function cleanHtmlComments(text: string): string {
+    if (!text) return '';
+    return text
+        .replace(/<!--[\s\S]*?(?:-->|—>|–>|→|&rarr;|&gt;|>)/gi, '')
+        .replace(/&lt;!--[\s\S]*?(?:--&gt;|—&gt;|–&gt;|→|&rarr;|&gt;|>)/gi, '')
+        .replace(/^[ \t]*<?!--[^\n]*>?/gim, '')
+        .trim();
+}
+
+/**
  * Membaca raw content_text dari lesson:
- * 1. Jika berbentuk JSON array [{ tag, title, content, imageUrl }, ...], gunakan langsung.
- * 2. Jika berbentuk JSON object bertipe multimedia { text, imageUrl, ... }, pecah teksnya atau render.
- * 3. Jika teks biasa, pecah teks tersebut menjadi 1-3 slide yang ramah untuk anak Fase A SD.
+ * 1. Mengurai JSON array [{ tag, title, content, imageUrl }, ...] jika ada.
+ * 2. Membagi slide berdasarkan pemisah '---' atau '***'.
+ * 3. Fallback: Membagi per heading markdown (# / ## / ###) atau paragraf.
  */
 function parseContentToSlides(lesson: LessonWithAssignment | null): SlideItem[] {
     if (!lesson) return [];
 
     const rawText = lesson.content_text?.trim() || '';
 
-    // 1. Coba parse JSON Array Slide
+    // 1. Coba parse jika formatnya berupa JSON Array Slide
     if (rawText.startsWith('[') && rawText.endsWith(']')) {
         try {
             const parsed = JSON.parse(rawText);
             if (Array.isArray(parsed) && parsed.length > 0) {
                 return parsed.map((item, idx) => ({
-                    tag: item.tag || `Bagian ${idx + 1}`,
-                    title: item.title || `Langkah ${idx + 1}`,
-                    content: item.content || item.text || '',
+                    tag: item.tag || `Lembar ${idx + 1}`,
+                    title: cleanHtmlComments(item.title || `Langkah ${idx + 1}`),
+                    content: cleanHtmlComments(item.content || item.text || ''),
                     imageUrl: item.imageUrl || item.image || lesson.image_url || null,
                 }));
             }
         } catch {
-            // Abaikan jika bukan JSON
+            // Lanjut ke fallback
         }
     }
 
-    // 2. Coba parse JSON Multimedia Object {"text": "...", "imageUrl": "..."}
-    let extractedText = rawText;
-    let fallbackImage = lesson.image_url;
+    // 2. Bersihkan komentar HTML dan entitas panah
+    const sanitizedText = cleanHtmlComments(rawText);
+    const fallbackImage = lesson.image_url || null;
 
-    if (rawText.startsWith('{') && rawText.endsWith('}')) {
-        try {
-            const parsedObj = JSON.parse(rawText);
-            if (parsedObj.text) {
-                extractedText = parsedObj.text;
-            }
-            if (parsedObj.imageUrl) {
-                fallbackImage = parsedObj.imageUrl;
-            }
-        } catch {
-            // Abaikan jika bukan JSON
-        }
-    }
-
-    // 3. Fallback: Pecah teks biasa menjadi slide 1-3
-    if (!extractedText) {
+    if (!sanitizedText) {
         return [
             {
                 tag: 'Materi Belajar',
-                title: lesson.title,
+                title: cleanHtmlComments(lesson.title),
                 content: lesson.learning_objectives || 'Mari kita simak dan pelajari materi menarik ini bersama-sama!',
                 imageUrl: fallbackImage,
             },
         ];
     }
 
-    // Pisahkan berdasarkan heading markdown (## atau ###) atau pembatas paragraf ganda
-    const sections = extractedText
-        .split(/\n(?=#{1,3}\s+)/g)
-        .map((s) => s.trim())
+    // 3. Pecah slide berdasarkan pembatas horizontal '---' atau '***'
+    const rawSlideBlocks = sanitizedText
+        .split(/\n\s*(?:---+|\*\*\*+)\s*\n/g)
+        .map((b) => cleanHtmlComments(b))
         .filter(Boolean);
 
-    if (sections.length > 1) {
-        return sections.map((sec, idx) => {
-            const lines = sec.split('\n');
+    if (rawSlideBlocks.length > 1) {
+        return rawSlideBlocks.map((block, idx) => {
+            const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
             let slideTitle = `${lesson.title} - Bagian ${idx + 1}`;
-            let contentBody = sec;
+            let bodyContent = block;
 
-            if (lines[0].startsWith('#')) {
-                slideTitle = lines[0].replace(/^#+\s*/, '').trim();
-                contentBody = lines.slice(1).join('\n').trim();
+            if (lines.length > 0 && lines[0].startsWith('#')) {
+                slideTitle = cleanHtmlComments(lines[0].replace(/^#+\s*/, '')).trim();
+                bodyContent = lines.slice(1).join('\n').trim();
             }
 
             return {
-                tag: `Slide ${idx + 1}`,
-                title: slideTitle,
-                content: contentBody || lines[0],
+                tag: `Lembar ${idx + 1}`,
+                title: cleanHtmlComments(slideTitle) || `${lesson.title} - Bagian ${idx + 1}`,
+                content: cleanHtmlComments(bodyContent),
                 imageUrl: fallbackImage,
             };
         });
     }
 
-    // Jika tidak ada heading, pecah berdasarkan 2 enter kosong
-    const paragraphs = extractedText
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter(Boolean);
+    // 4. Fallback pembagian slide per Heading jika pembatas '---' tidak ditemukan
+    const headingSections = sanitizedText
+        .split(/\n(?=#{1,3}\s+)/g)
+        .map((s) => cleanHtmlComments(s))
+        .filter((s) => s.length > 0);
 
-    if (paragraphs.length >= 3) {
-        // Bagi jadi 3 slide
-        const chunkSize = Math.ceil(paragraphs.length / 3);
-        const p1 = paragraphs.slice(0, chunkSize).join('\n\n');
-        const p2 = paragraphs.slice(chunkSize, chunkSize * 2).join('\n\n');
-        const p3 = paragraphs.slice(chunkSize * 2).join('\n\n');
+    if (headingSections.length > 1) {
+        return headingSections.map((sec, idx) => {
+            const lines = sec.split('\n').map((l) => l.trim()).filter(Boolean);
+            let slideTitle = `${lesson.title} - Bagian ${idx + 1}`;
+            let bodyContent = sec;
 
-        return [
-            {
-                tag: 'Pengenalan',
-                title: `${lesson.title} - Bagian 1`,
-                content: p1,
+            if (lines.length > 0 && lines[0].startsWith('#')) {
+                slideTitle = cleanHtmlComments(lines[0].replace(/^#+\s*/, '')).trim();
+                bodyContent = lines.slice(1).join('\n').trim();
+            }
+
+            return {
+                tag: `Lembar ${idx + 1}`,
+                title: cleanHtmlComments(slideTitle) || `${lesson.title} - Bagian ${idx + 1}`,
+                content: cleanHtmlComments(bodyContent) || lines[0] || slideTitle,
                 imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Inti Cerita',
-                title: `${lesson.title} - Bagian 2`,
-                content: p2,
-                imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Kesimpulan Seru',
-                title: `${lesson.title} - Bagian 3`,
-                content: p3,
-                imageUrl: fallbackImage,
-            },
-        ];
-    } else if (paragraphs.length === 2) {
-        return [
-            {
-                tag: 'Awal Belajar',
-                title: `${lesson.title} - Bagian 1`,
-                content: paragraphs[0],
-                imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Ayo Pahami',
-                title: `${lesson.title} - Bagian 2`,
-                content: paragraphs[1],
-                imageUrl: fallbackImage,
-            },
-        ];
+            };
+        });
     }
 
-    // Default 1 Slide
+    // 5. Default 1 lembar utuh
     return [
         {
             tag: 'Materi Lengkap',
-            title: lesson.title,
-            content: extractedText,
+            title: cleanHtmlComments(lesson.title),
+            content: sanitizedText,
             imageUrl: fallbackImage,
         },
     ];
@@ -340,7 +313,7 @@ export function LessonSlideOverlay({
 
                     {/* Judul Slide */}
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug mb-4 sm:mb-6 shrink-0">
-                        {currentSlide.title}
+                        {cleanHtmlComments(currentSlide.title)}
                     </h1>
 
                     {/* Layout Konten: Teks + Gambar */}
@@ -355,7 +328,7 @@ export function LessonSlideOverlay({
                         >
                             <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border-2 border-slate-200/80 shadow-xs">
                                 <MarkdownContent
-                                    content={currentSlide.content}
+                                    content={cleanHtmlComments(currentSlide.content)}
                                     size="base"
                                     className="!text-slate-800 !text-base sm:!text-lg !leading-relaxed font-semibold"
                                 />

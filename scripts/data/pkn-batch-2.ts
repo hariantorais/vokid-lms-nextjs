@@ -2,7 +2,7 @@
 // Bab 3: Aku Mengenal Indonesia (Semester 2)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 3: AKU MENGENAL INDONESIA

@@ -2,7 +2,7 @@
 // Bab 7-8: Sumber Energi di Rumah & Langit dan Bintang (Semester 2)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 7: SUMBER ENERGI DI RUMAH

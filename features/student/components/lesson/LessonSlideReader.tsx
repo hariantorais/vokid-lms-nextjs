@@ -35,143 +35,116 @@ interface LessonSlideReaderProps {
 }
 
 /**
+ * Membersihkan komentar HTML dengan segala variasi penutup (minus ganda, em-dash, tanda panah unicode, entitas)
+ */
+function cleanHtmlComments(text: string): string {
+    if (!text) return '';
+    return text
+        .replace(/<!--[\s\S]*?(?:-->|—>|–>|→|&rarr;|&gt;|>)/gi, '')
+        .replace(/&lt;!--[\s\S]*?(?:--&gt;|—&gt;|–&gt;|→|&rarr;|&gt;|>)/gi, '')
+        .replace(/^[ \t]*<?!--[^\n]*>?/gim, '')
+        .trim();
+}
+
+/**
  * Membaca raw content_text dari lesson:
- * 1. Jika berbentuk JSON array [{ tag, title, content, imageUrl }, ...], gunakan langsung.
- * 2. Jika berbentuk JSON object bertipe multimedia { text, imageUrl, ... }, pecah teksnya atau render.
- * 3. Jika teks biasa, pecah teks tersebut menjadi 1-3 slide yang ramah untuk anak Fase A SD.
+ * 1. Mengurai JSON array [{ tag, title, content, imageUrl }, ...] jika ada.
+ * 2. Membagi slide berdasarkan pemisah '---' atau '***'.
+ * 3. Fallback: Membagi per heading markdown (# / ## / ###) atau paragraf.
  */
 function parseContentToSlides(lesson: Lesson): SlideItem[] {
     const rawText = lesson.content_text?.trim() || '';
 
-    // 1. Coba parse JSON Array Slide
+    // 1. Coba parse jika formatnya berupa JSON Array Slide
     if (rawText.startsWith('[') && rawText.endsWith(']')) {
         try {
             const parsed = JSON.parse(rawText);
             if (Array.isArray(parsed) && parsed.length > 0) {
                 return parsed.map((item, idx) => ({
-                    tag: item.tag || `Bagian ${idx + 1}`,
-                    title: item.title || `Langkah ${idx + 1}`,
-                    content: item.content || item.text || '',
+                    tag: item.tag || `Lembar ${idx + 1}`,
+                    title: cleanHtmlComments(item.title || `Langkah ${idx + 1}`),
+                    content: cleanHtmlComments(item.content || item.text || ''),
                     imageUrl: item.imageUrl || item.image || lesson.image_url || null,
                 }));
             }
         } catch {
-            // Abaikan error parse dan lanjut ke fallback
+            // Lanjut ke fallback pengolahan teks markdown
         }
     }
 
-    // 2. Coba parse JSON Multimedia Object {"text": "...", "imageUrl": "..."}
-    let extractedText = rawText;
-    let fallbackImage = lesson.image_url;
+    // 2. Bersihkan komentar HTML dan entitas panah
+    const sanitizedText = cleanHtmlComments(rawText);
+    const fallbackImage = lesson.image_url || null;
 
-    if (rawText.startsWith('{') && rawText.endsWith('}')) {
-        try {
-            const parsedObj = JSON.parse(rawText);
-            if (parsedObj.text) {
-                extractedText = parsedObj.text;
-            }
-            if (parsedObj.imageUrl) {
-                fallbackImage = parsedObj.imageUrl;
-            }
-        } catch {
-            // Abaikan jika bukan JSON
-        }
-    }
-
-    // 3. Fallback: Pecah teks biasa menjadi slide 1-3
-    if (!extractedText) {
+    if (!sanitizedText) {
         return [
             {
                 tag: 'Materi Belajar',
-                title: lesson.title,
+                title: cleanHtmlComments(lesson.title),
                 content: lesson.learning_objectives || 'Mari kita simak dan pelajari materi menarik ini bersama-sama!',
                 imageUrl: fallbackImage,
             },
         ];
     }
 
-    // Pisahkan berdasarkan heading markdown (## atau ###) atau pembatas paragraf ganda
-    const sections = extractedText
-        .split(/\n(?=#{1,3}\s+)/g)
-        .map((s) => s.trim())
+    // 3. Pecah slide berdasarkan pembatas horizontal '---' atau '***'
+    const rawSlideBlocks = sanitizedText
+        .split(/\n\s*(?:---+|\*\*\*+)\s*\n/g)
+        .map((b) => cleanHtmlComments(b))
         .filter(Boolean);
 
-    if (sections.length > 1) {
-        return sections.map((sec, idx) => {
-            const lines = sec.split('\n');
+    if (rawSlideBlocks.length > 1) {
+        return rawSlideBlocks.map((block, idx) => {
+            const lines = block.split('\n').map((l) => l.trim()).filter(Boolean);
             let slideTitle = `${lesson.title} - Bagian ${idx + 1}`;
-            let contentBody = sec;
+            let bodyContent = block;
 
-            if (lines[0].startsWith('#')) {
-                slideTitle = lines[0].replace(/^#+\s*/, '').trim();
-                contentBody = lines.slice(1).join('\n').trim();
+            if (lines.length > 0 && lines[0].startsWith('#')) {
+                slideTitle = cleanHtmlComments(lines[0].replace(/^#+\s*/, '')).trim();
+                bodyContent = lines.slice(1).join('\n').trim();
             }
 
             return {
-                tag: `Slide ${idx + 1}`,
-                title: slideTitle,
-                content: contentBody || lines[0],
+                tag: `Lembar ${idx + 1}`,
+                title: cleanHtmlComments(slideTitle) || `${lesson.title} - Bagian ${idx + 1}`,
+                content: cleanHtmlComments(bodyContent),
                 imageUrl: fallbackImage,
             };
         });
     }
 
-    // Jika tidak ada heading, pecah berdasarkan 2 enter kosong
-    const paragraphs = extractedText
-        .split(/\n\s*\n/)
-        .map((p) => p.trim())
-        .filter(Boolean);
+    // 4. Fallback pembagian slide per Heading jika pembatas '---' tidak ditemukan
+    const headingSections = sanitizedText
+        .split(/\n(?=#{1,3}\s+)/g)
+        .map((s) => cleanHtmlComments(s))
+        .filter((s) => s.length > 0);
 
-    if (paragraphs.length >= 3) {
-        // Bagi jadi 3 slide
-        const chunkSize = Math.ceil(paragraphs.length / 3);
-        const p1 = paragraphs.slice(0, chunkSize).join('\n\n');
-        const p2 = paragraphs.slice(chunkSize, chunkSize * 2).join('\n\n');
-        const p3 = paragraphs.slice(chunkSize * 2).join('\n\n');
+    if (headingSections.length > 1) {
+        return headingSections.map((sec, idx) => {
+            const lines = sec.split('\n').map((l) => l.trim()).filter(Boolean);
+            let slideTitle = `${lesson.title} - Bagian ${idx + 1}`;
+            let bodyContent = sec;
 
-        return [
-            {
-                tag: 'Pengenalan',
-                title: `${lesson.title} - Bagian 1`,
-                content: p1,
+            if (lines.length > 0 && lines[0].startsWith('#')) {
+                slideTitle = cleanHtmlComments(lines[0].replace(/^#+\s*/, '')).trim();
+                bodyContent = lines.slice(1).join('\n').trim();
+            }
+
+            return {
+                tag: `Lembar ${idx + 1}`,
+                title: cleanHtmlComments(slideTitle) || `${lesson.title} - Bagian ${idx + 1}`,
+                content: cleanHtmlComments(bodyContent) || lines[0] || slideTitle,
                 imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Inti Cerita',
-                title: `${lesson.title} - Bagian 2`,
-                content: p2,
-                imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Kesimpulan Seru',
-                title: `${lesson.title} - Bagian 3`,
-                content: p3,
-                imageUrl: fallbackImage,
-            },
-        ];
-    } else if (paragraphs.length === 2) {
-        return [
-            {
-                tag: 'Awal Belajar',
-                title: `${lesson.title} - Bagian 1`,
-                content: paragraphs[0],
-                imageUrl: fallbackImage,
-            },
-            {
-                tag: 'Ayo Pahami',
-                title: `${lesson.title} - Bagian 2`,
-                content: paragraphs[1],
-                imageUrl: fallbackImage,
-            },
-        ];
+            };
+        });
     }
 
-    // Default 1 Slide
+    // 5. Default 1 lembar utuh
     return [
         {
             tag: 'Materi Lengkap',
-            title: lesson.title,
-            content: extractedText,
+            title: cleanHtmlComments(lesson.title),
+            content: sanitizedText,
             imageUrl: fallbackImage,
         },
     ];
@@ -193,7 +166,6 @@ export function LessonSlideReader({
     const isFirstSlide = currentIndex === 0;
     const isLastSlide = currentIndex === totalSlides - 1;
 
-    // Navigasi Next & Prev
     const handleNext = useCallback(() => {
         if (currentIndex < totalSlides - 1) {
             setCurrentIndex((prev) => prev + 1);
@@ -206,7 +178,7 @@ export function LessonSlideReader({
         }
     }, [currentIndex]);
 
-    // Navigasi Tombol Keyboard (Panah Kanan & Kiri)
+    // Navigasi keyboard (Panah Kiri, Kanan, Spasi, Escape)
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.key === 'ArrowRight' || e.key === 'Space') {
@@ -228,7 +200,8 @@ export function LessonSlideReader({
         return () => window.removeEventListener('keydown', handleKeyDown);
     }, [handleNext, handlePrev, backUrl, router]);
 
-    // Tandai selesai di slide terakhir
+    const targetBackUrl = backUrl || (lesson.module_id ? `/siswa/bab/${lesson.module_id}` : '/siswa');
+
     const handleCompleteLesson = () => {
         startTransition(async () => {
             try {
@@ -241,7 +214,6 @@ export function LessonSlideReader({
                         origin: { y: 0.6 },
                     });
                     toast.success('Hore! Kamu hebat sudah menyelesaikan materi ini! 🎉');
-                    // Arahkan kembali siswa ke peta bab setelah delay selebrasi singkat
                     setTimeout(() => {
                         router.push(targetBackUrl);
                     }, 1200);
@@ -254,11 +226,9 @@ export function LessonSlideReader({
         });
     };
 
-    const targetBackUrl = backUrl || (lesson.module_id ? `/siswa/bab/${lesson.module_id}` : '/siswa');
-
     return (
         <div className="fixed inset-0 z-50 bg-slate-950 flex flex-col items-center justify-between p-3 sm:p-6 select-none overflow-hidden font-sans">
-            {/* 1. Bar Atas: Tombol Keluar & Indikator Slide */}
+            {/* 1. Header Bar: Tombol Keluar & Indikator Slide */}
             <header className="w-full max-w-5xl flex items-center justify-between gap-3 text-white pb-2 z-10">
                 <Link
                     href={targetBackUrl}
@@ -269,32 +239,31 @@ export function LessonSlideReader({
                     <span className="xs:hidden">Kembali</span>
                 </Link>
 
-                {/* Progress Bullets / Bar */}
+                {/* Indikator Slide Bullets */}
                 <div className="flex items-center gap-2 sm:gap-3 bg-slate-900/80 border border-slate-800 px-4 py-2 rounded-2xl">
                     <Layers className="w-4 h-4 text-amber-400" />
                     <span className="text-xs sm:text-sm font-black text-amber-300">
                         Slide {currentIndex + 1} / {totalSlides}
                     </span>
                     <div className="hidden sm:flex items-center gap-1.5 ml-2">
-                        {slides.map((slideItem: SlideItem, i: number) => (
+                        {slides.map((_, i: number) => (
                             <button
                                 key={i}
                                 type="button"
                                 onClick={() => setCurrentIndex(i)}
-                                className={`h-2.5 rounded-full transition-all cursor-pointer ${
-                                    i === currentIndex
+                                className={`h-2.5 rounded-full transition-all cursor-pointer ${i === currentIndex
                                         ? 'w-6 bg-teal-400'
                                         : i < currentIndex
-                                        ? 'w-2.5 bg-teal-600/70'
-                                        : 'w-2.5 bg-slate-700'
-                                }`}
+                                            ? 'w-2.5 bg-teal-600/70'
+                                            : 'w-2.5 bg-slate-700'
+                                    }`}
                                 aria-label={`Menuju slide ${i + 1}`}
                             />
                         ))}
                     </div>
                 </div>
 
-                {/* Status Selesai Badge */}
+                {/* Badge Status Selesai */}
                 {isStudied && (
                     <div className="hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 text-emerald-300 text-xs font-black">
                         <CheckCircle2 className="w-4 h-4 text-emerald-400" />
@@ -303,10 +272,9 @@ export function LessonSlideReader({
                 )}
             </header>
 
-            {/* 2. Kartu Utama Presentasi (Warna Putih Responsif untuk Fase A SD) */}
+            {/* 2. Kartu Utama Slide */}
             <main className="w-full max-w-4xl flex-1 flex flex-col justify-center my-auto min-h-0 py-2 sm:py-4">
                 <div className="w-full h-full max-h-[80vh] bg-white rounded-3xl sm:rounded-[2.5rem] border-4 sm:border-8 border-slate-200 shadow-2xl overflow-y-auto flex flex-col p-5 sm:p-8 md:p-10 relative transition-all animate-in fade-in-50 zoom-in-95 duration-200">
-                    {/* Tag Top Badge */}
                     <div className="flex items-center justify-between mb-3 sm:mb-4 shrink-0">
                         <span className="text-xs sm:text-sm font-black uppercase tracking-wider text-teal-800 bg-teal-100 px-3.5 py-1 rounded-xl border border-teal-200">
                             {currentSlide.tag || 'Materi Seru'}
@@ -319,31 +287,26 @@ export function LessonSlideReader({
                         )}
                     </div>
 
-                    {/* Judul Slide */}
                     <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 tracking-tight leading-snug mb-4 sm:mb-6 shrink-0">
-                        {currentSlide.title}
+                        {cleanHtmlComments(currentSlide.title)}
                     </h1>
 
-                    {/* Layout Konten: Teks + Gambar */}
                     <div className="flex-1 grid grid-cols-1 md:grid-cols-12 gap-5 sm:gap-8 items-center overflow-y-auto pr-1">
-                        {/* Area Teks / Poin Edukatif */}
                         <div
-                            className={`${
-                                currentSlide.imageUrl
+                            className={`${currentSlide.imageUrl
                                     ? 'md:col-span-7 lg:col-span-7'
                                     : 'md:col-span-12'
-                            } flex flex-col justify-center`}
+                                } flex flex-col justify-center`}
                         >
                             <div className="p-4 sm:p-5 rounded-3xl bg-slate-50 border-2 border-slate-200/80 shadow-xs">
                                 <MarkdownContent
-                                    content={currentSlide.content}
+                                    content={cleanHtmlComments(currentSlide.content)}
                                     size="base"
                                     className="!text-slate-800 !text-base sm:!text-lg !leading-relaxed font-semibold"
                                 />
                             </div>
                         </div>
 
-                        {/* Area Gambar Ilustrasi (Jika Ada) */}
                         {currentSlide.imageUrl && (
                             <div className="md:col-span-5 lg:col-span-5 flex items-center justify-center">
                                 <div className="relative w-full aspect-4/3 sm:aspect-square max-h-60 sm:max-h-80 rounded-3xl overflow-hidden border-4 border-amber-200 bg-amber-50 shadow-md">
@@ -360,7 +323,7 @@ export function LessonSlideReader({
                         )}
                     </div>
 
-                    {/* Aksi Khusus Slide Terakhir: Tombol Saya Sudah Paham Semuanya */}
+                    {/* Tombol Tuntas di Slide Terakhir */}
                     {isLastSlide && (
                         <div className="mt-6 pt-4 border-t-2 border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 shrink-0 animate-in fade-in slide-in-from-bottom-2">
                             <div className="flex items-center gap-2 text-slate-600 text-xs sm:text-sm font-bold">
@@ -398,7 +361,7 @@ export function LessonSlideReader({
                 </div>
             </main>
 
-            {/* 3. Bar Bawah: Navigasi Panah Kiri & Kanan */}
+            {/* 3. Footer Bar: Navigasi Panah Kiri & Kanan */}
             <footer className="w-full max-w-5xl flex items-center justify-between gap-4 pt-2 z-10">
                 <button
                     type="button"
@@ -410,7 +373,6 @@ export function LessonSlideReader({
                     <span>Sebelumnya</span>
                 </button>
 
-                {/* Petunjuk Pintasan Keyboard di Layar Desktop */}
                 <span className="hidden md:inline-block text-[11px] text-slate-400 font-bold bg-slate-900/60 px-3 py-1.5 rounded-xl border border-slate-800">
                     Gunakan tombol keyboard <kbd className="text-amber-300 font-mono">←</kbd> dan <kbd className="text-amber-300 font-mono">→</kbd> untuk berpindah
                 </span>

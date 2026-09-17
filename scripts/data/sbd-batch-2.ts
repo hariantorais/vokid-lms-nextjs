@@ -2,7 +2,7 @@
 // Bab 3-4: Seni Tari & Seni Teater (Semester 1)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 3: SENI TARI — GERAK ANGGOTA TUBUH

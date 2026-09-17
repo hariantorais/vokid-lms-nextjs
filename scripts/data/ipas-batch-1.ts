@@ -2,7 +2,7 @@
 // Bab 1-2: Aku dan Tubuhku & Keluargaku Tersayang (Semester 1)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 1: AKU DAN TUBUHKU

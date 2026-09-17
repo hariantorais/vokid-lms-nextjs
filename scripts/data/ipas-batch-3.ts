@@ -2,7 +2,7 @@
 // Bab 5-6: Cuaca dan Musim & Benda di Sekitarku (Semester 2)
 // Konten 100% ramah anak — karakter: Maryam, Asiya, Fatimah, Maheer, Khadijah
 
-import type { SeedModuleItem } from './bahasa-indonesia-batch-1';
+import type { SeedModuleItem } from './types';
 
 // =============================================================================
 // BAB 5: CUACA DAN MUSIM
