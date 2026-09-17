@@ -6,10 +6,11 @@ import { toast } from 'sonner';
 import { cleanModuleTitle } from '@/lib/formatters';
 import { markLessonAsStudiedAction } from '@/features/student/actions/lesson-learning.actions';
 import { QuizCbtModal } from '../submissions/QuizCbtModal';
+import { LessonSlideOverlay } from '../lesson/LessonSlideOverlay';
 import { BabAdventureProgressBar } from './BabAdventureProgressBar';
 import { BabFocusedPostView } from './BabFocusedPostView';
 import { BabAdventurePath } from './BabAdventurePath';
-import type { PathNodeItem } from '../../types/learning-path';
+import type { PathNodeItem, LessonWithAssignment } from '../../types/learning-path';
 import { StudentBabDetailData } from '../../services/student-bab.service';
 import { StudentLayoutShell } from '../StudentLayoutShell';
 
@@ -77,6 +78,8 @@ export function StudentBabDetailClient({ data, classId }: StudentBabDetailClient
       toast.success('Materi selesai dipelajari! Pos berikutnya telah terbuka 🎉');
     });
   };
+
+  const [activeSlideLesson, setActiveSlideLesson] = useState<LessonWithAssignment | null>(null);
 
   const [activeQuizModal, setActiveQuizModal] = useState<{
     id: string;
@@ -187,7 +190,7 @@ export function StudentBabDetailClient({ data, classId }: StudentBabDetailClient
                 onFocusNode={(node) => {
                   setPreviewNode(null);
                   if (node.nodeType === 'LESSON') {
-                    router.push(`/siswa/pelajaran/${node.lesson.id}/slide`);
+                    setActiveSlideLesson(node.lesson);
                   } else {
                     setFocusedNode(node);
                   }
@@ -196,6 +199,19 @@ export function StudentBabDetailClient({ data, classId }: StudentBabDetailClient
             </section>
           </div>
         )}
+
+        {/* Modal Overlay Slide Belajar (Zero-Delay Tanpa Pindah Rute) */}
+        <LessonSlideOverlay
+          lesson={activeSlideLesson}
+          isOpen={Boolean(activeSlideLesson)}
+          onClose={() => setActiveSlideLesson(null)}
+          onCompleted={(lessonId) => {
+            setStudiedLessons((prev) => ({ ...prev, [lessonId]: true }));
+          }}
+          isInitiallyStudied={
+            activeSlideLesson ? Boolean(studiedLessons[activeSlideLesson.id]) : false
+          }
+        />
       </div>
     </StudentLayoutShell>
   );

@@ -102,24 +102,18 @@ export function PathNodePopover({
                                     }
                                 </div>
 
-                                {node.nodeType === 'LESSON' ? (
-                                    <Link
-                                        href={`/siswa/pelajaran/${node.lesson.id}/slide`}
-                                        className="w-full h-11 rounded-2xl border-2 font-black text-xs flex items-center justify-center gap-1.5 shadow-sm active:translate-y-1 active:border-b-2 transition-all cursor-pointer bg-teal-500 hover:bg-teal-600 text-white border-teal-700 border-b-5"
-                                    >
-                                        <Play className="w-3.5 h-3.5 fill-white" />
-                                        <span>{isDone ? 'Buka Kembali' : 'Mulai Sekarang'}</span>
-                                    </Link>
-                                ) : (
-                                    <button
-                                        type="button"
-                                        onClick={() => onSelect(node)}
-                                        className="w-full h-11 rounded-2xl border-2 font-black text-xs flex items-center justify-center gap-1.5 shadow-sm active:translate-y-1 active:border-b-2 transition-all cursor-pointer bg-emerald-500 hover:bg-emerald-600 text-white border-emerald-700 border-b-5"
-                                    >
-                                        <Play className="w-3.5 h-3.5 fill-white" />
-                                        <span>{isDone ? 'Buka Kembali' : 'Mulai Sekarang'}</span>
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => onSelect(node)}
+                                    className={`w-full h-11 rounded-2xl border-2 font-black text-xs flex items-center justify-center gap-1.5 shadow-sm active:translate-y-1 active:border-b-2 transition-all cursor-pointer text-white border-b-5 ${
+                                        node.nodeType === 'LESSON'
+                                            ? 'bg-teal-500 hover:bg-teal-600 border-teal-700'
+                                            : 'bg-emerald-500 hover:bg-emerald-600 border-emerald-700'
+                                    }`}
+                                >
+                                    <Play className="w-3.5 h-3.5 fill-white" />
+                                    <span>{isDone ? 'Buka Kembali' : 'Mulai Sekarang'}</span>
+                                </button>
 
                                 < button
                                     type="button"

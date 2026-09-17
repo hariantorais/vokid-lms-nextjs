@@ -7,6 +7,7 @@ export { QuizCbtModal } from './submissions/QuizCbtModal';
 export { AudioPromptPlayer } from './lesson/AudioPromptPlayer';
 export { UnifiedLessonContentCard } from './lesson/UnifiedLessonContentCard';
 export { LessonSlideReader } from './lesson/LessonSlideReader';
+export { LessonSlideOverlay } from './lesson/LessonSlideOverlay';
 
 // Path (Jalur Belajar)
 export { PathNodePopover } from './path/PathNodePopover';
